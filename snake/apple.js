@@ -16,7 +16,7 @@ export function initApple(grid, apple) {
   apple.eaten = false;
 }
 
-export function applePut(grid, apple, snake) {
+export function putApple(grid, apple, snake) {
   var _appleX = grid.offsetX + (grid.cell * (Math.floor(Math.random() * 20)));
   var _appleY = grid.offsetY + (grid.cell * (Math.floor(Math.random() * 15)));
 
@@ -30,14 +30,14 @@ export function applePut(grid, apple, snake) {
   }
 
   if (putAgain) {
-    applePut()
+    putApple(grid, apple, snake)
   } else {
     apple.x = _appleX
     apple.y = _appleY
   }
 }
 
-export function appleDraw(ctx, apple) {
+export function drawApple(ctx, apple) {
   ctx.fillStyle = "#f00"
   ctx.fillRect(apple.x, apple.y, apple.width, apple.height);
 }

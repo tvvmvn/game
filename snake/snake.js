@@ -95,7 +95,7 @@ export function wallCrash(snake, grid) {
   return false;
 }
 
-export function snakeDraw(ctx, snake) {
+export function drawSnake(ctx, snake) {
   for (var i = 0; i < snake.node.length; i++) {
     ctx.fillStyle = "#0a0"
     ctx.fillRect(snake.node[i].x, snake.node[i].y, snake.width, snake.height);
