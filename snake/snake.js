@@ -24,30 +24,6 @@ export function initSnake(grid, snake) {
   snake.dir = "right";
 }
 
-export function snakeMove(snake) {
-  // body
-  for (var j = snake.node.length - 1; j > 0; j--) {
-    snake.node[j].x = snake.node[j - 1].x;
-    snake.node[j].y = snake.node[j - 1].y;
-  }
-  
-  // head
-  snake.node[0].x = snake.x;
-  snake.node[0].y = snake.y;
-}
-
-export function selfCrash(snake) {
-  var value = false;
-
-  for (var h = 3; h < snake.node.length; h++) {
-    if (snake.x === snake.node[h].x && snake.y === snake.node[h].y) {
-      value = true
-    }
-  }
-
-  return value;
-}
-
 export function setSnake(snake, grid) {
   if (snake.dir === "right") {
     snake._x++;
@@ -80,6 +56,30 @@ export function setSnake(snake, grid) {
       snake._y = 0;
     }  
   }
+}
+
+export function snakeMove(snake) {
+  // body
+  for (var j = snake.node.length - 1; j > 0; j--) {
+    snake.node[j].x = snake.node[j - 1].x;
+    snake.node[j].y = snake.node[j - 1].y;
+  }
+  
+  // head
+  snake.node[0].x = snake.x;
+  snake.node[0].y = snake.y;
+}
+
+export function selfCrash(snake) {
+  var value = false;
+
+  for (var h = 3; h < snake.node.length; h++) {
+    if (snake.x === snake.node[h].x && snake.y === snake.node[h].y) {
+      value = true
+    }
+  }
+
+  return value;
 }
 
 export function wallCrash(snake, grid) {
