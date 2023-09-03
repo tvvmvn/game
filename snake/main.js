@@ -85,7 +85,7 @@ function render() {
     appleDraw(ctx, apple);
     
   } else {
-    gameEnd()
+    gameEnd();
   } 
 
   setTime();
