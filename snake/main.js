@@ -37,21 +37,16 @@ var snake = new Snake();
 var apple = new Apple();
 var time = new Time();
 
-initGrid(grid);
-initSnake(grid, snake);
-initApple(grid, apple);
-initTime(time);
-
 // others
-var over = false;
 var prevX = snake.x;
 var prevY = snake.y;
+var start = false;
 
-
+// start rendering
 var interval = createInterval();
 
 addEventListener("keydown", function (e) {
-  keyDownHandler(e, over, resetGame, snake)
+  keyDownHandler(e, start, startGame, snake);
 });
 
 function createInterval() {
@@ -61,6 +56,13 @@ function createInterval() {
 function render() {
   clearCanvas();
   
+  if (!start) {
+    drawStart();
+    return;
+  }
+  
+  drawBackground();
+
   setSnake(snake, grid);
 
   if (prevX !== snake.x || prevY !== snake.y) {
@@ -84,7 +86,7 @@ function render() {
     if (apple.eaten) {
       snake.node.push({ x: snake.x, y: snake.y });
       apple.count--;
-      putApple(grid, apple, snake)
+      putApple(grid, apple, snake);
       setLevel();
     }
     
@@ -96,11 +98,29 @@ function render() {
 
   setTime(time);
   drawTime(ctx, time);
-  scoreDraw();
+  drawScore();
   drawGrid(ctx, grid);
 }
 
-function scoreDraw() {
+function drawStart() {
+  ctx.fillStyle = "#000"
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.font = "48px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("SNAKE GAME", 100, 150);
+  
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("Press [Enter] to start game", 160, 200);
+}
+
+function drawBackground() {
+  ctx.fillStyle = "#000"
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawScore() {
   ctx.font = "16px Arial";
   ctx.fillStyle = "#fff";
   ctx.fillText(apple.count + " apples", 400, 30);
@@ -111,31 +131,37 @@ function setLevel() {
   snake.movingPoint--;
 }
 
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function startGame() {
+  initGrid(grid);
+  initSnake(grid, snake);
+  initApple(grid, apple);
+  initTime(time);
+
+  prevX = snake.x;
+  prevY = snake.y;
+
+  start = true;
+}
+
 function gameOver() {
   ctx.font = "20px Arial";
   ctx.fillStyle = "#fff";
   ctx.fillText("GAME OVER", 190, 208);
+  
   clearInterval(interval);
-  over = true;
+
+  // Get back to start screen in 2s.
+  setTimeout(() => {
+    start = false;
+    interval = createInterval();
+  }, 2000)
 }
 
 function gameEnd() {
   clearInterval(interval)
   console.log("YOU WIN")
-}
-
-function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function resetGame() {
-  initSnake(grid, snake);
-  initApple(grid, apple);
-  initTime(time);
-
-  over = false;
-  prevX = snake.x;
-  prevY = snake.y;
-
-  interval = createInterval();
 }

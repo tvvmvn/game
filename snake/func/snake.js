@@ -17,6 +17,7 @@ export function initSnake(grid, snake) {
 export function setSnake(snake, grid) {
   if (snake.dir === "right") {
     snake._x++;
+
     if (snake._x > snake.movingPoint) {
       snake.x += grid.cell;
       snake._x = 0;
@@ -25,6 +26,7 @@ export function setSnake(snake, grid) {
 
   if (snake.dir === "down") {
     snake._y++;
+
     if (snake._y > snake.movingPoint) {
       snake.y += grid.cell;
       snake._y = 0;
@@ -33,6 +35,7 @@ export function setSnake(snake, grid) {
 
   if (snake.dir === "left") {
     snake._x--;
+
     if (snake._x < -snake.movingPoint) {
       snake.x -= grid.cell;
       snake._x = 0;
@@ -41,6 +44,7 @@ export function setSnake(snake, grid) {
 
   if (snake.dir === "up") {
     snake._y--;
+    
     if (snake._y < -snake.movingPoint) {
       snake.y -= grid.cell;
       snake._y = 0;

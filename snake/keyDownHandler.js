@@ -1,11 +1,12 @@
-var prevKey = "ArrowRight";
 import key from "./enums/key.js";
 
-export default function keyDownHandler(e, over, resetGame, snake) {
+var prevKey = "ArrowRight";
 
-  if (over && e.key === "Enter") {
-    resetGame();
+export default function keyDownHandler(e, start, startGame, snake) {
+
+  if (!start && e.key === "Enter") {
     prevKey = key.RIGHT;
+    startGame();
   }
 
   if (prevKey === e.key) {
