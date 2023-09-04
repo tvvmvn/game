@@ -8,14 +8,14 @@ export function initApple(grid, apple) {
 }
 
 export function putApple(grid, apple, snake) {
-  var _appleX = grid.offsetX + (grid.cell * (Math.floor(Math.random() * 20)));
-  var _appleY = grid.offsetY + (grid.cell * (Math.floor(Math.random() * 15)));
+  var x = grid.offsetX + (grid.cell * (Math.floor(Math.random() * 20)));
+  var y = grid.offsetY + (grid.cell * (Math.floor(Math.random() * 15)));
 
   var putAgain = false;
 
   // detect apple on snake body
   for (var i = 0; i < snake.node.length; i++) {
-    if (snake.node[i].x === _appleX && snake.node[i].y === _appleY) {
+    if (snake.node[i].x === x && snake.node[i].y === y) {
       putAgain = true;
     }
   }
@@ -23,8 +23,8 @@ export function putApple(grid, apple, snake) {
   if (putAgain) {
     putApple(grid, apple, snake)
   } else {
-    apple.x = _appleX
-    apple.y = _appleY
+    apple.x = x
+    apple.y = y
   }
 }
 
