@@ -1,12 +1,3 @@
-export class Apple {
-  x;
-  y;
-  width;
-  height;
-  count;
-  eaten;
-}
-
 export function initApple(grid, apple) {
   apple.x = grid.offsetX + 100;
   apple.y = grid.offsetY + 100;

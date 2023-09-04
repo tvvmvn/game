@@ -1,37 +1,37 @@
-var ctx = canvas.getContext("2d");
+import Grid from './struct/Grid.js';
+import Snake from './struct/Snake.js';
+import Apple from './struct/Apple.js';
+import Time from './struct/Time.js';
 
 import { 
-  Snake, 
   initSnake, 
   snakeMove, 
   selfCrash, 
   setSnake, 
   wallCrash, 
   drawSnake, 
-} from './snake.js';
+} from './func/snake.js';
 
 import {
-  Grid,
   initGrid,
   drawGrid
-} from './grid.js';
+} from './func/grid.js';
 
 import {
-  Apple,
   initApple,
   putApple,
   drawApple
-} from './apple.js';
+} from './func/apple.js';
 
 import {
-  Time,
   initTime,
   setTime,
   drawTime
-} from './time.js';
+} from './func/time.js';
 
-import keyDownHandler from './key/keyDownHandler.js';
+import keyDownHandler from './keyDownHandler.js';
 
+var ctx = canvas.getContext("2d");
 var grid = new Grid();
 var snake = new Snake();
 var apple = new Apple();

@@ -1,8 +1,3 @@
-export class Time {
-  _s;
-  s;
-}
-
 export function initTime(time) {
   time._s = 0;
   time.s = 0;

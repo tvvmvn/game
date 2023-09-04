@@ -1,13 +1,3 @@
-export class Snake {
-  x;
-  y;
-  _x;
-  _y;
-  movingPoint;
-  node;
-  dir;
-};
-
 export function initSnake(grid, snake) {
   snake.x = grid.offsetX + (grid.cell * 2);
   snake.y = grid.offsetY;
