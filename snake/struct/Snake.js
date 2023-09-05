@@ -3,6 +3,8 @@ export default class Snake {
   y;
   _x;
   _y;
+  width;
+  height;
   movingPoint;
   node;
   dir;
