@@ -1,44 +1,56 @@
-import key from "./enums/key.js";
+import Key from "./enums/Key.js";
+import Direction from "./enums/Direction.js";
 
-var prevKey = "ArrowRight";
+var prevKey = Key.RIGHT;
 
 export default function keyDownHandler(e, start, startGame, snake) {
 
-  if (!start && e.key === "Enter") {
-    prevKey = key.RIGHT;
+  if (!start && e.key === Key.ENTER) {
+    prevKey = Key.RIGHT;
+
     startGame();
   }
 
-  if (prevKey === e.key) {
-    return;
-  }
+  // prevent accel and u-turn 
+  if (snake.dir === Direction.RIGHT) {
+    if (e.key === Key.RIGHT) return;
+    if (e.key === Key.LEFT) return;
+  } 
 
-  // prevent u-turn
-  var rtol = snake.dir === "right" && e.key === key.LEFT;
-  var ltor = snake.dir === "left" && e.key === key.RIGHT;
-  var utod = snake.dir === "up" && e.key === key.DOWN;
-  var dtou = snake.dir === "down" && e.key === key.UP;
+  if (snake.dir === Direction.DOWN) {
+    if (e.key === Key.DOWN) return;
+    if (e.key === Key.UP) return;
+  } 
 
-  if (rtol || ltor || utod || dtou) return;
-  
-  if (e.key === key.UP) {
+  if (snake.dir === Direction.LEFT) {
+    if (e.key === Key.LEFT) return;
+    if (e.key === Key.RIGHT) return;
+  } 
+
+  if (snake.dir === Direction.UP) {
+    if (e.key === Key.UP) return;
+    if (e.key === Key.DOWN) return;
+  } 
+
+  // turn 
+  if (e.key === Key.UP) {
     snake._y -= snake.movingPoint;
-    snake.dir = "up";
+    snake.dir = Direction.UP;
   }
   
-  if (e.key === key.LEFT) {
+  if (e.key === Key.LEFT) {
     snake._x -= snake.movingPoint;
-    snake.dir = "left";
+    snake.dir = Direction.LEFT;
   }
 
-  if (e.key === key.RIGHT) {
+  if (e.key === Key.RIGHT) {
     snake._x += snake.movingPoint;
-    snake.dir = "right";
+    snake.dir = Direction.RIGHT;
   }
   
-  if (e.key === key.DOWN) {
+  if (e.key === Key.DOWN) {
     snake._y += snake.movingPoint;
-    snake.dir = "down";
+    snake.dir = Direction.DOWN;
   }
 
   prevKey = e.key;

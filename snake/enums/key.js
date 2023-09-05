@@ -1,8 +1,9 @@
-const key = {
+const Key = {
   UP: 'ArrowUp', // read-only
   LEFT: 'ArrowLeft',
   RIGHT: 'ArrowRight',
-  DOWN: 'ArrowDown'
+  DOWN: 'ArrowDown',
+  ENTER: 'Enter'
 }
 
-export default key;
+export default Key;

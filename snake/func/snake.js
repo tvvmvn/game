@@ -1,3 +1,5 @@
+import Direction from "../enums/Direction.js";
+
 export function initSnake(grid, snake) {
   snake.x = grid.offsetX + (grid.cell * 2);
   snake.y = grid.offsetY;
@@ -11,11 +13,11 @@ export function initSnake(grid, snake) {
     { x: grid.offsetX + (grid.cell * 1), y: grid.offsetY },
     { x: grid.offsetX, y: grid.offsetY }
   ]
-  snake.dir = "right";
+  snake.dir = Direction.RIGHT;
 }
 
 export function setSnake(snake, grid) {
-  if (snake.dir === "right") {
+  if (snake.dir === Direction.RIGHT) {
     snake._x++;
 
     if (snake._x > snake.movingPoint) {
@@ -24,7 +26,7 @@ export function setSnake(snake, grid) {
     }
   }
 
-  if (snake.dir === "down") {
+  if (snake.dir === Direction.DOWN) {
     snake._y++;
 
     if (snake._y > snake.movingPoint) {
@@ -33,7 +35,7 @@ export function setSnake(snake, grid) {
     }
   }
 
-  if (snake.dir === "left") {
+  if (snake.dir === Direction.LEFT) {
     snake._x--;
 
     if (snake._x < -snake.movingPoint) {
@@ -42,7 +44,7 @@ export function setSnake(snake, grid) {
     }
   }
 
-  if (snake.dir === "up") {
+  if (snake.dir === Direction.UP) {
     snake._y--;
     
     if (snake._y < -snake.movingPoint) {
