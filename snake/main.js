@@ -10,24 +10,24 @@ import {
   setSnake, 
   wallCrash, 
   drawSnake, 
-} from './func/snake.js';
+} from './function/snake.js';
 
 import {
   initGrid,
   drawGrid
-} from './func/grid.js';
+} from './function/grid.js';
 
 import {
   initApple,
   putApple,
   drawApple
-} from './func/apple.js';
+} from './function/apple.js';
 
 import {
   initTime,
   setTime,
   drawTime
-} from './func/time.js';
+} from './function/time.js';
 
 import keyDownHandler from './keyDownHandler.js';
 
@@ -36,36 +36,24 @@ var grid = new Grid();
 var snake = new Snake();
 var apple = new Apple();
 var time = new Time();
+var interval;
+var prevX;
+var prevY;
+var start;
 
-// others
-var prevX = snake.x;
-var prevY = snake.y;
-var start = false;
-
-// start rendering
-var interval = createInterval();
+initGame();
 
 addEventListener("keydown", function (e) {
   keyDownHandler(e, start, startGame, snake);
 });
 
-function createInterval() {
-  return setInterval(render, 10) // 100hz
-}
-
 function render() {
   clearCanvas();
-  
-  if (!start) {
-    drawStart();
-    return;
-  }
-  
-  drawBackground();
 
   setSnake(snake, grid);
 
   if (prevX !== snake.x || prevY !== snake.y) {
+    console.log(prevX, prevY)
     if (wallCrash(snake, grid)) {
       gameOver()
     } else if (selfCrash(snake)) {
@@ -79,7 +67,7 @@ function render() {
   }
 
   drawSnake(ctx, snake);
-  
+
   if (apple.count) {
     apple.eaten = (snake.x === apple.x) && (snake.y === apple.y)
     
@@ -100,24 +88,16 @@ function render() {
   drawTime(ctx, time);
   drawScore();
   drawGrid(ctx, grid);
+
+  if (!start) {
+    drawStart();
+  }
 }
 
-function drawStart() {
-  ctx.fillStyle = "#000"
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.font = "48px Arial";
-  ctx.fillStyle = "#fff";
-  ctx.fillText("SNAKE GAME", 100, 150);
-  
+function drawStart() {  
   ctx.font = "16px Arial";
   ctx.fillStyle = "#fff";
-  ctx.fillText("Press [Enter] to start game", 160, 200);
-}
-
-function drawBackground() {
-  ctx.fillStyle = "#000"
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillText("Press any key to start game", 160, 200);
 }
 
 function drawScore() {
@@ -135,33 +115,45 @@ function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function startGame() {
+function createInterval() {
+  interval = setInterval(render, 10) // 100hz
+}
+
+function removeInterval() {
+  clearInterval(interval);
+}
+
+function initGame() {
   initGrid(grid);
   initSnake(grid, snake);
   initApple(grid, apple);
   initTime(time);
-
+  
   prevX = snake.x;
   prevY = snake.y;
+  start = false;
+  
+  render();
+}
 
+function startGame() {
   start = true;
+
+  createInterval();
 }
 
 function gameOver() {
   ctx.font = "20px Arial";
   ctx.fillStyle = "#fff";
   ctx.fillText("GAME OVER", 190, 208);
+  // ctx.globalCompositeOperation = "destination-over";
   
-  clearInterval(interval);
-
-  // Get back to start screen in 2s.
-  setTimeout(() => {
-    start = false;
-    interval = createInterval();
-  }, 2000)
+  removeInterval()
+  
+  setTimeout(initGame, 2000)
 }
 
 function gameEnd() {
-  clearInterval(interval)
+  removeInterval()
   console.log("YOU WIN")
 }

@@ -5,10 +5,10 @@ var prevKey = Key.RIGHT;
 
 export default function keyDownHandler(e, start, startGame, snake) {
 
-  if (!start && e.key === Key.ENTER) {
+  if (!start) {
     prevKey = Key.RIGHT;
 
-    startGame();
+    return startGame();
   }
 
   // prevent accel and u-turn 

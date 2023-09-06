@@ -98,6 +98,6 @@ export function drawSnake(ctx, snake) {
   }
 
   // snake x, y
-  ctx.fillStyle = "#00f"
-  ctx.fillRect(snake.x, snake.y, 5, 5); 
+  // ctx.fillStyle = "#f00"
+  // ctx.fillRect(snake.x, snake.y, 5, 5); 
 }

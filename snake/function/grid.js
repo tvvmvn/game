@@ -10,7 +10,7 @@ export function initGrid(grid) {
 
 export function drawGrid(ctx, grid) {
   ctx.beginPath();
-  ctx.strokeStyle = "#fff";
+  ctx.strokeStyle = "#555";
   
   // rows
   for (var r = 0; r < grid.rowCount + 1 ; r++) {
