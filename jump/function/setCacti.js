@@ -1,24 +1,17 @@
-import Cactus from "../class/Cactus.js";
-
 var ctx = canvas.getContext("2d");
-var cacti = [];
 var count = 100;
 var limit = 100;
+var _on = 0;
+var on = 0;
 
-for (var i = 0; i < count; i++) {
-  var cactus = new Cactus();
-
-  cacti.push(cactus);
-}
-
-export default function setCacti(stage, actor, score, setOver) {
+export default function setCacti(cacti, stage, actor, setScore, setOver) {
   // Activate cactus
-  if (cactus.on < count - 1) {
-    cactus._on++;
+  if (on < count - 1) {
+    _on++;
 
-    if (cactus._on > limit) {
-      cactus.on++;
-      cactus._on = 0;
+    if (_on > limit) {
+      on++;
+      _on = 0;
 
       // interval between cactus
       limit = 50 + (Math.random() * 100);
@@ -26,12 +19,12 @@ export default function setCacti(stage, actor, score, setOver) {
       console.log(limit);
     }
 
-    cacti[cactus.on].active = true;
+    cacti[on].active = true;
   }
 
   // Control each cactus
   for (var i = 0; i < cacti.length; i++) {
-    // Deactive cactus
+    // Deactivate cactus
     if (cacti[i].x < stage.offsetX - 10) {
       cacti[i].active = false
     }
@@ -56,11 +49,15 @@ export default function setCacti(stage, actor, score, setOver) {
     if (metLeft && metRight && metY) {
       console.log('collided')
       setOver()
+      
+      limit = 100;
+      _on = 0;
+      on = 0;
     }
-
+  
     // Score
     if (actor.x === cacti[i].x) {
-      score++;
+      setScore();
     }
 
     // draw cactus

@@ -5,7 +5,5 @@ export default class Cactus {
     this.width = 5 + (Math.random() * 15)
     this.height = 10;
     this.active = false;
-    this._on = 0;
-    this.on = 0;
   }
 }
