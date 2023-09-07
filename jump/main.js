@@ -21,8 +21,7 @@ var stage = {
   height: 200
 }
 
-initGame();
-
+addEventListener("load", initGame);
 addEventListener("keydown", keyDownHandler);
 
 function createInterval() {
@@ -120,12 +119,16 @@ function initGame() {
   render();
 }
 
+function startGame() {
+  start = true;
+  createInterval();
+}
+
 function keyDownHandler(e) {
   var key = e.key;
 
   if (!start) {
-    start = true;
-    return createInterval();
+    return startGame();
   }
 
   if (actor.jump) {
