@@ -4,6 +4,13 @@ var limit = 100;
 var _on = 0;
 var on = 0;
 
+
+var img = new Image();
+img.src = "./t-rex-background.png";
+function drawBackground() {
+  ctx.drawImage(img, on, 0)
+}
+
 export default function setCacti(cacti, stage, actor, setScore, setOver) {
   // Activate cactus
   if (on < count - 1) {
@@ -40,6 +47,8 @@ export default function setCacti(cacti, stage, actor, setScore, setOver) {
     if (cacti[i].active) {
       cacti[i].x--;
     }
+
+    drawBackground(cacti[i].x)
 
     // handle collision 
     var metLeft = cacti[i].x + cacti[i].width > actor.x

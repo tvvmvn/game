@@ -1,51 +1,128 @@
 var ctx = canvas.getContext("2d");
-
-var stage = {
-  offsetX: 50,
-  offsetY: 50,
-  width: 400,
-  height: 200
-}
-
 var x = 0;
+var _x = 0;
 
-setInterval(render, 10);
+var image = new Image();
+image.src = "./t-rex-background.png";
+
+var imageX1 = 0;
+var imageX2 = canvas.width;
+
+var actorY = 180;
+var jump = false;
+var v = -5;
+
+var _s = 0;
+var s = 0;
+
+var cactusX1 = setCactusX();
+var cactusX2 = setCactusX();
+
+var interval;
+var paused = false;
+
+createInterval();
+document.addEventListener("keydown", keyDownHandler);
+
+function createInterval() {
+  interval = setInterval(render, 10);
+}
 
 function render() {
   clearCanvas();
 
-  x--;
+  x--; 
 
-  drawActor()
   drawStage()
 
+  drawCacti()
+
+  drawActor()
 }
 
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function drawActor() {
-  ctx.beginPath();
-  ctx.arc(100, 100, 40, 0, 2 * Math.PI);
-  ctx.stroke();
+function drawStage() {
+
+  imageX1--;
+  
+  if (imageX1 < -canvas.width) {
+    imageX1 = canvas.width;
+  }
+  
+  imageX2--;
+
+  if (imageX2 < -canvas.width) {
+    imageX2 = canvas.width;
+  }
+
+  ctx.drawImage(image, imageX1, 0);
+  ctx.drawImage(image, imageX2, 0);
 }
 
-function drawStage() {
-  // ctx.fillRect(x, 200, 2000, 10)
+function setCactusX() {
+  return canvas.width + Math.random() * 500;
+}
 
-  // ctx.font = "16px Arial";
-  // ctx.fillRect(400 + x, 180, 20, 20)
-  // ctx.fillRect(800 + x, 190, 20, 10)
-  // ctx.fillRect(1200 + x, 180, 20, 20)
-  // ctx.fillRect(1600 + x, 160, 20, 40)
-  // ctx.fillRect(2000 + x, 180, 20, 20)
+function drawCacti() {
+  cactusX1--;
+  cactusX2--;
+  
+  if (cactusX1 < -10) {
+    cactusX1 = setCactusX()
+  }
 
-  ctx.moveTo(0, 200);
-  ctx.lineTo(300, 100);
+  if (cactusX2 < -10) {
+    cactusX2 = setCactusX()
+  }
 
-  ctx.moveTo(300, 100);
-  ctx.lineTo(500, 100);
+  ctx.fillRect(cactusX1, 200, 10, 10)
+  ctx.fillRect(cactusX2, 200, 10, 10)
+}
 
-  ctx.stroke();
+function drawActor() {
+  if (jump) {
+    // y from -5 to 5
+    actorY += v;
+    v += 0.2
+  }
+
+  if (actorY > 180) {
+    jump = false;
+    v = -5;
+  }
+
+  // ctx.rotate(20 * Math.PI / 180);
+  ctx.fillRect(100, actorY, 20, 20);
+}
+
+function drawTime() {
+  _s++
+
+  if (_s > 100) {
+    s++;
+    _s = 0;
+  }
+}
+
+function keyDownHandler(e) {
+  if (e.key === 'p') {
+   if (paused) { // resume
+      createInterval();
+      paused = false;
+    } else {
+      clearInterval(interval)
+      paused = true;
+    }
+  }
+
+  if (jump) {
+    return;
+  }
+
+  if (e.key === "ArrowUp") {
+    jump = true;
+  }
 }
