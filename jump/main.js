@@ -1,109 +1,74 @@
 var ctx = canvas.getContext("2d");
-var x = 0;
-var _x = 0;
-
-var image = new Image();
-image.src = "./t-rex-background.png";
-
-var imageX1 = 0;
-var imageX2 = canvas.width;
-
-var actorY = 180;
+var img = new Image();
+img.src =  "./offline-sprite-1x.png";
 var jump = false;
+var actorY = 180
 var v = -5;
-
 var _s = 0;
 var s = 0;
 
-var cactusX1 = setCactusX();
-var cactusX2 = setCactusX();
-
-var interval;
-var paused = false;
-
-createInterval();
+var interval = setInterval(draw, 10)
 document.addEventListener("keydown", keyDownHandler);
 
-function createInterval() {
-  interval = setInterval(render, 10);
-}
-
-function render() {
-  clearCanvas();
-
-  x--; 
-
-  drawStage()
-
-  drawCacti()
-
-  drawActor()
-}
-
-function clearCanvas() {
+function draw() {
+  /* 
+  drawImage(image, dx, dy)
+  drawImage(image, dx, dy, dWidth, dHeight)
+  drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+  */
+ 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function drawStage() {
-
-  imageX1--;
   
-  if (imageX1 < -canvas.width) {
-    imageX1 = canvas.width;
-  }
+  trex()
+}
+
+var rightFoot = true;
+
+function trex() {
+  var sx = 810; // 765
+  var sy = 2;
+  var sWidth = 42;
+  var sHeight = 45;
+  var dx = 50;
+  var dy = 200;
+  var dWidth = sWidth;
+  var dHeight = sHeight;
   
-  imageX2--;
+  /* 
+    RUNNING: {
+      frames: [88, 132],
+      msPerFrame: 1000 / 12
+    },
+  */
 
-  if (imageX2 < -canvas.width) {
-    imageX2 = canvas.width;
+  _s++
+  if (_s > 10) {
+    if (rightFoot) {
+      rightFoot = false;
+    } else {
+      rightFoot = true;
+    }
+    _s = 0;
   }
 
-  ctx.drawImage(image, imageX1, 0);
-  ctx.drawImage(image, imageX2, 0);
-}
+  if (rightFoot) {
+    sx = 809;
+  } else {
+    sx = 765;
+  }  
 
-function setCactusX() {
-  return canvas.width + Math.random() * 500;
-}
-
-function drawCacti() {
-  cactusX1--;
-  cactusX2--;
-  
-  if (cactusX1 < -10) {
-    cactusX1 = setCactusX()
-  }
-
-  if (cactusX2 < -10) {
-    cactusX2 = setCactusX()
-  }
-
-  ctx.fillRect(cactusX1, 200, 10, 10)
-  ctx.fillRect(cactusX2, 200, 10, 10)
-}
-
-function drawActor() {
   if (jump) {
     // y from -5 to 5
     actorY += v;
     v += 0.2
+    ctx.drawImage(img, 677, sy, sWidth, sHeight, dx, actorY, dWidth, dHeight)
+  } else {
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, actorY, dWidth, dHeight)
   }
 
   if (actorY > 180) {
     jump = false;
     v = -5;
-  }
-
-  // ctx.rotate(20 * Math.PI / 180);
-  ctx.fillRect(100, actorY, 20, 20);
-}
-
-function drawTime() {
-  _s++
-
-  if (_s > 100) {
-    s++;
-    _s = 0;
   }
 }
 
