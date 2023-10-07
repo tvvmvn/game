@@ -12,8 +12,8 @@ export function setPaddle() {
 
 export function drawPaddle() {
   ctx.beginPath();
-  ctx.rect(paddle.x, canvas.height - paddle.height, paddle.width, paddle.height);
-  ctx.fillStyle = "#333";
+  ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+  ctx.fillStyle = paddle.color;
   ctx.fill();
   ctx.closePath();
 }

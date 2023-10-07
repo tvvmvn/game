@@ -1,26 +1,17 @@
-var canvas = document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
 import { setBall, drawBall } from "./functions/ball.js";
 import { setPaddle, drawPaddle } from "./functions/paddle.js";
 import { initBricks, collisionDetection, drawBricks } from "./functions/brick.js";
 import { keyDownHandler, keyUpHandler } from "./keyHandler.js";
 import { ball, paddle, misc } from "./header.js";
 
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
 var interval;
 
 initBricks();
-
 interval = createInterval();
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-
-function createInterval() {
-  return setInterval(draw, 10);
-}
-
-function removeInterval() {
-  clearInterval(interval);
-}
 
 function draw() {
   clearCanvas();
@@ -28,7 +19,6 @@ function draw() {
   setBall()
   drawBall();
   drawPaddle();
-  drawScore();  
   collisionDetection();
   setPaddle()
   drawPaddle()
@@ -58,19 +48,19 @@ function clearCanvas() {
 
 function drawStart() {
   ctx.font = "16px Arial";
-  ctx.fillStyle = "#333";
-  ctx.fillText("Press any key to start", 160, 160);
+  ctx.fillStyle = "#eee";
+  ctx.fillText("Press any key to start game", 160, 160);
 }
 
 function drawOver() {
   ctx.font = "20px Arial";
-  ctx.fillStyle = "#333";
+  ctx.fillStyle = "#eee";
   ctx.fillText("GAME OVER", 175, 170);
 }
 
 function drawEnd() {
   ctx.font = "20px Arial";
-  ctx.fillStyle = "#333";
+  ctx.fillStyle = "#eee";
   ctx.fillText("YOU WIN!", 180, 170);
 }
 
@@ -101,9 +91,10 @@ function initialize() {
   }, 2000)
 }
 
-function drawScore() {
-  ctx.font = "16px Arial";
-  ctx.fillStyle = "#333";
-  ctx.fillText("Score: " + misc.score, 8, 20);
+function createInterval() {
+  return setInterval(draw, 10);
 }
 
+function removeInterval() {
+  clearInterval(interval);
+}

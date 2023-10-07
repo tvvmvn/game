@@ -1,4 +1,0 @@
-class Brick {
-  width;
-  height;
-}

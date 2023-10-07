@@ -14,7 +14,10 @@ export function setBall() {
   // bottom
   } else if (ball.y + ball.dy > canvas.height - ball.radius) {
     // into paddle
-    if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+    if (
+      ball.x + ball.radius > paddle.x 
+      && ball.x - ball.radius < paddle.x + paddle.width
+      ) {
       ball.dy = -ball.dy;
     // out of paddle
     } else {
@@ -26,7 +29,7 @@ export function setBall() {
 export function drawBall() {
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-  ctx.fillStyle = "#333";
+  ctx.fillStyle = ball.color;
   ctx.fill();
   ctx.closePath();
 }

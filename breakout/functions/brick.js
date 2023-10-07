@@ -2,43 +2,36 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 import { ball, misc } from "../header.js";
 
-class Brick { 
-  x;
-  y;
-  width;
-  height;
-  status;
-}
-
-var padding = 5;
-var offsetTop = 30;
-var offsetLeft = 30;
-var rowCount = 6;
-var columnCount = 4;
+var padding = 2;
+var offsetTop = 2;
+var offsetLeft = 4;
+var rowCount = 4;
+var columnCount = 8;
 var bricks = [];
+var colors = ["red", "orange", "green", "navy"];
 
 export function initBricks() {
-  for (var c = 0; c < columnCount; c++) {
-    bricks[c] = [];
-  
-    for (var r = 0; r < rowCount; r++) {
-      // initialize
-      var brick = new Brick();
-      brick.x = 0;
-      brick.y = 0;
-      brick.width = 70;
-      brick.height = 20;
-      brick.status = 1;
+  for (var r = 0; r < rowCount; r++) {
+    bricks[r] = [];
+    for (var c = 0; c < columnCount; c++) {
+      var brick = {
+        x: 0,
+        y: 0,
+        width: 60,
+        height: 20,
+        status: 1,
+        color: colors[r]
+      }
 
-      bricks[c][r] = brick;
+      bricks[r][c] = brick;
     }
   }
 }
 
 export function collisionDetection() {
-  for (var c = 0; c < columnCount; c++) {
-    for (var r = 0; r < rowCount; r++) {
-      var brick = bricks[c][r];
+  for (var r = 0; r < rowCount; r++) {
+    for (var c = 0; c < columnCount; c++) {
+      var brick = bricks[r][c];
 
       if (brick.status == 1) {
         if (
@@ -61,18 +54,18 @@ export function collisionDetection() {
 }
 
 export function drawBricks() {
-  for (var c = 0; c < columnCount; c++) {
-    for (var r = 0; r < rowCount; r++) {
-      if (bricks[c][r].status == 1) {
+  for (var r = 0; r < rowCount; r++) {
+    for (var c = 0; c < columnCount; c++) {
+      if (bricks[r][c].status == 1) {
         // update
-        var brick = bricks[c][r];
+        var brick = bricks[r][c];
         
-        brick.x = (r * (brick.width + padding)) + offsetLeft;
-        brick.y = (c * (brick.height + padding)) + offsetTop;
+        brick.x = (c * (brick.width + padding)) + offsetLeft;
+        brick.y = (r * (brick.height + padding)) + offsetTop;
 
         ctx.beginPath();
         ctx.rect(brick.x, brick.y, brick.width, brick.height);
-        ctx.fillStyle = "#333";
+        ctx.fillStyle = brick.color;
         ctx.fill();
         ctx.closePath();
       }
