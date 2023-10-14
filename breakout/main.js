@@ -75,8 +75,8 @@ function initialize() {
     misc.score = 0;
     
     // ball
-    ball.x = canvas.width/2;
-    ball.y = canvas.height-30;
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height - 30;
     ball.dx = 2;
     ball.dy = -2;
 

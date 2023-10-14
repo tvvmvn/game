@@ -12,7 +12,7 @@ export function setBall() {
   if (ball.y + ball.dy < ball.radius) {
     ball.dy = -ball.dy;
   // bottom
-  } else if (ball.y + ball.dy > canvas.height - ball.radius) {
+  } else if (ball.y  > canvas.height - ball.radius - 10) {
     // into paddle
     if (
       ball.x + ball.radius > paddle.x 
