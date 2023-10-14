@@ -1,13 +1,8 @@
-export function initApple(grid, apple) {
-  apple.x = grid.offsetX + 100;
-  apple.y = grid.offsetY + 100;
-  apple.width = 20;
-  apple.height = 20;
-  apple.count = 20;
-  apple.eaten = false;
-}
+import { grid, snake, apple } from "../header.js";
 
-export function putApple(grid, apple, snake) {
+var ctx = canvas.getContext("2d");
+
+export function putApple() {
   var x = grid.offsetX + (grid.cell * (Math.floor(Math.random() * 20)));
   var y = grid.offsetY + (grid.cell * (Math.floor(Math.random() * 15)));
 
@@ -28,7 +23,7 @@ export function putApple(grid, apple, snake) {
   }
 }
 
-export function drawApple(ctx, apple) {
-  ctx.fillStyle = "#f00"
+export function drawApple() {
+  ctx.fillStyle = apple.color;
   ctx.fillRect(apple.x, apple.y, apple.width, apple.height);
 }

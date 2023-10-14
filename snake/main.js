@@ -1,97 +1,79 @@
-import Grid from './struct/Grid.js';
-import Snake from './struct/Snake.js';
-import Apple from './struct/Apple.js';
-import Time from './struct/Time.js';
-
-import { 
-  initSnake, 
-  snakeMove, 
-  selfCrash, 
-  setSnake, 
-  wallCrash, 
-  drawSnake, 
-} from './function/snake.js';
-
-import {
-  initGrid,
-  drawGrid
-} from './function/grid.js';
-
-import {
-  initApple,
-  putApple,
-  drawApple
-} from './function/apple.js';
-
-import {
-  initTime,
-  setTime,
-  drawTime
-} from './function/time.js';
-
+import { grid, snake, apple, time, misc, json } from './header.js';
+import { snakeMove, selfCrash, setSnake, wallCrash, drawSnake } from './function/snake.js';
+import { drawGrid } from './function/grid.js';
+import { putApple, drawApple } from './function/apple.js';
+import { setTime, drawTime } from './function/time.js';
 import keyDownHandler from './keyDownHandler.js';
 
 var ctx = canvas.getContext("2d");
-var grid = new Grid();
-var snake = new Snake();
-var apple = new Apple();
-var time = new Time();
+var prevX = snake.x;
+var prevY = snake.y;
 var interval;
-var prevX;
-var prevY;
-var start;
 
-initGame();
+interval = createInterval();
+addEventListener("keydown", keyDownHandler);
 
-addEventListener("keydown", function (e) {
-  keyDownHandler(e, start, startGame, snake);
-});
-
-function render() {
+function draw() {
   clearCanvas();
+  
+  drawGrid();
 
-  setSnake(snake, grid);
-
-  if (prevX !== snake.x || prevY !== snake.y) {
-    console.log(prevX, prevY)
-    if (wallCrash(snake, grid)) {
-      gameOver()
-    } else if (selfCrash(snake)) {
-      gameOver()
-    } else {
-      snakeMove(snake)
-    }
-
-    prevX = snake.x;
-    prevY = snake.y;
+  if (!misc.start) {
+    drawStart();
+    return;
   }
 
-  drawSnake(ctx, snake);
+  setTime();
+  drawTime();
+  drawScore();
 
+  if (misc.over) {
+    drawOver();
+    initGame();
+  }
+  
+  if (misc.end) {
+    drawEnd();
+    initGame()
+  }
+  
+  // Snake
+  setSnake();
+
+  if (prevX !== snake.x || prevY !== snake.y) {
+    if (wallCrash()) {
+      misc.over = true;
+    } else if (selfCrash()) {
+      misc.over = true;
+    } else {
+      snakeMove()
+    }
+  }
+
+  drawSnake();
+
+  // Apple
   if (apple.count) {
     apple.eaten = (snake.x === apple.x) && (snake.y === apple.y)
     
     if (apple.eaten) {
       snake.node.push({ x: snake.x, y: snake.y });
       apple.count--;
-      putApple(grid, apple, snake);
-      setLevel();
+      putApple();
+      snake.movingPoint--;
     }
     
-    drawApple(ctx, apple);
-    
+    drawApple();
   } else {
-    gameEnd();
+    drawEnd();
   } 
 
-  setTime(time);
-  drawTime(ctx, time);
-  drawScore();
-  drawGrid(ctx, grid);
+  prevX = snake.x;
+  prevY = snake.y;
+}
 
-  if (!start) {
-    drawStart();
-  }
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function drawStart() {  
@@ -106,54 +88,51 @@ function drawScore() {
   ctx.fillText(apple.count + " apples", 400, 30);
 }
 
-function setLevel() {
-  // get faster
-  snake.movingPoint--;
-}
-
-function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function createInterval() {
-  interval = setInterval(render, 10) // 100hz
-}
-
-function removeInterval() {
-  clearInterval(interval);
-}
-
-function initGame() {
-  initGrid(grid);
-  initSnake(grid, snake);
-  initApple(grid, apple);
-  initTime(time);
-  
-  prevX = snake.x;
-  prevY = snake.y;
-  start = false;
-  
-  render();
-}
-
-function startGame() {
-  start = true;
-
-  createInterval();
-}
-
-function gameOver() {
+function drawOver() {
   ctx.font = "20px Arial";
   ctx.fillStyle = "#fff";
   ctx.fillText("GAME OVER", 190, 208);
   // ctx.globalCompositeOperation = "destination-over";
-  
-  removeInterval()
-  
-  setTimeout(initGame, 2000)
 }
 
-function gameEnd() {
-  removeInterval()
-  console.log("YOU WIN")
+function drawEnd() {
+  ctx.font = "20px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("YOU WIN!", 190, 208);
+}
+
+function initGame() {
+  clearInterval(interval);
+
+  setTimeout(() => {
+    var o = JSON.parse(json);
+
+    snake.x = o.snake.x;
+    snake.y = o.snake.y;
+    snake._x = o.snake._x;
+    snake._y = o.snake._y;
+    snake.node = o.snake.node;
+    snake.dir = o.snake.dir;
+    snake.movingPoint = o.snake.movingPoint;
+    prevX = o.snake.x;
+    prevY = o.snake.y;
+
+    apple.x = o.apple.x;
+    apple.y = o.apple.y;
+    apple.eaten = o.apple.eaten;
+    apple.count = o.apple.count;
+
+    time.s = o.time.s
+    time._s = o.time._s;
+
+    misc.start = o.misc.start;
+    misc.end = o.misc.end;
+    misc.over = o.misc.over;
+
+    interval = createInterval();
+  }, 2000)
+}
+
+function createInterval() {
+  return setInterval(draw, 10) // 100hz
 }

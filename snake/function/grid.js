@@ -1,14 +1,8 @@
-export function initGrid(grid) {
-  grid.offsetX = 50;
-  grid.offsetY = 50;
-  grid.width = 400;
-  grid.height = 300;
-  grid.rowCount = 15;
-  grid.colCount = 20;
-  grid.cell = 20;
-}
+import { grid } from "../header.js";
 
-export function drawGrid(ctx, grid) {
+var ctx = canvas.getContext("2d");
+
+export function drawGrid() {
   ctx.beginPath();
   ctx.strokeStyle = "#555";
   

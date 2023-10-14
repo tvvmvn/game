@@ -1,9 +1,8 @@
-export function initTime(time) {
-  time._s = 0;
-  time.s = 0;
-}
+import { time } from "../header.js";
 
-export function setTime(time) {
+var ctx = canvas.getContext("2d");
+
+export function setTime() {
   time._s++
   
   if (time._s > 100) {
@@ -12,7 +11,7 @@ export function setTime(time) {
   }
 }
 
-export function drawTime(ctx, time) {
+export function drawTime() {
   ctx.font = "16px Arial";
   ctx.fillStyle = "#fff";
   ctx.fillText("Time: " + time.s, 20, 30);

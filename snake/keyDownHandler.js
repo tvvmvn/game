@@ -1,14 +1,12 @@
+import { snake, misc } from "./header.js";
 import Key from "./enums/Key.js";
-import Direction from "./enums/Direction.js";
+import { Direction } from "./enums/Direction.js";
 
 var prevKey = Key.RIGHT;
 
-export default function keyDownHandler(e, start, startGame, snake) {
-
-  if (!start) {
-    prevKey = Key.RIGHT;
-
-    return startGame();
+export default function keyDownHandler(e) {
+  if (!misc.start) {
+    misc.start = true;
   }
 
   // prevent accel and u-turn 

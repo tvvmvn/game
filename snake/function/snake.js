@@ -1,22 +1,9 @@
-import Direction from "../enums/Direction.js";
+import { snake, grid } from "../header.js";
+import { Direction } from "../enums/Direction.js";
 
-export function initSnake(grid, snake) {
-  snake.x = grid.offsetX + (grid.cell * 2);
-  snake.y = grid.offsetY;
-  snake._x = 0;
-  snake._y = 0;
-  snake.width = 20;
-  snake.height = 20;
-  snake.movingPoint = 20;
-  snake.node = [
-    { x: grid.offsetX + (grid.cell * 2), y: grid.offsetY },
-    { x: grid.offsetX + (grid.cell * 1), y: grid.offsetY },
-    { x: grid.offsetX, y: grid.offsetY }
-  ]
-  snake.dir = Direction.RIGHT;
-}
+var ctx = canvas.getContext("2d");
 
-export function setSnake(snake, grid) {
+export function setSnake() {
   if (snake.dir === Direction.RIGHT) {
     snake._x++;
 
@@ -54,7 +41,7 @@ export function setSnake(snake, grid) {
   }
 }
 
-export function snakeMove(snake) {
+export function snakeMove() {
   // body
   for (var j = snake.node.length - 1; j > 0; j--) {
     snake.node[j].x = snake.node[j - 1].x;
@@ -66,19 +53,19 @@ export function snakeMove(snake) {
   snake.node[0].y = snake.y;
 }
 
-export function selfCrash(snake) {
+export function selfCrash() {
   var value = false;
 
   for (var h = 3; h < snake.node.length; h++) {
     if (snake.x === snake.node[h].x && snake.y === snake.node[h].y) {
-      value = true
+      value = true;
     }
   }
 
   return value;
 }
 
-export function wallCrash(snake, grid) {
+export function wallCrash() {
   var leftCrash = snake.x < grid.offsetX
   var rightCrash = snake.x + grid.cell > grid.offsetX + grid.width;
   var topCrash = snake.y < grid.offsetY;
@@ -91,9 +78,9 @@ export function wallCrash(snake, grid) {
   return false;
 }
 
-export function drawSnake(ctx, snake) {
+export function drawSnake() {
   for (var i = 0; i < snake.node.length; i++) {
-    ctx.fillStyle = "#0a0"
+    ctx.fillStyle = snake.color;
     ctx.fillRect(snake.node[i].x, snake.node[i].y, snake.width, snake.height);
   }
 
