@@ -1,3 +1,4 @@
 {
-  "liveServer.settings.multiRootWorkspaceName": "game"
+  "liveServer.settings.multiRootWorkspaceName": "game",
+  "liveServer.settings.port": 5501
 }
