@@ -18,7 +18,6 @@ function game() {
     { x: 200, y: 200, by: 0 },
   ];
   var turn = 1;
-  var selected;
   var interval;
   var result = {
     outcome: null,
@@ -44,12 +43,12 @@ function game() {
   
     if (result.outcome === "DONE") {
       if (result.winner === 1) {
-        drawResult("YOU WIN");
+        drawResult("YOU WIN", "#00f");
       } else {
-        drawResult("YOU LOSE");
+        drawResult("YOU LOSE", "#f00");
       }
     } else if (result.outcome === "DRAW") {
-      drawResult("DRAW!");
+      drawResult("DRAW!", "#0f0");
     } else {
       if (turn === 2) {
         setTimeout(drawCom, 1000);
@@ -183,9 +182,9 @@ function game() {
     }
   }
 
-  function drawResult(text) {
+  function drawResult(text, color) {
     ctx.font = "30px Comic Sans MS";
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = color;
     ctx.textAlign = "center";
     ctx.fillText(text, canvas.width / 2, 250);
 
@@ -205,24 +204,27 @@ function game() {
     var x = e.touches[0].clientX - boardOffsetX;
     var y = e.touches[0].clientY - boardOffsetY;
   
-    // console.log(x, y)
+    console.log(x, y)
+
+    var selected = null;
   
     if (y > 0 && y < 100) {
       if (x > 0 && x < 100) selected = 0;
       if (x > 100 && x < 200) selected = 1;
       if (x > 200 && x < 300) selected = 2;
     } else if (y > 100 && y < 200) {
-      if (x < 100) selected = 3;
+      if (x > 0 && x < 100) selected = 3;
       if (x > 100 && x < 200) selected = 4;
-      if (x > 200) selected = 5;
+      if (x > 200 && x < 300) selected = 5;
     } else if (y > 200 && y < 300) {
       if (x > 0 && x < 100) selected = 6;
       if (x > 100 && x < 200) selected = 7;
       if (x > 200 && x < 300) selected = 8;
     }
   
-    blocks[selected].by = 1;
-  
-    turn = 2;
+    if (selected !== null) {
+      blocks[selected].by = 1;
+      turn = 2;
+    }
   }
 }
