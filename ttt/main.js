@@ -1,230 +1,246 @@
-game();
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var gridSize = 300;
+var gridOffsetX = (innerWidth - gridSize) / 2;
+var gridOffsetY = 100;
+var gridItemCount = 3;
+var gridItemSize = gridSize / gridItemCount;
+var gridItems = createItems();
+var board = [];
+var turn;
+var initialized;
+var result = {};
+var interval;
 
-function game() {
-  var canvas = document.getElementById("canvas");
-  var ctx = canvas.getContext("2d");
-  var boardSize = 300;
-  var boardOffsetX = (innerWidth - boardSize) / 2;
-  var boardOffsetY = 100;
-  var blocks = [
-    { x: 0, y: 0, by: 0 },
-    { x: 100, y: 0, by: 0 },
-    { x: 200, y: 0, by: 0 },
-    { x: 0, y: 100, by: 0 },
-    { x: 100, y: 100, by: 0 },
-    { x: 200, y: 100, by: 0 },
-    { x: 0, y: 200, by: 0 },
-    { x: 100, y: 200, by: 0 },
-    { x: 200, y: 200, by: 0 },
-  ];
-  var turn = 1;
-  var interval;
-  var result = {
-    outcome: null,
-    winner: null,
-  }
-  var initialized = true;
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+canvas.style["backgroundColor"] = "#222";
+canvas.addEventListener("touchstart", touchHandler);
 
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-  canvas.style["backgroundColor"] = "#222";
-  canvas.addEventListener("touchstart", touchHandler);
-  interval = setInterval(draw, 10);
+startGame();
 
-
-  function draw() {
-    clearCanvas();
+function startGame() {
+  board = [0,0,0,0,0,0,0,0,0];
+  turn = 1;
+  result.outcome = null;
+  result.winner = null;
+  initialized = false;
   
-    drawTitle();
-    drawBoard();
-    drawSymbol();
+  interval = setInterval(render, 10);
+}
 
-    getResult();
-  
+function render() {
+  clearCanvas();
+  drawTitle();
+  drawGrid();
+  setSymbol();
+  getResult();
+
+  // keep playing
+  if (result.outcome == null) {
+    if (turn === 2) {
+      setTimeout(com, 1000);
+      turn = 0;
+    }
+  } else { // or end
     if (result.outcome === "DONE") {
       if (result.winner === 1) {
         drawResult("YOU WIN", "#00f");
       } else {
         drawResult("YOU LOSE", "#f00");
       }
-    } else if (result.outcome === "DRAW") {
-      drawResult("DRAW!", "#0f0");
-    } else {
-      if (turn === 2) {
-        setTimeout(drawCom, 1000);
-        turn = 0;
-      }
-    }
-  }
-
-  function clearCanvas() {
-    ctx.clearRect(0, 0, innerWidth, innerHeight);
-  }
-
-  function drawBoard() {
-    ctx.beginPath();
-    ctx.moveTo(boardOffsetX, boardOffsetY + 100);
-    ctx.lineTo(boardOffsetX + 300, boardOffsetY + 100);
-  
-    ctx.moveTo(boardOffsetX, boardOffsetY + 200);
-    ctx.lineTo(boardOffsetX + 300, boardOffsetY + 200);
-  
-    ctx.moveTo(boardOffsetX + 100, boardOffsetY);
-    ctx.lineTo(boardOffsetX + 100, boardOffsetY + 300);
-  
-    ctx.moveTo(boardOffsetX + 200, boardOffsetY);
-    ctx.lineTo(boardOffsetX + 200, boardOffsetY + 300);
-    ctx.strokeStyle = "#333";
-    ctx.lineWidth = 4;
-    ctx.stroke();
-  }
-  
-  function drawTitle() {
-    ctx.font = "30px Comic Sans MS";
-    ctx.fillStyle = "#fff";
-    ctx.textAlign = "center";
-    ctx.fillText("TIC TAC TOE", canvas.width / 2, 60);
-  } 
-  
-  function drawCom() {
-    var n = Math.floor(Math.random() * 9);
-    
-    if (blocks[n].by === 0) {
-      blocks[n].by = 2;
-    } else {
-      drawCom();
-    }
-    
-    turn = 1;
-  }
-  
-  function drawSymbol() {
-    for (var i=0; i<blocks.length; i++) {
-      var block = blocks[i];
-  
-      if (block.by !== 0) {
-        if (block.by === 1) {
-          drawCircle(block.x, block.y);
-        } else {
-          // ctx.fillStyle = "#a00";
-          // ctx.fillRect(block.x + boardOffsetX, block.y + boardOffsetY, 100, 100);
-          drawX(block.x, block.y);
-        }
-      }
-    }
-  }
-
-  function drawCircle(x, y) {
-    ctx.beginPath();
-    ctx.arc(
-      x + boardOffsetX + 50, 
-      y + boardOffsetY + 50, 
-      30, 0, 2 * Math.PI
-    );
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 8
-    ctx.stroke();
-  }
-
-  function drawX(x, y) {
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 8
-
-    // Begin a Path
-    ctx.beginPath();
-    ctx.moveTo(x + boardOffsetX + 20, y + boardOffsetY + 20);
-    ctx.lineTo(x + boardOffsetX + 80, y + boardOffsetY + 80);
-    ctx.stroke();
-
-    // Begin a new Path
-    ctx.beginPath();
-    ctx.moveTo(x + boardOffsetX + 80, y + boardOffsetY + 20);
-    ctx.lineTo(x + boardOffsetX + 20, y + boardOffsetY + 80);
-    ctx.stroke();
-  }
-  
-  function getResult() {
-    // get bingo
-    cmp(blocks[3].by, blocks[4].by, blocks[5].by);
-    cmp(blocks[1].by, blocks[4].by, blocks[7].by);
-    cmp(blocks[2].by, blocks[4].by, blocks[6].by);
-    cmp(blocks[0].by, blocks[4].by, blocks[8].by);
-
-    cmp(blocks[0].by, blocks[3].by, blocks[6].by);
-    cmp(blocks[0].by, blocks[1].by, blocks[2].by);
-    cmp(blocks[2].by, blocks[5].by, blocks[8].by);
-    cmp(blocks[6].by, blocks[7].by, blocks[8].by);
-    
-    if (result.winner) {
-      return;
-    }
-
-    // get draw
-    var drawn = true;
-    
-    for (var i=0; i<blocks.length; i++) {
-      if (blocks[i].by === 0) {
-        drawn = false;
-        break;
-      }
-    }
-    
-    if (drawn) {
-      result.outcome = "DRAW";
-      result.winner = null;
     } 
-  }
-
-  function cmp(a, b, c) {
-    if (a !== 0 && a === b && b === c) {
-      result.outcome = "DONE";
-      result.winner = a;
+    
+    if (result.outcome === "DRAW") {
+      drawResult("DRAW!", "#0f0");
     }
-  }
 
-  function drawResult(text, color) {
-    ctx.font = "30px Comic Sans MS";
-    ctx.fillStyle = color;
-    ctx.textAlign = "center";
-    ctx.fillText(text, canvas.width / 2, 250);
-
-    if (initialized) {
+    if (!initialized) {
       setTimeout(() => {
         clearInterval(interval);
-        game();
+        start();
       }, 2000);
+  
+      initialized = true;
+    }
+  }
+}
 
-      initialized = false;
+function drawStart() {
+  ctx.font = "30px Comic Sans MS";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.fillText("Touch to start game", canvas.width / 2, 250);
+}
+
+function drawTitle() {
+  ctx.font = "30px Comic Sans MS";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.fillText("TIC TAC TOE", canvas.width / 2, 60);
+} 
+
+function com() {
+  var n = Math.floor(Math.random() * 9);
+  
+  if (board[n] === 0) {
+    board[n] = 2;
+  } else {
+    com();
+  }
+  
+  turn = 1;
+}
+
+function setSymbol() {
+  for (var i=0; i<board.length; i++) {  
+    if (board[i] !== 0) {
+      if (board[i] === 1) {
+        drawCircle(gridItems[i].x, gridItems[i].y);
+      } else {
+        drawCross(gridItems[i].x, gridItems[i].y)
+      }
+    }
+  }
+}
+
+function getResult() {
+  // 1. get bingo
+  checkBingo(board[3], board[4], board[5]);
+  checkBingo(board[1], board[4], board[7]);
+  checkBingo(board[2], board[4], board[6]);
+  checkBingo(board[0], board[4], board[8]);
+  checkBingo(board[0], board[3], board[6]);
+  checkBingo(board[0], board[1], board[2]);
+  checkBingo(board[2], board[5], board[8]);
+  checkBingo(board[6], board[7], board[8]);
+  
+  if (result.outcome == "DONE") {
+    return;
+  }
+
+  // 2. get draw
+  var drawn = true;
+  
+  for (var i=0; i<board.length; i++) {
+    if (board[i] === 0) {
+      drawn = false;
+      break;
+    }
+  }
+  
+  if (drawn) {
+    result.outcome = "DRAW";
+    result.winner = null;
+  } 
+}
+
+function checkBingo(a, b, c) {
+  if (a !== 0 && a === b && b === c) {
+    result.outcome = "DONE";
+    result.winner = a;
+  }
+}
+
+function drawResult(text, color) {
+  ctx.font = "30px Comic Sans MS";
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.fillText(text, canvas.width / 2, 250);
+}
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+}
+
+function drawGrid() {
+  ctx.beginPath();
+  ctx.strokeStyle = "#333";
+  ctx.lineWidth = 4;
+  
+  // rows
+  for (var i=0; i<4; i++) {
+    ctx.moveTo(gridOffsetX, gridOffsetY + (i * gridItemSize));
+    ctx.lineTo(gridOffsetX + gridSize, gridOffsetY + (i * gridItemSize));
+  }
+  
+  // cols
+  for (var j=0; j<4; j++) {
+    ctx.moveTo(gridOffsetX + (j * gridItemSize), gridOffsetY);
+    ctx.lineTo(gridOffsetX + (j * gridItemSize), gridOffsetY + gridSize);
+  }
+
+  ctx.stroke();
+}
+
+function createItems() {
+  var items = [];
+  
+  for (var i=0; i<3; i++) {
+    items[i] = [];
+    for (var j=0; j<3; j++) {
+      items[i][j] = { 
+        x: gridOffsetX + (j * gridItemSize), 
+        y: gridOffsetY + (i * gridItemSize),
+      }
     }
   }
 
-  function touchHandler(e) {
-    if (turn != 1) return;
-  
-    var x = e.touches[0].clientX - boardOffsetX;
-    var y = e.touches[0].clientY - boardOffsetY;
-  
-    console.log(x, y)
+  return items.flat();
+}
 
-    var selected = null;
+function drawCircle(x, y) {
+  ctx.beginPath();
+  ctx.arc(x + 50, y + 50, 30, 0, 2 * Math.PI);
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 8
+  ctx.stroke();
+}
+
+function drawCross(x, y) {
+  ctx.beginPath();
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 8
+  ctx.moveTo(x + 20, y + 20);
+  ctx.lineTo(x + 80, y + 80);
+  ctx.moveTo(x + 80, y + 20);
+  ctx.lineTo(x + 20, y + 80);
+  ctx.stroke();
+}
+
+function touchHandler(e) {
+  if (turn != 1) return;
+
+  var x = e.touches[0].clientX - gridOffsetX;
+  var y = e.touches[0].clientY - gridOffsetY;
+  // console.log(x, y);
+
+  var selected = null;
+
+  var row1 = y > 0 && y < gridItemSize;
+  var row2 = y > gridItemSize && y < (gridItemSize * 2);
+  var row3 = y > (gridItemSize * 2) && y < (gridItemSize * 3);
   
-    if (y > 0 && y < 100) {
-      if (x > 0 && x < 100) selected = 0;
-      if (x > 100 && x < 200) selected = 1;
-      if (x > 200 && x < 300) selected = 2;
-    } else if (y > 100 && y < 200) {
-      if (x > 0 && x < 100) selected = 3;
-      if (x > 100 && x < 200) selected = 4;
-      if (x > 200 && x < 300) selected = 5;
-    } else if (y > 200 && y < 300) {
-      if (x > 0 && x < 100) selected = 6;
-      if (x > 100 && x < 200) selected = 7;
-      if (x > 200 && x < 300) selected = 8;
-    }
-  
-    if (selected !== null) {
-      blocks[selected].by = 1;
-      turn = 2;
-    }
+  var col1 = x > 0 && x < gridItemSize;
+  var col2 = x > gridItemSize && x < (gridItemSize * 2);
+  var col3 = x > (gridItemSize * 2) && x < (gridItemSize * 3);
+
+  if (row1) {
+    if (col1) selected = 0;
+    if (col2) selected = 1;
+    if (col3) selected = 2;
+  } else if (row2) {
+    if (col1) selected = 3;
+    if (col2) selected = 4;
+    if (col3) selected = 5;
+  } else if (row3) {
+    if (col1) selected = 6;
+    if (col2) selected = 7;
+    if (col3) selected = 8;
+  }
+
+  if (selected !== null) {
+    board[selected] = 1;
+    turn = 2;
   }
 }
