@@ -1,395 +1,431 @@
-f();
-
-function f() {
-  var ctx = canvas.getContext("2d");
-
-  const Direction = {
-    TOP: 0,
-    LEFT: 1,
-    RIGHT: 2,
-    DOWN: 3
+// struct
+class Snake {
+  constructor(x, y, _x, _y, size, movingPoint, node, dir, color) {
+    this.x = x;
+    this.y = y;
+    this._x =_x;
+    this._y = _y;
+    this.size = size;
+    this.movingPoint = movingPoint;
+    this.node = node;
+    this.dir = dir;
+    this.color = color;
   }
-  
-  const Key = {
-    UP: 'ArrowUp', // read only
-    LEFT: 'ArrowLeft',
-    RIGHT: 'ArrowRight',
-    DOWN: 'ArrowDown',
-    ENTER: 'Enter'
-  }
+}
 
-  var grid = {
-    offsetX: 50,
-    offsetY: 50,
-    width: 400,
-    height: 300,
-    rowCount: 15,
-    colCount: 20,
-    cell: 20,
+class Apple {
+  constructor(x, y, size, count, eaten, color) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.count = count;
+    this.eaten = eaten;
+    this.color = color;
   }
-  
-  var snake = {
-    x: grid.offsetX + (grid.cell * 2),
-    y: grid.offsetY,
-    _x: 0,
-    _y: 0,
-    width: grid.cell,
-    height: grid.cell,
-    movingPoint: 20,
-    node: [
-      { x: grid.offsetX + (grid.cell * 2), y: grid.offsetY },
-      { x: grid.offsetX + (grid.cell * 1), y: grid.offsetY },
-      { x: grid.offsetX, y: grid.offsetY }
+}
+
+// enums
+const Direction = {
+  UP: 0,
+  LEFT: 1,
+  RIGHT: 2,
+  DOWN: 3
+}
+
+// enums
+const Key = {
+  UP: 'ArrowUp', // read only
+  LEFT: 'ArrowLeft',
+  RIGHT: 'ArrowRight',
+  DOWN: 'ArrowDown',
+  ENTER: 'Enter'
+}
+
+// enums
+const Grid = {
+  OFFSET_X: 50,
+  OFFSET_Y: 50,
+  WIDTH: 400,
+  HEIGHT: 300,
+  ROW_COUNT: 15,
+  COL_COUNT: 20,
+  CELL: 20,
+}
+
+// variables
+var ctx = canvas.getContext("2d");
+var snake;
+var apple;
+var time;
+var game;
+var prevX;
+var prevY;
+var interval;
+var prevKey;
+
+
+addEventListener("keydown", keyDownHandler);
+startGame();
+
+
+function startGame() {
+  snake = new Snake(
+    Grid.OFFSET_X + (Grid.CELL * 2), Grid.OFFSET_Y,
+    0,0,
+    Grid.CELL,
+    20,
+    [
+      [Grid.OFFSET_X + (Grid.CELL * 2), Grid.OFFSET_Y],
+      [Grid.OFFSET_X + (Grid.CELL * 1), Grid.OFFSET_Y],
+      [Grid.OFFSET_X, Grid.OFFSET_Y]
     ],
-    dir: Direction.RIGHT,
-    color: "#0a0"
-  }
-  
-  var apple = {
-    x: grid.offsetX + 100,
-    y: grid.offsetY + 100,
-    width: 20,
-    height: 20,
-    count: 20,
-    eaten: false,
-    color: "#f00"
-  };
-  
-  var time = {
+    Direction.RIGHT,
+    "#0a0"
+  );
+
+  apple = new Apple(
+    Grid.OFFSET_X + 100, Grid.OFFSET_Y + 100,  
+    20,
+    20,
+    false,
+    "#f00"
+  )
+
+  time = {
     _s: 0,
     s: 0,
   };
-  
-  var misc = {
+
+  game = {
     start: false,
     over: false,
     end: false
   }
-  
-  var prevX = snake.x;
-  var prevY = snake.y;
-  var interval = createInterval();
-  var prevKey = Key.RIGHT;
 
-  addEventListener("keydown", keyDownHandler);
+  prevX = snake.x;
+  prevY = snake.y;
+  interval;
+  prevKey = Key.RIGHT;
+
+  interval = createInterval();
+}
 
 
-  /* FUNCTIONS */
+/* FUNCTIONS */
+
+
+function draw() {
+  clearCanvas();
   
+  drawGrid();
+
+  if (!game.start) {
+    drawStart();
+    return;
+  }
+
+  setTime();
+  drawTime();
+  drawScore();
+
+  if (game.over) {
+    drawOver();
+    initGame();
+  }
   
-  function draw() {
-    clearCanvas();
-    
-    drawGrid();
+  if (game.end) {
+    drawEnd();
+    initGame()
+  }
   
-    if (!misc.start) {
-      drawStart();
-      return;
-    }
-  
-    setTime();
-    drawTime();
-    drawScore();
-  
-    if (misc.over) {
-      drawOver();
-      initGame();
-    }
-    
-    if (misc.end) {
-      drawEnd();
-      initGame()
-    }
-    
-    // Snake
-    setSnake();
-  
-    if (prevX !== snake.x || prevY !== snake.y) {
-      if (wallCrash()) {
-        misc.over = true;
-      } else if (selfCrash()) {
-        misc.over = true;
-      } else {
-        snakeMove()
-      }
-    }
-  
-    drawSnake();
-  
-    // Apple
-    if (apple.count) {
-      apple.eaten = (snake.x === apple.x) && (snake.y === apple.y)
-      
-      if (apple.eaten) {
-        snake.node.push({ x: snake.x, y: snake.y });
-        apple.count--;
-        putApple();
-        snake.movingPoint--;
-      }
-      
-      drawApple();
+  // Snake
+  setSnake();
+
+  if (prevX !== snake.x || prevY !== snake.y) {
+    if (wallCrash()) {
+      game.over = true;
+    } else if (selfCrash()) {
+      game.over = true;
     } else {
-      drawEnd();
-    } 
-  
-    prevX = snake.x;
-    prevY = snake.y;
-  }
-  
-  function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-  
-  function drawStart() {  
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("Press any key to start game", 160, 200);
-  }
-  
-  function drawScore() {
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#fff";
-    ctx.fillText(apple.count + " apples", 400, 30);
-  }
-  
-  function drawOver() {
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("GAME OVER", 190, 208);
-    // ctx.globalCompositeOperation = "destination-over";
-  }
-  
-  function drawEnd() {
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("YOU WIN!", 190, 208);
-  }
-  
-  function initGame() {
-    clearInterval(interval);
-  
-    setTimeout(() => {
-      f();
-    }, 2000)
-  }
-  
-  function createInterval() {
-    return setInterval(draw, 10) // 100hz
-  }
-
-
-  /* SNAKE */
-
-
-  function setSnake() {
-    if (snake.dir === Direction.RIGHT) {
-      snake._x++;
-  
-      if (snake._x > snake.movingPoint) {
-        snake.x += grid.cell;
-        snake._x = 0;
-      }
-    }
-  
-    if (snake.dir === Direction.DOWN) {
-      snake._y++;
-  
-      if (snake._y > snake.movingPoint) {
-        snake.y += grid.cell;
-        snake._y = 0;
-      }
-    }
-  
-    if (snake.dir === Direction.LEFT) {
-      snake._x--;
-  
-      if (snake._x < -snake.movingPoint) {
-        snake.x -= grid.cell;
-        snake._x = 0;
-      }
-    }
-  
-    if (snake.dir === Direction.UP) {
-      snake._y--;
-      
-      if (snake._y < -snake.movingPoint) {
-        snake.y -= grid.cell;
-        snake._y = 0;
-      }  
+      snakeMove()
     }
   }
-  
-  function snakeMove() {
-    // body
-    for (var j = snake.node.length - 1; j > 0; j--) {
-      snake.node[j].x = snake.node[j - 1].x;
-      snake.node[j].y = snake.node[j - 1].y;
+
+  drawSnake();
+
+  // Apple
+  if (apple.count) {
+    apple.eaten = (snake.x === apple.x) && (snake.y === apple.y)
+    
+    if (apple.eaten) {
+      snake.node.push([snake.x, snake.y]);
+      apple.count--;
+      putApple();
+      snake.movingPoint--;
     }
     
-    // head
-    snake.node[0].x = snake.x;
-    snake.node[0].y = snake.y;
-  }
-  
-  function selfCrash() {
-    var value = false;
-  
-    for (var h = 3; h < snake.node.length; h++) {
-      if (snake.x === snake.node[h].x && snake.y === snake.node[h].y) {
-        value = true;
-      }
-    }
-  
-    return value;
-  }
-  
-  function wallCrash() {
-    var leftCrash = snake.x < grid.offsetX
-    var rightCrash = snake.x + grid.cell > grid.offsetX + grid.width;
-    var topCrash = snake.y < grid.offsetY;
-    var bottomCrash = snake.y + grid.cell > grid.offsetY + grid.height;
-  
-    if (leftCrash || rightCrash || topCrash || bottomCrash) {
-      return true
-    }
-  
-    return false;
-  }
-  
-  function drawSnake() {
-    for (var i = 0; i < snake.node.length; i++) {
-      ctx.fillStyle = snake.color;
-      ctx.fillRect(snake.node[i].x, snake.node[i].y, snake.width, snake.height);
-    }
-  
-    // snake x, y
-    // ctx.fillStyle = "#f00"
-    // ctx.fillRect(snake.x, snake.y, 5, 5); 
-  }
+    drawApple();
+  } else {
+    drawEnd();
+  } 
+
+  prevX = snake.x;
+  prevY = snake.y;
+}
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawStart() {  
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("Press any key to start game", 160, 200);
+}
+
+function drawScore() {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText(apple.count + " apples", 400, 30);
+}
+
+function drawOver() {
+  ctx.font = "20px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("GAME OVER", 190, 208);
+  // ctx.globalCompositeOperation = "destination-over";
+}
+
+function drawEnd() {
+  ctx.font = "20px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("YOU WIN!", 190, 208);
+}
+
+function initGame() {
+  clearInterval(interval);
+
+  setTimeout(() => {
+    startGame();
+  }, 2000)
+}
+
+function createInterval() {
+  return setInterval(draw, 10) // 100hz
+}
 
 
-  /* APPLE */
-  
-  
-  function putApple() {
-    var x = grid.offsetX + (grid.cell * (Math.floor(Math.random() * 20)));
-    var y = grid.offsetY + (grid.cell * (Math.floor(Math.random() * 15)));
-  
-    var putAgain = false;
-  
-    // detect apple on snake body
-    for (var i = 0; i < snake.node.length; i++) {
-      if (snake.node[i].x === x && snake.node[i].y === y) {
-        putAgain = true;
-      }
-    }
-  
-    if (putAgain) {
-      putApple(grid, apple, snake)
-    } else {
-      apple.x = x
-      apple.y = y
+/* SNAKE */
+
+
+function setSnake() {
+  if (snake.dir === Direction.RIGHT) {
+    snake._x++;
+
+    if (snake._x > snake.movingPoint) {
+      snake.x += Grid.CELL;
+      snake._x = 0;
     }
   }
-  
-  function drawApple() {
-    ctx.fillStyle = apple.color;
-    ctx.fillRect(apple.x, apple.y, apple.width, apple.height);
+
+  if (snake.dir === Direction.DOWN) {
+    snake._y++;
+
+    if (snake._y > snake.movingPoint) {
+      snake.y += Grid.CELL;
+      snake._y = 0;
+    }
   }
 
+  if (snake.dir === Direction.LEFT) {
+    snake._x--;
 
-  /* GRID */
-  
+    if (snake._x < -snake.movingPoint) {
+      snake.x -= Grid.CELL;
+      snake._x = 0;
+    }
+  }
 
-  function drawGrid() {
-    ctx.beginPath();
-    ctx.strokeStyle = "#555";
+  if (snake.dir === Direction.UP) {
+    snake._y--;
     
-    // rows
-    for (var r = 0; r < grid.rowCount + 1 ; r++) {
-      ctx.moveTo(grid.offsetX, grid.offsetY + (r * grid.cell));
-      ctx.lineTo(grid.offsetX + grid.width, grid.offsetY + (r * grid.cell));
-    }
-  
-    // cols
-    for (var c = 0; c < grid.colCount + 1; c++) {
-      ctx.moveTo(grid.offsetX + (c * grid.cell), grid.offsetY);
-      ctx.lineTo(grid.offsetX + (c * grid.cell), grid.offsetY + grid.height);
-    }
-  
-    ctx.stroke();
+    if (snake._y < -snake.movingPoint) {
+      snake.y -= Grid.CELL;
+      snake._y = 0;
+    }  
   }
+}
 
-
-  /* TIME */
-
-  
-  function setTime() {
-    time._s++
-    
-    if (time._s > 100) {
-      time.s++;
-      time._s = 0;
-    }
+function snakeMove() {
+  // body
+  for (var j = snake.node.length - 1; j > 0; j--) {
+    snake.node[j][0] = snake.node[j - 1][0];
+    snake.node[j][1] = snake.node[j - 1][1];
   }
   
-  function drawTime() {
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("Time: " + time.s, 20, 30);
+  // head
+  snake.node[0][0] = snake.x;
+  snake.node[0][1] = snake.y;
+}
+
+function selfCrash() {
+  var value = false;
+
+  for (var h = 3; h < snake.node.length; h++) {
+    if (snake.x === snake.node[h][0] && snake.y === snake.node[h][1]) {
+      value = true;
+    }
   }
 
+  return value;
+}
 
-  /* KEY HANDLER */
+function wallCrash() {
+  var leftCrash = snake.x < Grid.OFFSET_X
+  var rightCrash = snake.x + Grid.CELL > Grid.OFFSET_X + Grid.WIDTH;
+  var topCrash = snake.y < Grid.OFFSET_Y;
+  var bottomCrash = snake.y + Grid.CELL > Grid.OFFSET_Y + Grid.HEIGHT;
 
-
-  function keyDownHandler(e) {
-    if (!misc.start) {
-      misc.start = true;
-    }
-  
-    // prevent accel and u-turn 
-    if (snake.dir === Direction.RIGHT) {
-      if (e.key === Key.RIGHT) return;
-      if (e.key === Key.LEFT) return;
-    } 
-  
-    if (snake.dir === Direction.DOWN) {
-      if (e.key === Key.DOWN) return;
-      if (e.key === Key.UP) return;
-    } 
-  
-    if (snake.dir === Direction.LEFT) {
-      if (e.key === Key.LEFT) return;
-      if (e.key === Key.RIGHT) return;
-    } 
-  
-    if (snake.dir === Direction.UP) {
-      if (e.key === Key.UP) return;
-      if (e.key === Key.DOWN) return;
-    } 
-  
-    // turn 
-    if (e.key === Key.UP) {
-      snake._y -= snake.movingPoint;
-      snake.dir = Direction.UP;
-    }
-    
-    if (e.key === Key.LEFT) {
-      snake._x -= snake.movingPoint;
-      snake.dir = Direction.LEFT;
-    }
-  
-    if (e.key === Key.RIGHT) {
-      snake._x += snake.movingPoint;
-      snake.dir = Direction.RIGHT;
-    }
-    
-    if (e.key === Key.DOWN) {
-      snake._y += snake.movingPoint;
-      snake.dir = Direction.DOWN;
-    }
-  
-    prevKey = e.key;
+  if (leftCrash || rightCrash || topCrash || bottomCrash) {
+    return true
   }
+
+  return false;
+}
+
+function drawSnake() {
+  for (var i = 0; i < snake.node.length; i++) {
+    ctx.fillStyle = snake.color;
+    ctx.fillRect(snake.node[i][0], snake.node[i][1], snake.size, snake.size);
+  }
+
+  // snake x, y
+  // ctx.fillStyle = "#f00"
+  // ctx.fillRect(snake.x, snake.y, 5, 5); 
+}
+
+
+/* APPLE */
+
+
+function putApple() {
+  var x = Grid.OFFSET_X + (Grid.CELL * (Math.floor(Math.random() * 20)));
+  var y = Grid.OFFSET_Y + (Grid.CELL * (Math.floor(Math.random() * 15)));
+
+  var putAgain = false;
+
+  // detect apple on snake body
+  for (var i = 0; i < snake.node.length; i++) {
+    if (snake.node[i][0] === x && snake.node[i][1] === y) {
+      putAgain = true;
+    }
+  }
+
+  if (putAgain) {
+    putApple()
+  } else {
+    apple.x = x
+    apple.y = y
+  }
+}
+
+function drawApple() {
+  ctx.fillStyle = apple.color;
+  ctx.fillRect(apple.x, apple.y, apple.size, apple.size);
+}
+
+
+/* GRID */
+
+
+function drawGrid() {
+  ctx.beginPath();
+  ctx.strokeStyle = "#555";
+  
+  // rows
+  for (var r = 0; r < Grid.ROW_COUNT + 1 ; r++) {
+    ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y + (r * Grid.CELL));
+    ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y + (r * Grid.CELL));
+  }
+
+  // cols
+  for (var c = 0; c < Grid.COL_COUNT + 1; c++) {
+    ctx.moveTo(Grid.OFFSET_X + (c * Grid.CELL), Grid.OFFSET_Y);
+    ctx.lineTo(Grid.OFFSET_X + (c * Grid.CELL), Grid.OFFSET_Y + Grid.HEIGHT);
+  }
+
+  ctx.stroke();
+}
+
+
+/* TIME */
+
+
+function setTime() {
+  time._s++
+  
+  if (time._s > 100) {
+    time.s++;
+    time._s = 0;
+  }
+}
+
+function drawTime() {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("Time: " + time.s, 20, 30);
+}
+
+
+/* KEY HANDLER */
+
+
+function keyDownHandler(e) {
+  if (!game.start) {
+    game.start = true;
+  }
+
+  // prevent accel and u-turn 
+  if (snake.dir === Direction.RIGHT) {
+    if (e.key === Key.RIGHT) return;
+    if (e.key === Key.LEFT) return;
+  } 
+
+  if (snake.dir === Direction.DOWN) {
+    if (e.key === Key.DOWN) return;
+    if (e.key === Key.UP) return;
+  } 
+
+  if (snake.dir === Direction.LEFT) {
+    if (e.key === Key.LEFT) return;
+    if (e.key === Key.RIGHT) return;
+  } 
+
+  if (snake.dir === Direction.UP) {
+    if (e.key === Key.UP) return;
+    if (e.key === Key.DOWN) return;
+  } 
+
+  // turn 
+  if (e.key === Key.UP) {
+    snake._y -= snake.movingPoint;
+    snake.dir = Direction.UP;
+  }
+  
+  if (e.key === Key.LEFT) {
+    snake._x -= snake.movingPoint;
+    snake.dir = Direction.LEFT;
+  }
+
+  if (e.key === Key.RIGHT) {
+    snake._x += snake.movingPoint;
+    snake.dir = Direction.RIGHT;
+  }
+  
+  if (e.key === Key.DOWN) {
+    snake._y += snake.movingPoint;
+    snake.dir = Direction.DOWN;
+  }
+
+  prevKey = e.key;
 }

@@ -1,11 +1,14 @@
+// enum Grid
+const GRID_SIZE = 300;
+const GRID_OFFSET_X = (innerWidth - GRID_SIZE) / 2;
+const GRID_OFFSET_Y = 100;
+const GRID_ITEM_COUNT = 3;
+const GRID_ITEM_SIZE = GRID_SIZE / GRID_ITEM_COUNT;
+const GRID_ITEM_CRDS = createItems(); 
+
+// variables
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-var gridSize = 300;
-var gridOffsetX = (innerWidth - gridSize) / 2;
-var gridOffsetY = 100;
-var gridItemCount = 3;
-var gridItemSize = gridSize / gridItemCount;
-var gridItems = createItems();
 var board = [];
 var turn;
 var initialized;
@@ -95,11 +98,11 @@ function com() {
 function setSymbol() {
   for (var i=0; i<board.length; i++) {  
     if (board[i] == 1) {
-      drawCircle(gridItems[i].x, gridItems[i].y);
+      drawCircle(GRID_ITEM_CRDS[i][0], GRID_ITEM_CRDS[i][1]);
     } 
     
     if (board[i] == 2) {
-      drawCross(gridItems[i].x, gridItems[i].y)
+      drawCross(GRID_ITEM_CRDS[i][0], GRID_ITEM_CRDS[i][1])
     }
   }
 }
@@ -160,14 +163,14 @@ function drawGrid() {
   
   // rows
   for (var i=0; i<4; i++) {
-    ctx.moveTo(gridOffsetX, gridOffsetY + (i * gridItemSize));
-    ctx.lineTo(gridOffsetX + gridSize, gridOffsetY + (i * gridItemSize));
+    ctx.moveTo(GRID_OFFSET_X, GRID_OFFSET_Y + (i * GRID_ITEM_SIZE));
+    ctx.lineTo(GRID_OFFSET_X + GRID_SIZE, GRID_OFFSET_Y + (i * GRID_ITEM_SIZE));
   }
   
   // cols
   for (var j=0; j<4; j++) {
-    ctx.moveTo(gridOffsetX + (j * gridItemSize), gridOffsetY);
-    ctx.lineTo(gridOffsetX + (j * gridItemSize), gridOffsetY + gridSize);
+    ctx.moveTo(GRID_OFFSET_X + (j * GRID_ITEM_SIZE), GRID_OFFSET_Y);
+    ctx.lineTo(GRID_OFFSET_X + (j * GRID_ITEM_SIZE), GRID_OFFSET_Y + GRID_SIZE);
   }
 
   ctx.stroke();
@@ -179,10 +182,10 @@ function createItems() {
   for (var i=0; i<3; i++) {
     items[i] = [];
     for (var j=0; j<3; j++) {
-      items[i][j] = { 
-        x: gridOffsetX + (j * gridItemSize), 
-        y: gridOffsetY + (i * gridItemSize),
-      }
+      items[i][j] = [
+        GRID_OFFSET_X + (j * GRID_ITEM_SIZE), 
+        GRID_OFFSET_Y + (i * GRID_ITEM_SIZE),
+      ]
     }
   }
 
@@ -211,19 +214,19 @@ function drawCross(x, y) {
 function touchHandler(e) {
   if (turn != 1) return;
 
-  var x = e.touches[0].clientX - gridOffsetX;
-  var y = e.touches[0].clientY - gridOffsetY;
+  var x = e.touches[0].clientX - GRID_OFFSET_X;
+  var y = e.touches[0].clientY - GRID_OFFSET_Y;
   // console.log(x, y);
 
   var selected = null;
 
-  var row1 = y > 0 && y < gridItemSize;
-  var row2 = y > gridItemSize && y < (gridItemSize * 2);
-  var row3 = y > (gridItemSize * 2) && y < (gridItemSize * 3);
+  var row1 = y > 0 && y < GRID_ITEM_SIZE;
+  var row2 = y > GRID_ITEM_SIZE && y < (GRID_ITEM_SIZE * 2);
+  var row3 = y > (GRID_ITEM_SIZE * 2) && y < (GRID_ITEM_SIZE * 3);
   
-  var col1 = x > 0 && x < gridItemSize;
-  var col2 = x > gridItemSize && x < (gridItemSize * 2);
-  var col3 = x > (gridItemSize * 2) && x < (gridItemSize * 3);
+  var col1 = x > 0 && x < GRID_ITEM_SIZE;
+  var col2 = x > GRID_ITEM_SIZE && x < (GRID_ITEM_SIZE * 2);
+  var col3 = x > (GRID_ITEM_SIZE * 2) && x < (GRID_ITEM_SIZE * 3);
 
   if (row1) {
     if (col1) selected = 0;
