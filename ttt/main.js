@@ -20,7 +20,7 @@ canvas.addEventListener("touchstart", touchHandler);
 startGame();
 
 function startGame() {
-  board = [0,0,0,0,0,0,0,0,0];
+  board = new Array(9);
   turn = 1;
   result.outcome = null;
   result.winner = null;
@@ -38,27 +38,27 @@ function render() {
 
   // keep playing
   if (result.outcome == null) {
-    if (turn === 2) {
+    if (turn == 2) {
       setTimeout(com, 1000);
       turn = 0;
     }
   } else { // or end
-    if (result.outcome === "DONE") {
-      if (result.winner === 1) {
+    if (result.outcome == "DONE") {
+      if (result.winner == 1) {
         drawResult("YOU WIN", "#00f");
       } else {
         drawResult("YOU LOSE", "#f00");
       }
     } 
     
-    if (result.outcome === "DRAW") {
+    if (result.outcome == "DRAW") {
       drawResult("DRAW!", "#0f0");
     }
 
     if (!initialized) {
       setTimeout(() => {
         clearInterval(interval);
-        start();
+        startGame();
       }, 2000);
   
       initialized = true;
@@ -83,7 +83,7 @@ function drawTitle() {
 function com() {
   var n = Math.floor(Math.random() * 9);
   
-  if (board[n] === 0) {
+  if (board[n] == null) {
     board[n] = 2;
   } else {
     com();
@@ -94,12 +94,12 @@ function com() {
 
 function setSymbol() {
   for (var i=0; i<board.length; i++) {  
-    if (board[i] !== 0) {
-      if (board[i] === 1) {
-        drawCircle(gridItems[i].x, gridItems[i].y);
-      } else {
-        drawCross(gridItems[i].x, gridItems[i].y)
-      }
+    if (board[i] == 1) {
+      drawCircle(gridItems[i].x, gridItems[i].y);
+    } 
+    
+    if (board[i] == 2) {
+      drawCross(gridItems[i].x, gridItems[i].y)
     }
   }
 }
@@ -123,7 +123,7 @@ function getResult() {
   var drawn = true;
   
   for (var i=0; i<board.length; i++) {
-    if (board[i] === 0) {
+    if (board[i] == null) {
       drawn = false;
       break;
     }
@@ -136,7 +136,7 @@ function getResult() {
 }
 
 function checkBingo(a, b, c) {
-  if (a !== 0 && a === b && b === c) {
+  if (a != null && a == b && b == c) {
     result.outcome = "DONE";
     result.winner = a;
   }
