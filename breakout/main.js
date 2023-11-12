@@ -1,56 +1,93 @@
+// struct
+class Ball {
+  constructor(x, y, radius, dx, dy, color) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.dx = dx;
+    this.dy = dy;
+    this.color = color;
+  }
+}
+
+class Brick {
+  constructor(x, y, width, height, status, color) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.status = status;
+    this.color = color;
+  }
+}
+
+class Paddle {
+  constructor(x, y, width, height, color) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.color = color;
+  }
+}
+
+class Game {
+  constructor(start, over, end, score) {
+    this.start = start;
+    this.over = over;
+    this.end = end;
+    this.score = score;
+  }
+}
+
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
-
 var offsetTop = 2;
 var offsetLeft = 4;
 var rowCount = 4;
 var columnCount = 8;
 var padding = 2;
 var colors = ["red", "orange", "green", "navy"];
-var bricks = [];
-
-var ball = {};
-var paddle = {}
-var game = {}
+var bricks;
+var ball;
+var paddle;
+var game;
 var pressedKey = {};
-
+var interval;
 const Key = {
   LEFT: "ArrowLeft",
   RIGHT: "ArrowRight"
 }
-var interval;
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 startGame();
 
 function startGame() {
-  // game
-  game.start = false;
-  game.over = false;
-  game.end = false;
-  game.score = 0;
-  
   // ball
-  ball.x = canvas.width / 2;
-  ball.y = canvas.height - 30;
-  ball.radius = 10;
-  ball.dx = 2;
-  ball.dy = -2;
-  ball.color = "#eee";
-
+  ball = new Ball(canvas.width / 2, canvas.height - 30, 10, 2, -2, "#eee");
+    
   // paddle
-  paddle.x = (canvas.width - 70) / 2
-  paddle.y = canvas.height - 10
-  paddle.width = 70
-  paddle.height = 5
-  paddle.color = "#eee"
+  paddle = new Paddle((canvas.width - 70) / 2, canvas.height - 10, 70, 5, "#eee");
+    
+  // bricks
+  bricks = [];
+
+  for (var r = 0; r < rowCount; r++) {
+    bricks[r] = [];
+    for (var c = 0; c < columnCount; c++) {
+      var brick = new Brick(0, 0, 60, 20, 1, colors[r])
+
+      bricks[r][c] = brick;
+    }
+  }
 
   // key
   pressedKey.left = false;
   pressedKey.right = false;
   
-  initBricks();
+  // game
+  game = new Game(false, false, false, 0);
 
   interval = createInterval();
 }
@@ -121,24 +158,6 @@ function createInterval() {
 
 function removeInterval() {
   clearInterval(interval);
-}
-
-function initBricks() {
-  for (var r = 0; r < rowCount; r++) {
-    bricks[r] = [];
-    for (var c = 0; c < columnCount; c++) {
-      var brick = {
-        x: 0,
-        y: 0,
-        width: 60,
-        height: 20,
-        status: 1,
-        color: colors[r]
-      }
-
-      bricks[r][c] = brick;
-    }
-  }
 }
 
 function collisionDetection() {
