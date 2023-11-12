@@ -215,6 +215,29 @@ function createInterval() {
 }
 
 
+/* GRID */
+
+
+function drawGrid() {
+  ctx.beginPath();
+  ctx.strokeStyle = "#555";
+  
+  // rows
+  for (var r = 0; r < Grid.ROW_COUNT + 1 ; r++) {
+    ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y + (r * Grid.CELL));
+    ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y + (r * Grid.CELL));
+  }
+
+  // cols
+  for (var c = 0; c < Grid.COL_COUNT + 1; c++) {
+    ctx.moveTo(Grid.OFFSET_X + (c * Grid.CELL), Grid.OFFSET_Y);
+    ctx.lineTo(Grid.OFFSET_X + (c * Grid.CELL), Grid.OFFSET_Y + Grid.HEIGHT);
+  }
+
+  ctx.stroke();
+}
+
+
 /* SNAKE */
 
 
@@ -333,30 +356,6 @@ function drawApple() {
   ctx.fillStyle = apple.color;
   ctx.fillRect(apple.x, apple.y, apple.size, apple.size);
 }
-
-
-/* GRID */
-
-
-function drawGrid() {
-  ctx.beginPath();
-  ctx.strokeStyle = "#555";
-  
-  // rows
-  for (var r = 0; r < Grid.ROW_COUNT + 1 ; r++) {
-    ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y + (r * Grid.CELL));
-    ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y + (r * Grid.CELL));
-  }
-
-  // cols
-  for (var c = 0; c < Grid.COL_COUNT + 1; c++) {
-    ctx.moveTo(Grid.OFFSET_X + (c * Grid.CELL), Grid.OFFSET_Y);
-    ctx.lineTo(Grid.OFFSET_X + (c * Grid.CELL), Grid.OFFSET_Y + Grid.HEIGHT);
-  }
-
-  ctx.stroke();
-}
-
 
 /* TIME */
 

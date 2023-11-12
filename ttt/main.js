@@ -1,4 +1,8 @@
-// enum Grid
+/* 
+  enums
+*/
+
+
 const GRID_SIZE = 300;
 const GRID_OFFSET_X = (innerWidth - GRID_SIZE) / 2;
 const GRID_OFFSET_Y = 100;
@@ -6,7 +10,12 @@ const GRID_ITEM_COUNT = 3;
 const GRID_ITEM_SIZE = GRID_SIZE / GRID_ITEM_COUNT;
 const GRID_ITEM_CRDS = createItems(); 
 
-// variables
+
+/*
+  variables
+*/
+
+
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var board = [];
@@ -20,7 +29,29 @@ canvas.height = innerHeight;
 canvas.style["backgroundColor"] = "#222";
 canvas.addEventListener("touchstart", touchHandler);
 
+
+/*
+  functions
+*/
+
+
 startGame();
+
+function createItems() {
+  var items = [];
+  
+  for (var i=0; i<3; i++) {
+    items[i] = [];
+    for (var j=0; j<3; j++) {
+      items[i][j] = [
+        GRID_OFFSET_X + (j * GRID_ITEM_SIZE), 
+        GRID_OFFSET_Y + (i * GRID_ITEM_SIZE),
+      ]
+    }
+  }
+
+  return items.flat();
+}
 
 function startGame() {
   board = new Array(9);
@@ -174,22 +205,6 @@ function drawGrid() {
   }
 
   ctx.stroke();
-}
-
-function createItems() {
-  var items = [];
-  
-  for (var i=0; i<3; i++) {
-    items[i] = [];
-    for (var j=0; j<3; j++) {
-      items[i][j] = [
-        GRID_OFFSET_X + (j * GRID_ITEM_SIZE), 
-        GRID_OFFSET_Y + (i * GRID_ITEM_SIZE),
-      ]
-    }
-  }
-
-  return items.flat();
 }
 
 function drawCircle(x, y) {

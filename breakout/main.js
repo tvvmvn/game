@@ -1,4 +1,8 @@
-// struct
+/*
+  struct
+*/
+
+
 class Ball {
   constructor(x, y, radius, dx, dy, color) {
     this.x = x;
@@ -40,24 +44,40 @@ class Game {
   }
 }
 
+
+/*
+  contants (or enums)
+*/
+
+// Grid
+const OFFSET_TOP = 20;
+const OFFSET_LEFT = 30;
+const PADDING = 10;
+const ROW_COUNT = 6;
+const COLUMN_COUNT = 5;
+
+
+/*
+  variables
+*/
+
+
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
-var offsetTop = 2;
-var offsetLeft = 4;
-var rowCount = 4;
-var columnCount = 8;
-var padding = 2;
-var colors = ["red", "orange", "green", "navy"];
 var bricks;
+var brickCount = 0;
 var ball;
 var paddle;
 var game;
-var pressedKey = {};
+var leftKeyPressed;
+var rightKeyPressed;
 var interval;
-const Key = {
-  LEFT: "ArrowLeft",
-  RIGHT: "ArrowRight"
-}
+
+
+/* 
+  functions
+*/
+
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -65,26 +85,32 @@ startGame();
 
 function startGame() {
   // ball
-  ball = new Ball(canvas.width / 2, canvas.height - 30, 10, 2, -2, "#eee");
+  ball = new Ball(canvas.width / 2, canvas.height - 30, 10, 2, -2, "#fff");
     
   // paddle
-  paddle = new Paddle((canvas.width - 70) / 2, canvas.height - 10, 70, 5, "#eee");
+  paddle = new Paddle((canvas.width - 70) / 2, canvas.height - 10, 70, 5, "#fff");
     
   // bricks
   bricks = [];
 
-  for (var r = 0; r < rowCount; r++) {
+  for (var r = 0; r < ROW_COUNT; r++) {
     bricks[r] = [];
-    for (var c = 0; c < columnCount; c++) {
-      var brick = new Brick(0, 0, 60, 20, 1, colors[r])
+    for (var c = 0; c < COLUMN_COUNT; c++) {
+      var bool = Math.round(Math.random());
+      
+      if (bool == 1) {
+        brickCount++;
+      }
+
+      var brick = new Brick(0, 0, 80, 20, bool, "pink")
 
       bricks[r][c] = brick;
     }
   }
 
   // key
-  pressedKey.left = false;
-  pressedKey.right = false;
+  leftKeyPressed = false;
+  rightKeyPressed = false;
   
   // game
   game = new Game(false, false, false, 0);
@@ -127,19 +153,19 @@ function clearCanvas() {
 
 function drawStart() {
   ctx.font = "16px Arial";
-  ctx.fillStyle = "#eee";
+  ctx.fillStyle = "#fff";
   ctx.fillText("Press any key to start game", 160, 160);
 }
 
 function drawOver() {
   ctx.font = "20px Arial";
-  ctx.fillStyle = "#eee";
+  ctx.fillStyle = "#fff";
   ctx.fillText("GAME OVER", 175, 170);
 }
 
 function drawEnd() {
   ctx.font = "20px Arial";
-  ctx.fillStyle = "#eee";
+  ctx.fillStyle = "#fff";
   ctx.fillText("YOU WIN!", 180, 170);
 }
 
@@ -161,8 +187,8 @@ function removeInterval() {
 }
 
 function collisionDetection() {
-  for (var r = 0; r < rowCount; r++) {
-    for (var c = 0; c < columnCount; c++) {
+  for (var r = 0; r < ROW_COUNT; r++) {
+    for (var c = 0; c < COLUMN_COUNT; c++) {
       var brick = bricks[r][c];
 
       if (brick.status == 1) {
@@ -176,7 +202,7 @@ function collisionDetection() {
           brick.status = 0;
           game.score++;
 
-          if (game.score == rowCount * columnCount) {
+          if (game.score == brickCount) {
             game.end = true;
           }
         }
@@ -186,14 +212,14 @@ function collisionDetection() {
 }
 
 function drawBricks() {
-  for (var r = 0; r < rowCount; r++) {
-    for (var c = 0; c < columnCount; c++) {
+  for (var r = 0; r < ROW_COUNT; r++) {
+    for (var c = 0; c < COLUMN_COUNT; c++) {
       if (bricks[r][c].status == 1) {
         // update
         var brick = bricks[r][c];
         
-        brick.x = (c * (brick.width + padding)) + offsetLeft;
-        brick.y = (r * (brick.height + padding)) + offsetTop;
+        brick.x = (c * (brick.width + PADDING)) + OFFSET_LEFT;
+        brick.y = (r * (brick.height + PADDING)) + OFFSET_TOP;
 
         ctx.beginPath();
         ctx.rect(brick.x, brick.y, brick.width, brick.height);
@@ -238,9 +264,9 @@ function drawBall() {
 }
 
 function setPaddle() {
-  if (pressedKey.right && paddle.x < canvas.width - paddle.width) {
+  if (rightKeyPressed && paddle.x < canvas.width - paddle.width) {
     paddle.x += 4;
-  } else if (pressedKey.left && paddle.x > 0) {
+  } else if (leftKeyPressed && paddle.x > 0) {
     paddle.x -= 4;
   }
 }
@@ -258,17 +284,17 @@ function keyDownHandler(e) {
     game.start = true;
   }
 
-  if (e.code == Key.RIGHT) {
-    pressedKey.right = true;
-  } else if (e.code == Key.LEFT) {
-    pressedKey.left = true;
+  if (e.code == "ArrowRight") {
+    rightKeyPressed = true;
+  } else if (e.code == "ArrowLeft") {
+    leftKeyPressed = true;
   }
 }
 
 function keyUpHandler(e) {
-  if (e.code == Key.RIGHT) {
-    pressedKey.right = false;
-  } else if (e.code == Key.LEFT) {
-    pressedKey.left = false;
+  if (e.code == "ArrowRight") {
+    rightKeyPressed = false;
+  } else if (e.code == "ArrowLeft") {
+    leftKeyPressed = false;
   }
 }
