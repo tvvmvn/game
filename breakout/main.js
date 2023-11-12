@@ -65,7 +65,7 @@ const COLUMN_COUNT = 5;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var bricks;
-var brickCount = 0;
+var brickCount;
 var ball;
 var paddle;
 var game;
@@ -92,6 +92,7 @@ function startGame() {
     
   // bricks
   bricks = [];
+  brickCount = 0;
 
   for (var r = 0; r < ROW_COUNT; r++) {
     bricks[r] = [];
