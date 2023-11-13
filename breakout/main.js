@@ -49,12 +49,15 @@ class Game {
   contants (or enums)
 */
 
+
 // Grid
 const OFFSET_TOP = 20;
 const OFFSET_LEFT = 30;
 const PADDING = 10;
 const ROW_COUNT = 6;
 const COLUMN_COUNT = 5;
+const ARROW_RIGHT = "ArrowRight";
+const ARROW_LEFT = "ArrowLeft";
 
 
 /*
@@ -190,6 +193,7 @@ function removeInterval() {
 function collisionDetection() {
   for (var r = 0; r < ROW_COUNT; r++) {
     for (var c = 0; c < COLUMN_COUNT; c++) {
+      
       var brick = bricks[r][c];
 
       if (brick.status == 1) {
@@ -216,7 +220,7 @@ function drawBricks() {
   for (var r = 0; r < ROW_COUNT; r++) {
     for (var c = 0; c < COLUMN_COUNT; c++) {
       if (bricks[r][c].status == 1) {
-        // update
+
         var brick = bricks[r][c];
         
         brick.x = (c * (brick.width + PADDING)) + OFFSET_LEFT;
@@ -243,14 +247,12 @@ function setBall() {
     ball.dy = -ball.dy;
   // bottom
   } else if (ball.y  > canvas.height - ball.radius - 10) {
-    // into paddle
-    if (
+    if ( // into paddle
       ball.x + ball.radius > paddle.x 
       && ball.x - ball.radius < paddle.x + paddle.width
       ) {
       ball.dy = -ball.dy;
-    // out of paddle
-    } else {
+    } else { // out of paddle
       game.over = true;
     }
   }
@@ -285,17 +287,17 @@ function keyDownHandler(e) {
     game.start = true;
   }
 
-  if (e.code == "ArrowRight") {
+  if (e.code == ARROW_RIGHT) {
     rightKeyPressed = true;
-  } else if (e.code == "ArrowLeft") {
+  } else if (e.code == ARROW_LEFT) {
     leftKeyPressed = true;
   }
 }
 
 function keyUpHandler(e) {
-  if (e.code == "ArrowRight") {
+  if (e.code == ARROW_RIGHT) {
     rightKeyPressed = false;
-  } else if (e.code == "ArrowLeft") {
+  } else if (e.code == ARROW_LEFT) {
     leftKeyPressed = false;
   }
 }
