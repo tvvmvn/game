@@ -1,5 +1,21 @@
+/*
+  struct
+*/
+
+
+class Game {
+  constructor(start, turn, decided, outcome, winner) {
+    this.start = start;
+    this.turn = turn;
+    this.decided = decided;
+    this.outcome = outcome;
+    this.winner = winner;
+  }
+}
+
+
 /* 
-  enums
+  constants (enums)
 */
 
 
@@ -18,10 +34,9 @@ const GRID_ITEM_CRDS = createItems();
 
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-var board = [];
-var turn;
+var board;
+var game;
 var initialized;
-var result = {};
 var interval;
 
 canvas.width = innerWidth;
@@ -55,11 +70,9 @@ function createItems() {
 
 function startGame() {
   board = new Array(9);
-  turn = 1;
-  result.outcome = null;
-  result.winner = null;
+  game = new Game(false, Math.ceil(Math.random()*2), false, null, null);
   initialized = false;
-  
+
   interval = setInterval(render, 10);
 }
 
@@ -67,25 +80,36 @@ function render() {
   clearCanvas();
   drawTitle();
   drawGrid();
+
+  if (!game.start) {
+    drawStart();
+    return;
+  }
+
+  if (!game.decided) {
+    drawLot();
+    return;
+  }
+
   setSymbol();
   getResult();
 
   // keep playing
-  if (result.outcome == null) {
-    if (turn == 2) {
+  if (game.outcome == null) {
+    if (game.turn == 2) {
       setTimeout(com, 1000);
-      turn = 0;
+      game.turn = 0;
     }
   } else { // or end
-    if (result.outcome == "DONE") {
-      if (result.winner == 1) {
+    if (game.outcome == "DONE") {
+      if (game.winner == 1) {
         drawResult("YOU WIN", "#00f");
       } else {
         drawResult("YOU LOSE", "#f00");
       }
     } 
     
-    if (result.outcome == "DRAW") {
+    if (game.outcome == "DRAW") {
       drawResult("DRAW!", "#0f0");
     }
 
@@ -107,6 +131,15 @@ function drawStart() {
   ctx.fillText("Touch to start game", canvas.width / 2, 250);
 }
 
+function drawLot() {
+  var text = game.turn == 1 ? "You First" : "Com First";
+
+  ctx.font = "30px Comic Sans MS";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.fillText(text + ", Ready?", canvas.width / 2, 250);
+}
+
 function drawTitle() {
   ctx.font = "30px Comic Sans MS";
   ctx.fillStyle = "#fff";
@@ -123,7 +156,7 @@ function com() {
     com();
   }
   
-  turn = 1;
+  game.turn = 1;
 }
 
 function setSymbol() {
@@ -149,7 +182,7 @@ function getResult() {
   checkBingo(board[2], board[5], board[8]);
   checkBingo(board[6], board[7], board[8]);
   
-  if (result.outcome == "DONE") {
+  if (game.outcome == "DONE") {
     return;
   }
 
@@ -164,15 +197,15 @@ function getResult() {
   }
   
   if (drawn) {
-    result.outcome = "DRAW";
-    result.winner = null;
+    game.outcome = "DRAW";
+    game.winner = null;
   } 
 }
 
 function checkBingo(a, b, c) {
   if (a != null && a == b && b == c) {
-    result.outcome = "DONE";
-    result.winner = a;
+    game.outcome = "DONE";
+    game.winner = a;
   }
 }
 
@@ -227,7 +260,17 @@ function drawCross(x, y) {
 }
 
 function touchHandler(e) {
-  if (turn != 1) return;
+  if (!game.start) {
+    game.start = true;
+    return;
+  }
+
+  if (!game.decided) {
+    game.decided = true;
+    return;
+  }
+  
+  if (game.turn != 1) return;
 
   var x = e.touches[0].clientX - GRID_OFFSET_X;
   var y = e.touches[0].clientY - GRID_OFFSET_Y;
@@ -259,6 +302,6 @@ function touchHandler(e) {
 
   if (selected !== null) {
     board[selected] = 1;
-    turn = 2;
+    game.turn = 2;
   }
 }
