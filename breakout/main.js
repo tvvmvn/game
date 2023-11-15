@@ -91,7 +91,7 @@ function startGame() {
   ball = new Ball(canvas.width / 2, canvas.height - 30, 10, 2, -2, "#fff");
     
   // paddle
-  paddle = new Paddle((canvas.width - 70) / 2, canvas.height - 10, 70, 5, "#fff");
+  paddle = new Paddle((canvas.width - 30) / 2, canvas.height - 10, 30, 5, "#fff");
     
   // bricks
   bricks = [];
