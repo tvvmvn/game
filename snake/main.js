@@ -309,10 +309,10 @@ function snakeMove() {
     snake.node[j][0] = snake.node[j - 1][0];
     snake.node[j][1] = snake.node[j - 1][1];
   }
-  
   // head
   snake.node[0][0] = snake.x;
   snake.node[0][1] = snake.y;
+  
 }
 
 function selfCrash() {
