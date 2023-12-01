@@ -1,2 +1,2 @@
 # Game 
-> JavaScript and html canvas
+> https://tvvmvn.github.io/game

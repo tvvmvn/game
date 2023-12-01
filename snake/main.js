@@ -14,10 +14,10 @@ class Snake {
 }
 
 class Apple {
-  constructor(x, y, size, count, eaten, color) {
+  constructor(x, y, radius, count, eaten, color) {
     this.x = x;
     this.y = y;
-    this.size = size;
+    this.radius = radius;
     this.count = count;
     this.eaten = eaten;
     this.color = color;
@@ -34,21 +34,19 @@ const Direction = {
 
 // enums
 const Key = {
-  UP: 'ArrowUp', // read only
-  LEFT: 'ArrowLeft',
-  RIGHT: 'ArrowRight',
-  DOWN: 'ArrowDown',
-  ENTER: 'Enter'
+  UP: "ArrowUp", // read only
+  LEFT: "ArrowLeft",
+  RIGHT: "ArrowRight",
+  DOWN: "ArrowDown",
+  ENTER: "Enter"
 }
 
 // enums
 const Grid = {
-  OFFSET_X: 50,
+  OFFSET_X: 40,
   OFFSET_Y: 50,
-  WIDTH: 400,
+  WIDTH: 420,
   HEIGHT: 300,
-  ROW_COUNT: 15,
-  COL_COUNT: 20,
   CELL: 20,
 }
 
@@ -62,7 +60,22 @@ var prevX;
 var prevY;
 var interval;
 var prevKey;
+var arr = [];
 
+for (var r=0; r<15; r++) {
+  arr[r] = [];
+  for (var c=0; c<21; c++) {
+    if ((r + c) % 2) {
+      arr[r][c] = 1;
+    } else {
+      arr[r][c] = 0;
+    }
+  }
+}
+
+canvas.width = 500;
+canvas.height = 400;
+canvas.style.backgroundColor = "#222";
 
 addEventListener("keydown", keyDownHandler);
 startGame();
@@ -85,7 +98,7 @@ function startGame() {
 
   apple = new Apple(
     Grid.OFFSET_X + 100, Grid.OFFSET_Y + 100,  
-    20,
+    10,
     20,
     false,
     "#f00"
@@ -116,8 +129,8 @@ function startGame() {
 
 function draw() {
   clearCanvas();
-  
   drawGrid();
+  
 
   if (!game.start) {
     drawStart();
@@ -219,21 +232,32 @@ function createInterval() {
 
 
 function drawGrid() {
+  ctx.fillStyle = "#333";
+  for (var i=0; i<arr.length; i++) {
+    for (var j=0; j<arr[i].length; j++) {
+      if (arr[i][j]) {
+        ctx.fillRect(
+          Grid.OFFSET_X + (20 * j), 
+          Grid.OFFSET_Y + (20 * i), 
+          20, 20);
+      }
+    }
+  }
+
   ctx.beginPath();
-  ctx.strokeStyle = "#555";
+  ctx.strokeStyle = "#ddd";
   
-  // rows
-  for (var r = 0; r < Grid.ROW_COUNT + 1 ; r++) {
-    ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y + (r * Grid.CELL));
-    ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y + (r * Grid.CELL));
-  }
-
-  // cols
-  for (var c = 0; c < Grid.COL_COUNT + 1; c++) {
-    ctx.moveTo(Grid.OFFSET_X + (c * Grid.CELL), Grid.OFFSET_Y);
-    ctx.lineTo(Grid.OFFSET_X + (c * Grid.CELL), Grid.OFFSET_Y + Grid.HEIGHT);
-  }
-
+  ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y);
+  ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y);
+  
+  ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y + Grid.HEIGHT);
+  ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y + Grid.HEIGHT);
+  
+  ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y);
+  ctx.lineTo(Grid.OFFSET_X, Grid.OFFSET_Y + Grid.HEIGHT);
+  
+  ctx.moveTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y);
+  ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y + Grid.HEIGHT);
   ctx.stroke();
 }
 
@@ -353,9 +377,15 @@ function putApple() {
 }
 
 function drawApple() {
-  ctx.fillStyle = apple.color;
-  ctx.fillRect(apple.x, apple.y, apple.size, apple.size);
+  // ctx.fillStyle = apple.color;
+  // ctx.fillRect(apple.x, apple.y, apple.size, apple.size);
+
+  ctx.beginPath();
+  ctx.arc(apple.x + 10, apple.y + 10, 10, 0, 2 * Math.PI);
+  ctx.fillStyle = "#f00";
+  ctx.fill();
 }
+
 
 /* TIME */
 
