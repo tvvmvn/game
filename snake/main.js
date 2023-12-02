@@ -61,13 +61,13 @@ var prevY;
 var interval;
 var checker = [];
 
-for (var row = 0; row < Stage.HEIGHT / Stage.CELL; row++) {
-  checker[row] = [];
-  for (var col = 0; col < Stage.WIDTH / Stage.CELL; col++) {
-    if ((row + col) % 2) {
-      checker[row][col] = 1;
+for (var r = 0; r < Stage.HEIGHT / Stage.CELL; r++) {
+  checker[r] = [];
+  for (var c = 0; c < Stage.WIDTH / Stage.CELL; c++) {
+    if ((r + c) % 2) {
+      checker[r][c] = 1;
     } else {
-      checker[row][col] = 0;
+      checker[r][c] = 0;
     }
   }
 }
@@ -233,12 +233,12 @@ function drawStage() {
   // checker
   ctx.fillStyle = "#333";
   
-  for (var row = 0; row < checker.length; row++) {
-    for (var col = 0; col < checker[row].length; col++) {
-      if (checker[row][col]) {
+  for (var r = 0; r < checker.length; r++) {
+    for (var c = 0; c < checker[r].length; c++) {
+      if (checker[r][c]) {
         ctx.fillRect(
-          Stage.OFFSET_X + (Stage.CELL * col),
-          Stage.OFFSET_Y + (Stage.CELL * row),
+          Stage.OFFSET_X + (Stage.CELL * c),
+          Stage.OFFSET_Y + (Stage.CELL * r),
           Stage.CELL, Stage.CELL);
       }
     }

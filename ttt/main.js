@@ -15,7 +15,7 @@ class Game {
 
 
 /* 
-  constants (enums)
+  constants 
 */
 
 
@@ -25,6 +25,8 @@ const GRID_OFFSET_Y = 100;
 const GRID_ITEM_COUNT = 3;
 const GRID_ITEM_SIZE = GRID_SIZE / GRID_ITEM_COUNT;
 const GRID_ITEM_CRDS = createItems(); 
+const USER = 1;
+const COM = 2;
 
 
 /*
@@ -55,12 +57,12 @@ startGame();
 function createItems() {
   var items = [];
   
-  for (var i=0; i<3; i++) {
-    items[i] = [];
-    for (var j=0; j<3; j++) {
-      items[i][j] = [
-        GRID_OFFSET_X + (j * GRID_ITEM_SIZE), 
-        GRID_OFFSET_Y + (i * GRID_ITEM_SIZE),
+  for (var r = 0; r < 3; r++) {
+    items[r] = [];
+    for (var c = 0; c < 3; c++) {
+      items[r][c] = [
+        GRID_OFFSET_X + (c * GRID_ITEM_SIZE),
+        GRID_OFFSET_Y + (r * GRID_ITEM_SIZE),
       ]
     }
   }
@@ -70,7 +72,13 @@ function createItems() {
 
 function startGame() {
   board = new Array(9);
-  game = new Game(false, Math.ceil(Math.random()*2), false, null, null);
+  game = new Game(
+    false, 
+    Math.ceil(Math.random() * 2), 
+    false, 
+    null, 
+    null
+  );
   initialized = false;
 
   interval = setInterval(render, 10);
@@ -96,9 +104,9 @@ function render() {
 
   // keep playing
   if (game.outcome == null) {
-    if (game.turn == 2) {
+    if (game.turn == COM) {
       setTimeout(com, 1000);
-      game.turn = 0;
+      game.turn = undefined;
     }
   } else { // or end
     if (game.outcome == "DONE") {
@@ -132,7 +140,7 @@ function drawStart() {
 }
 
 function drawLot() {
-  var text = game.turn == 1 ? "You First" : "Com First";
+  var text = game.turn == USER ? "You First" : "Com First";
 
   ctx.font = "30px Comic Sans MS";
   ctx.fillStyle = "#fff";
@@ -156,7 +164,7 @@ function com() {
     com();
   }
   
-  game.turn = 1;
+  game.turn = USER;
 }
 
 function setSymbol() {
@@ -244,14 +252,14 @@ function drawCircle(x, y) {
   ctx.beginPath();
   ctx.arc(x + 50, y + 50, 30, 0, 2 * Math.PI);
   ctx.strokeStyle = "#fff";
-  ctx.lineWidth = 8
+  ctx.lineWidth = 8;
   ctx.stroke();
 }
 
 function drawCross(x, y) {
   ctx.beginPath();
   ctx.strokeStyle = "#fff";
-  ctx.lineWidth = 8
+  ctx.lineWidth = 8;
   ctx.moveTo(x + 20, y + 20);
   ctx.lineTo(x + 80, y + 80);
   ctx.moveTo(x + 80, y + 20);
@@ -270,7 +278,7 @@ function touchHandler(e) {
     return;
   }
   
-  if (game.turn != 1) return;
+  if (game.turn != USER) return;
 
   var x = e.touches[0].clientX - GRID_OFFSET_X;
   var y = e.touches[0].clientY - GRID_OFFSET_Y;
@@ -302,6 +310,6 @@ function touchHandler(e) {
 
   if (selected !== null) {
     board[selected] = 1;
-    game.turn = 2;
+    game.turn = COM;
   }
 }
