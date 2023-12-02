@@ -1,4 +1,6 @@
-// struct
+/* struct */
+
+
 class Snake {
   constructor(x, y, _x, _y, size, movingPoint, node, dir, color) {
     this.x = x;
@@ -24,7 +26,10 @@ class Apple {
   }
 }
 
-// enums
+
+/* enums */
+
+
 const Direction = {
   UP: 0,
   LEFT: 1,
@@ -32,16 +37,14 @@ const Direction = {
   DOWN: 3
 }
 
-// enums
 const Key = {
-  UP: "ArrowUp", // read only
+  UP: "ArrowUp", 
   LEFT: "ArrowLeft",
   RIGHT: "ArrowRight",
   DOWN: "ArrowDown",
   ENTER: "Enter"
 }
 
-// enums
 const Stage = {
   OFFSET_X: 40,
   OFFSET_Y: 50,
@@ -50,7 +53,10 @@ const Stage = {
   CELL: 20,
 }
 
-// variables
+
+/* variables */
+
+
 var ctx = canvas.getContext("2d");
 var snake;
 var apple;
@@ -75,9 +81,17 @@ for (var r = 0; r < Stage.HEIGHT / Stage.CELL; r++) {
 canvas.width = 500;
 canvas.height = 400;
 canvas.style.backgroundColor = "#222";
+document.body.style["backgroundColor"] = "#000";
 
-addEventListener("keydown", keyDownHandler);
+
+/* run */
+
+
 startGame();
+addEventListener("keydown", keyDownHandler);
+
+
+/* FUNCTIONS */
 
 
 function startGame() {
@@ -92,7 +106,7 @@ function startGame() {
       [Stage.OFFSET_X, Stage.OFFSET_Y]
     ],
     Direction.RIGHT,
-    "#0bf"
+    "#0b0"
   );
 
   apple = new Apple(
@@ -100,7 +114,7 @@ function startGame() {
     10,
     20,
     false,
-    "#0b0"
+    "#b00"
   )
 
   time = {
@@ -122,14 +136,10 @@ function startGame() {
 }
 
 
-/* FUNCTIONS */
-
-
 function draw() {
   clearCanvas();
   drawStage();
   
-
   if (!game.start) {
     drawStart();
     return;
@@ -226,7 +236,7 @@ function createInterval() {
 }
 
 
-/* GRID */
+/* stage */
 
 
 function drawStage() {
@@ -334,10 +344,6 @@ function drawSnake() {
     ctx.fillStyle = snake.color;
     ctx.fillRect(snake.node[i][0], snake.node[i][1], snake.size, snake.size);
   }
-
-  // snake x, y
-  ctx.fillStyle = "#f00"
-  ctx.fillRect(snake.x, snake.y, 5, 5); 
 }
 
 
@@ -366,11 +372,14 @@ function putApple() {
 }
 
 function drawApple() {
-  // ctx.fillStyle = apple.color;
-  // ctx.fillRect(apple.x, apple.y, apple.size, apple.size);
-
   ctx.beginPath();
-  ctx.arc(apple.x + 10, apple.y + 10, 10, 0, 2 * Math.PI);
+  ctx.arc(
+    apple.x + apple.radius, 
+    apple.y + apple.radius, 
+    10, 
+    0, 
+    2 * Math.PI
+  );
   ctx.fillStyle = apple.color;
   ctx.fill();
 }
