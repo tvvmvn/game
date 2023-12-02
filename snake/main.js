@@ -42,7 +42,7 @@ const Key = {
 }
 
 // enums
-const Grid = {
+const Stage = {
   OFFSET_X: 40,
   OFFSET_Y: 50,
   WIDTH: 420,
@@ -59,16 +59,15 @@ var game;
 var prevX;
 var prevY;
 var interval;
-var prevKey;
-var arr = [];
+var checker = [];
 
-for (var r=0; r<15; r++) {
-  arr[r] = [];
-  for (var c=0; c<21; c++) {
-    if ((r + c) % 2) {
-      arr[r][c] = 1;
+for (var row = 0; row < Stage.HEIGHT / Stage.CELL; row++) {
+  checker[row] = [];
+  for (var col = 0; col < Stage.WIDTH / Stage.CELL; col++) {
+    if ((row + col) % 2) {
+      checker[row][col] = 1;
     } else {
-      arr[r][c] = 0;
+      checker[row][col] = 0;
     }
   }
 }
@@ -83,25 +82,25 @@ startGame();
 
 function startGame() {
   snake = new Snake(
-    Grid.OFFSET_X + (Grid.CELL * 2), Grid.OFFSET_Y,
+    Stage.OFFSET_X + (Stage.CELL * 2), Stage.OFFSET_Y,
     0,0,
-    Grid.CELL,
+    Stage.CELL,
     20,
     [
-      [Grid.OFFSET_X + (Grid.CELL * 2), Grid.OFFSET_Y],
-      [Grid.OFFSET_X + (Grid.CELL * 1), Grid.OFFSET_Y],
-      [Grid.OFFSET_X, Grid.OFFSET_Y]
+      [Stage.OFFSET_X + (Stage.CELL * 2), Stage.OFFSET_Y],
+      [Stage.OFFSET_X + (Stage.CELL * 1), Stage.OFFSET_Y],
+      [Stage.OFFSET_X, Stage.OFFSET_Y]
     ],
     Direction.RIGHT,
-    "#0a0"
+    "#0bf"
   );
 
   apple = new Apple(
-    Grid.OFFSET_X + 100, Grid.OFFSET_Y + 100,  
+    Stage.OFFSET_X + 100, Stage.OFFSET_Y + 100,  
     10,
     20,
     false,
-    "#f00"
+    "#0b0"
   )
 
   time = {
@@ -118,7 +117,6 @@ function startGame() {
   prevX = snake.x;
   prevY = snake.y;
   interval;
-  prevKey = Key.RIGHT;
 
   interval = createInterval();
 }
@@ -129,7 +127,7 @@ function startGame() {
 
 function draw() {
   clearCanvas();
-  drawGrid();
+  drawStage();
   
 
   if (!game.start) {
@@ -231,33 +229,25 @@ function createInterval() {
 /* GRID */
 
 
-function drawGrid() {
+function drawStage() {
+  // checker
   ctx.fillStyle = "#333";
-  for (var i=0; i<arr.length; i++) {
-    for (var j=0; j<arr[i].length; j++) {
-      if (arr[i][j]) {
+  
+  for (var row = 0; row < checker.length; row++) {
+    for (var col = 0; col < checker[row].length; col++) {
+      if (checker[row][col]) {
         ctx.fillRect(
-          Grid.OFFSET_X + (20 * j), 
-          Grid.OFFSET_Y + (20 * i), 
-          20, 20);
+          Stage.OFFSET_X + (Stage.CELL * col),
+          Stage.OFFSET_Y + (Stage.CELL * row),
+          Stage.CELL, Stage.CELL);
       }
     }
   }
 
+  // border
   ctx.beginPath();
   ctx.strokeStyle = "#ddd";
-  
-  ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y);
-  ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y);
-  
-  ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y + Grid.HEIGHT);
-  ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y + Grid.HEIGHT);
-  
-  ctx.moveTo(Grid.OFFSET_X, Grid.OFFSET_Y);
-  ctx.lineTo(Grid.OFFSET_X, Grid.OFFSET_Y + Grid.HEIGHT);
-  
-  ctx.moveTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y);
-  ctx.lineTo(Grid.OFFSET_X + Grid.WIDTH, Grid.OFFSET_Y + Grid.HEIGHT);
+  ctx.rect(Stage.OFFSET_X, Stage.OFFSET_Y, Stage.WIDTH, Stage.HEIGHT);
   ctx.stroke();
 }
 
@@ -270,7 +260,7 @@ function setSnake() {
     snake._x++;
 
     if (snake._x > snake.movingPoint) {
-      snake.x += Grid.CELL;
+      snake.x += Stage.CELL;
       snake._x = 0;
     }
   }
@@ -279,7 +269,7 @@ function setSnake() {
     snake._y++;
 
     if (snake._y > snake.movingPoint) {
-      snake.y += Grid.CELL;
+      snake.y += Stage.CELL;
       snake._y = 0;
     }
   }
@@ -288,7 +278,7 @@ function setSnake() {
     snake._x--;
 
     if (snake._x < -snake.movingPoint) {
-      snake.x -= Grid.CELL;
+      snake.x -= Stage.CELL;
       snake._x = 0;
     }
   }
@@ -297,7 +287,7 @@ function setSnake() {
     snake._y--;
     
     if (snake._y < -snake.movingPoint) {
-      snake.y -= Grid.CELL;
+      snake.y -= Stage.CELL;
       snake._y = 0;
     }  
   }
@@ -312,7 +302,6 @@ function snakeMove() {
   // head
   snake.node[0][0] = snake.x;
   snake.node[0][1] = snake.y;
-  
 }
 
 function selfCrash() {
@@ -328,10 +317,10 @@ function selfCrash() {
 }
 
 function wallCrash() {
-  var leftCrash = snake.x < Grid.OFFSET_X
-  var rightCrash = snake.x + Grid.CELL > Grid.OFFSET_X + Grid.WIDTH;
-  var topCrash = snake.y < Grid.OFFSET_Y;
-  var bottomCrash = snake.y + Grid.CELL > Grid.OFFSET_Y + Grid.HEIGHT;
+  var leftCrash = snake.x < Stage.OFFSET_X
+  var rightCrash = snake.x + Stage.CELL > Stage.OFFSET_X + Stage.WIDTH;
+  var topCrash = snake.y < Stage.OFFSET_Y;
+  var bottomCrash = snake.y + Stage.CELL > Stage.OFFSET_Y + Stage.HEIGHT;
 
   if (leftCrash || rightCrash || topCrash || bottomCrash) {
     return true
@@ -347,8 +336,8 @@ function drawSnake() {
   }
 
   // snake x, y
-  // ctx.fillStyle = "#f00"
-  // ctx.fillRect(snake.x, snake.y, 5, 5); 
+  ctx.fillStyle = "#f00"
+  ctx.fillRect(snake.x, snake.y, 5, 5); 
 }
 
 
@@ -356,8 +345,8 @@ function drawSnake() {
 
 
 function putApple() {
-  var x = Grid.OFFSET_X + (Grid.CELL * (Math.floor(Math.random() * 20)));
-  var y = Grid.OFFSET_Y + (Grid.CELL * (Math.floor(Math.random() * 15)));
+  var x = Stage.OFFSET_X + (Stage.CELL * (Math.floor(Math.random() * 20)));
+  var y = Stage.OFFSET_Y + (Stage.CELL * (Math.floor(Math.random() * 15)));
 
   var putAgain = false;
 
@@ -382,7 +371,7 @@ function drawApple() {
 
   ctx.beginPath();
   ctx.arc(apple.x + 10, apple.y + 10, 10, 0, 2 * Math.PI);
-  ctx.fillStyle = "#f00";
+  ctx.fillStyle = apple.color;
   ctx.fill();
 }
 
@@ -439,7 +428,7 @@ function keyDownHandler(e) {
   if (e.key === Key.UP) {
     snake._y -= snake.movingPoint;
     snake.dir = Direction.UP;
-  }
+  } 
   
   if (e.key === Key.LEFT) {
     snake._x -= snake.movingPoint;
@@ -455,6 +444,4 @@ function keyDownHandler(e) {
     snake._y += snake.movingPoint;
     snake.dir = Direction.DOWN;
   }
-
-  prevKey = e.key;
 }
