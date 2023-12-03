@@ -2,13 +2,14 @@
 
 
 class Snake {
-  constructor(x, y, _x, _y, size, movingPoint, node, dir, color) {
+  constructor(x, y, _x, _y, size, movingPoint, moved, node, dir, color) {
     this.x = x;
     this.y = y;
     this._x =_x;
     this._y = _y;
     this.size = size;
     this.movingPoint = movingPoint;
+    this.moved = moved;
     this.node = node;
     this.dir = dir;
     this.color = color;
@@ -100,6 +101,7 @@ function startGame() {
     0,0,
     Stage.CELL,
     20,
+    true,
     [
       [Stage.OFFSET_X + (Stage.CELL * 2), Stage.OFFSET_Y],
       [Stage.OFFSET_X + (Stage.CELL * 1), Stage.OFFSET_Y],
@@ -303,20 +305,9 @@ function setSnake() {
   }
 }
 
-function snakeMove() {
-  // body
-  for (var j = snake.node.length - 1; j > 0; j--) {
-    snake.node[j][0] = snake.node[j - 1][0];
-    snake.node[j][1] = snake.node[j - 1][1];
-  }
-  // head
-  snake.node[0][0] = snake.x;
-  snake.node[0][1] = snake.y;
-}
-
 function selfCrash() {
   var value = false;
-
+  
   for (var h = 3; h < snake.node.length; h++) {
     if (snake.x === snake.node[h][0] && snake.y === snake.node[h][1]) {
       value = true;
@@ -331,12 +322,25 @@ function wallCrash() {
   var rightCrash = snake.x + Stage.CELL > Stage.OFFSET_X + Stage.WIDTH;
   var topCrash = snake.y < Stage.OFFSET_Y;
   var bottomCrash = snake.y + Stage.CELL > Stage.OFFSET_Y + Stage.HEIGHT;
-
+  
   if (leftCrash || rightCrash || topCrash || bottomCrash) {
     return true
   }
-
+  
   return false;
+}
+
+function snakeMove() {
+  // body
+  for (var j = snake.node.length - 1; j > 0; j--) {
+    snake.node[j][0] = snake.node[j - 1][0];
+    snake.node[j][1] = snake.node[j - 1][1];
+  }
+  // head
+  snake.node[0][0] = snake.x;
+  snake.node[0][1] = snake.y;
+
+  snake.moved = true;
 }
 
 function drawSnake() {
@@ -408,6 +412,8 @@ function drawTime() {
 
 
 function keyDownHandler(e) {
+  if (!snake.moved) return;
+
   if (!game.start) {
     game.start = true;
   }
@@ -453,4 +459,6 @@ function keyDownHandler(e) {
     snake._y += snake.movingPoint;
     snake.dir = Direction.DOWN;
   }
+
+  snake.moved = false;
 }
