@@ -37,9 +37,11 @@ const COM = 2;
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var board;
+var target;
 var game;
 var initialized;
 var interval;
+
 
 canvas.width = innerWidth;
 canvas.height = innerHeight;
@@ -101,7 +103,7 @@ function render() {
 
   setSymbol();
   getResult();
-
+  
   // keep playing
   if (game.outcome == null) {
     if (game.turn == COM) {
@@ -110,7 +112,7 @@ function render() {
     }
   } else { // or end
     if (game.outcome == "DONE") {
-      if (game.winner == 1) {
+      if (game.winner == USER) {
         drawResult("YOU WIN", "#00f");
       } else {
         drawResult("YOU LOSE", "#f00");
@@ -156,15 +158,56 @@ function drawTitle() {
 } 
 
 function com() {
-  var n = Math.floor(Math.random() * 9);
-  
-  if (board[n] == null) {
-    board[n] = 2;
+  setAlg();
+
+  if (target) {
+    board[target] = COM;
+    target = null;
   } else {
-    com();
+    var n = Math.floor(Math.random() * 9);
+    
+    if (board[n] == null) {
+      board[n] = COM;
+    } else {
+      com();
+    }
   }
   
   game.turn = USER;
+}
+
+function setAlg() {
+  fill_hole(3, 4, 5);
+  fill_hole(1, 4, 7);
+  fill_hole(2, 4, 6);
+  fill_hole(0, 4, 8);
+
+  fill_hole(0, 3, 6);
+  fill_hole(0, 1, 2);
+  fill_hole(2, 5, 8);
+  fill_hole(6, 7, 8);
+}
+
+function fill_hole(a, b, c) {
+  if (
+    board[a] != null
+    && board[a] == board[b] 
+    && board[c] == null
+  ) {
+    target = c;
+  } else if (
+    board[b] != null
+    && board[b] == board[c] 
+    && board[a] == null
+  ) {
+    target = a;
+  } else if (
+    board[a] != null
+    && board[a] == board[c] 
+    && board[b] == null
+  ) {
+    target = b;
+  }
 }
 
 function setSymbol() {
@@ -181,14 +224,15 @@ function setSymbol() {
 
 function getResult() {
   // 1. get bingo
-  checkBingo(board[3], board[4], board[5]);
-  checkBingo(board[1], board[4], board[7]);
-  checkBingo(board[2], board[4], board[6]);
-  checkBingo(board[0], board[4], board[8]);
-  checkBingo(board[0], board[3], board[6]);
-  checkBingo(board[0], board[1], board[2]);
-  checkBingo(board[2], board[5], board[8]);
-  checkBingo(board[6], board[7], board[8]);
+  checkBingo(3, 4, 5);
+  checkBingo(1, 4, 7);
+  checkBingo(2, 4, 6);
+  checkBingo(0, 4, 8);
+
+  checkBingo(0, 3, 6);
+  checkBingo(0, 1, 2);
+  checkBingo(2, 5, 8);
+  checkBingo(6, 7, 8);
   
   if (game.outcome == "DONE") {
     return;
@@ -211,9 +255,13 @@ function getResult() {
 }
 
 function checkBingo(a, b, c) {
-  if (a != null && a == b && b == c) {
+  if (
+      board[a] != null 
+      && board[a] == board[b] 
+      && board[b] == board[c]
+    ) {
     game.outcome = "DONE";
-    game.winner = a;
+    game.winner = board[a];
   }
 }
 
@@ -277,6 +325,10 @@ function touchHandler(e) {
     game.decided = true;
     return;
   }
+
+  if (game.outcome) {
+    return;
+  }
   
   if (game.turn != USER) return;
 
@@ -309,7 +361,7 @@ function touchHandler(e) {
   }
 
   if (selected !== null) {
-    board[selected] = 1;
+    board[selected] = USER;
     game.turn = COM;
   }
 }
