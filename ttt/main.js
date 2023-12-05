@@ -160,8 +160,6 @@ function drawLot() {
 function com() {
   setAlg();
 
-  console.log(target);
-
   if (target != null) {
     board[target] = COM;
     target = null;
