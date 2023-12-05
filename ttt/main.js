@@ -164,16 +164,20 @@ function com() {
     board[target] = COM;
     target = null;
   } else {
-    var n = Math.floor(Math.random() * 9);
-    
-    if (board[n] == null) {
-      board[n] = COM;
-    } else {
-      com();
-    }
+    tmp(); 
   }
   
   game.turn = USER;
+}
+
+function tmp() {
+  var n = Math.floor(Math.random() * 9);
+    
+  if (board[n] == null) {
+    board[n] = COM;
+  } else {
+    tmp();
+  }
 }
 
 function setAlg() {
