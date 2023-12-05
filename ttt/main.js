@@ -134,33 +134,35 @@ function render() {
   }
 }
 
+function drawTitle() {
+  ctx.font = "30px Monospace";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.fillText("TIC TAC TOE", canvas.width / 2, 60);
+} 
+
 function drawStart() {
-  ctx.font = "30px Comic Sans MS";
+  ctx.font = "24px Monospace";
   ctx.fillStyle = "#fff";
   ctx.textAlign = "center";
   ctx.fillText("Touch to start game", canvas.width / 2, 250);
 }
 
 function drawLot() {
-  var text = game.turn == USER ? "You First" : "Com First";
+  var text = game.turn == USER ? "YOU First" : "COM First";
 
-  ctx.font = "30px Comic Sans MS";
+  ctx.font = "24px Monospace";
   ctx.fillStyle = "#fff";
   ctx.textAlign = "center";
   ctx.fillText(text + ", Ready?", canvas.width / 2, 250);
 }
 
-function drawTitle() {
-  ctx.font = "30px Comic Sans MS";
-  ctx.fillStyle = "#fff";
-  ctx.textAlign = "center";
-  ctx.fillText("TIC TAC TOE", canvas.width / 2, 60);
-} 
-
 function com() {
   setAlg();
 
-  if (target) {
+  console.log(target);
+
+  if (target != null) {
     board[target] = COM;
     target = null;
   } else {
@@ -270,7 +272,7 @@ function checkBingo(a, b, c) {
 }
 
 function drawResult(text, color) {
-  ctx.font = "30px Comic Sans MS";
+  ctx.font = "30px Monospace";
   ctx.fillStyle = color;
   ctx.textAlign = "center";
   ctx.fillText(text, canvas.width / 2, 250);
@@ -286,13 +288,13 @@ function drawGrid() {
   ctx.lineWidth = 4;
   
   // rows
-  for (var i=0; i<4; i++) {
+  for (var i=1; i<3; i++) {
     ctx.moveTo(GRID_OFFSET_X, GRID_OFFSET_Y + (i * GRID_ITEM_SIZE));
     ctx.lineTo(GRID_OFFSET_X + GRID_SIZE, GRID_OFFSET_Y + (i * GRID_ITEM_SIZE));
   }
   
   // cols
-  for (var j=0; j<4; j++) {
+  for (var j=1; j<3; j++) {
     ctx.moveTo(GRID_OFFSET_X + (j * GRID_ITEM_SIZE), GRID_OFFSET_Y);
     ctx.lineTo(GRID_OFFSET_X + (j * GRID_ITEM_SIZE), GRID_OFFSET_Y + GRID_SIZE);
   }
