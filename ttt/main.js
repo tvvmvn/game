@@ -160,24 +160,21 @@ function drawLot() {
 function com() {
   setAlg();
 
-  if (target != null) {
+  if (target != null) { // * target must include 0
     board[target] = COM;
     target = null;
   } else {
-    tmp(); 
+    while (true) {
+      var n = Math.floor(Math.random() * 9);
+        
+      if (board[n] == null) {
+        board[n] = COM;
+        break;
+      } 
+    }
   }
   
   game.turn = USER;
-}
-
-function tmp() {
-  var n = Math.floor(Math.random() * 9);
-    
-  if (board[n] == null) {
-    board[n] = COM;
-  } else {
-    tmp();
-  }
 }
 
 function setAlg() {
@@ -194,23 +191,23 @@ function setAlg() {
 
 function fill_hole(a, b, c) {
   if (
-    board[a] != null
-    && board[a] == board[b] 
-    && board[c] == null
-  ) {
-    target = c;
-  } else if (
     board[b] != null
-    && board[b] == board[c] 
+    && board[b] == board[c]
     && board[a] == null
   ) {
     target = a;
   } else if (
     board[a] != null
-    && board[a] == board[c] 
+    && board[a] == board[c]
     && board[b] == null
   ) {
     target = b;
+  } else if (
+    board[a] != null
+    && board[a] == board[b]
+    && board[c] == null
+  ) {
+    target = c;
   }
 }
 
