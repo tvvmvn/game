@@ -70,6 +70,7 @@ var checker = [];
 
 for (var r = 0; r < Stage.HEIGHT / Stage.CELL; r++) {
   checker[r] = [];
+  
   for (var c = 0; c < Stage.WIDTH / Stage.CELL; c++) {
     if ((r + c) % 2) {
       checker[r][c] = 1;
@@ -83,13 +84,11 @@ canvas.width = 500;
 canvas.height = 400;
 canvas.style.backgroundColor = "#222";
 document.body.style["backgroundColor"] = "#000";
+addEventListener("keydown", keyDownHandler);
 
 
 /* run */
-
-
 startGame();
-addEventListener("keydown", keyDownHandler);
 
 
 /* FUNCTIONS */
@@ -132,7 +131,6 @@ function startGame() {
 
   prevX = snake.x;
   prevY = snake.y;
-  interval;
 
   interval = createInterval();
 }
@@ -164,7 +162,9 @@ function draw() {
   // Snake
   setSnake();
 
-  if (prevX !== snake.x || prevY !== snake.y) {
+  var crdsUpdated = prevX !== snake.x || prevY !== snake.y;
+
+  if (crdsUpdated) {
     if (wallCrash()) {
       game.over = true;
     } else if (selfCrash()) {
@@ -238,7 +238,7 @@ function createInterval() {
 }
 
 
-/* stage */
+/* Stage */
 
 
 function drawStage() {
@@ -340,6 +340,7 @@ function snakeMove() {
   snake.node[0][0] = snake.x;
   snake.node[0][1] = snake.y;
 
+  // crds update of each node has been completed, so
   snake.moved = true;
 }
 
