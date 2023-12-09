@@ -157,6 +157,7 @@ function render() {
   setPaddle();
   drawPaddle();
 
+  // game status
   if (!game.start) {
     drawMessage("Press any key to start game"); 
     return;
@@ -172,6 +173,7 @@ function render() {
     initialize();
   }
 
+  // set ball x, y
   ball.x += ball.dx;
   ball.y += ball.dy;
 }
@@ -192,6 +194,7 @@ function createInterval() {
   return setInterval(render, 10); // 100hz
 }
 
+// Bricks
 function setBricks() {
   for (var r = 0; r < ROW_COUNT; r++) {
     for (var c = 0; c < COLUMN_COUNT; c++) {
@@ -222,6 +225,7 @@ function setBricks() {
   }
 }
 
+// Ball
 function setBall() {
   // right
   if (ball.x + ball.dx > STAGE_OFFSET_X + STAGE_WIDTH - ball.radius) { 
@@ -251,6 +255,7 @@ function setBall() {
   }
 }
 
+// Paddle
 function setPaddle() {
   if (
     rightKeyPressed 

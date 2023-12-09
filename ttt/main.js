@@ -1,6 +1,4 @@
-/*
-  struct
-*/
+/* struct */
 
 
 class Game {
@@ -14,9 +12,7 @@ class Game {
 }
 
 
-/* 
-  constants 
-*/
+/* constants  */
 
 
 const GRID_SIZE = 300;
@@ -28,10 +24,25 @@ const GRID_ITEM_CRDS = createItems();
 const USER = 1;
 const COM = 2;
 
+function createItems() {
+  var items = [];
+  
+  for (var r = 0; r < 3; r++) {
+    items[r] = [];
 
-/*
-  variables
-*/
+    for (var c = 0; c < 3; c++) {
+      items[r][c] = [
+        GRID_OFFSET_X + (c * GRID_ITEM_SIZE),
+        GRID_OFFSET_Y + (r * GRID_ITEM_SIZE),
+      ]
+    }
+  }
+
+  return items.flat();
+}
+
+
+/* variables */
 
 
 var canvas = document.getElementById("canvas");
@@ -49,42 +60,12 @@ canvas.style["backgroundColor"] = "#222";
 canvas.addEventListener("touchstart", touchHandler);
 
 
-/*
-  functions
-*/
-
-
+/*  run */
 startGame();
 
-function createItems() {
-  var items = [];
-  
-  for (var r = 0; r < 3; r++) {
-    items[r] = [];
-    for (var c = 0; c < 3; c++) {
-      items[r][c] = [
-        GRID_OFFSET_X + (c * GRID_ITEM_SIZE),
-        GRID_OFFSET_Y + (r * GRID_ITEM_SIZE),
-      ]
-    }
-  }
 
-  return items.flat();
-}
+/* functions */
 
-function startGame() {
-  board = new Array(9);
-  game = new Game(
-    false, 
-    Math.ceil(Math.random() * 2), 
-    false, 
-    null, 
-    null
-  );
-  initialized = false;
-
-  interval = setInterval(render, 10);
-}
 
 function render() {
   clearCanvas();
@@ -133,6 +114,20 @@ function render() {
       initialized = true;
     }
   }
+}
+
+function startGame() {
+  board = new Array(9);
+  game = new Game(
+    false, 
+    Math.ceil(Math.random() * 2), 
+    false, 
+    null, 
+    null
+  );
+  initialized = false;
+
+  interval = setInterval(render, 10);
 }
 
 function com() {
@@ -189,6 +184,7 @@ function fill_hole(a, b, c) {
   }
 }
 
+// Symbol
 function setSymbol() {
   for (var i=0; i<board.length; i++) {  
     if (board[i] == 1) {
@@ -249,9 +245,7 @@ function clearCanvas() {
 }
 
 
-/* 
-  draw
-*/
+/* draw */
 
 
 function drawTitle() {
@@ -312,9 +306,7 @@ function drawCross(x, y) {
 }
 
 
-/*
-  touch handler
-*/
+/* touch handler */
 
 
 function touchHandler(e) {
