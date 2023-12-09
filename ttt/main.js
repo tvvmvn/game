@@ -92,12 +92,13 @@ function render() {
   drawGrid();
 
   if (!game.start) {
-    drawStart();
+    drawMessage("Touch to start game");
     return;
   }
 
   if (!game.decided) {
-    drawLot();
+    var message = game.turn == USER ? "YOU First" : "COM First";
+    drawMessage(message + ", Ready?");
     return;
   }
 
@@ -113,14 +114,14 @@ function render() {
   } else { // or end
     if (game.outcome == "DONE") {
       if (game.winner == USER) {
-        drawResult("YOU WIN", "#00f");
+        drawMessage("YOU WIN");
       } else {
-        drawResult("YOU LOSE", "#f00");
+        drawMessage("YOU LOSE");
       }
     } 
     
     if (game.outcome == "DRAW") {
-      drawResult("DRAW!", "#0f0");
+      drawMessage("DRAW!");
     }
 
     if (!initialized) {
@@ -132,29 +133,6 @@ function render() {
       initialized = true;
     }
   }
-}
-
-function drawTitle() {
-  ctx.font = "30px Monospace";
-  ctx.fillStyle = "#fff";
-  ctx.textAlign = "center";
-  ctx.fillText("TIC TAC TOE", canvas.width / 2, 60);
-} 
-
-function drawStart() {
-  ctx.font = "24px Monospace";
-  ctx.fillStyle = "#fff";
-  ctx.textAlign = "center";
-  ctx.fillText("Touch to start game", canvas.width / 2, 250);
-}
-
-function drawLot() {
-  var text = game.turn == USER ? "YOU First" : "COM First";
-
-  ctx.font = "24px Monospace";
-  ctx.fillStyle = "#fff";
-  ctx.textAlign = "center";
-  ctx.fillText(text + ", Ready?", canvas.width / 2, 250);
 }
 
 function com() {
@@ -266,16 +244,22 @@ function checkBingo(a, b, c) {
   }
 }
 
-function drawResult(text, color) {
-  ctx.font = "30px Monospace";
-  ctx.fillStyle = color;
-  ctx.textAlign = "center";
-  ctx.fillText(text, canvas.width / 2, 250);
-}
-
 function clearCanvas() {
   ctx.clearRect(0, 0, innerWidth, innerHeight);
 }
+
+
+/* 
+  draw
+*/
+
+
+function drawTitle() {
+  ctx.font = "30px Monospace";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.fillText("TIC TAC TOE", canvas.width / 2, 60);
+} 
 
 function drawGrid() {
   ctx.beginPath();
@@ -297,17 +281,28 @@ function drawGrid() {
   ctx.stroke();
 }
 
+function drawMessage(message) {
+  ctx.font = "24px Monospace";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.fillText(
+    message, 
+    canvas.width / 2, 
+    GRID_OFFSET_Y + ((GRID_SIZE + 24) / 2)
+  );
+}
+
 function drawCircle(x, y) {
   ctx.beginPath();
   ctx.arc(x + 50, y + 50, 30, 0, 2 * Math.PI);
-  ctx.strokeStyle = "#fff";
+  ctx.strokeStyle = "#888";
   ctx.lineWidth = 8;
   ctx.stroke();
 }
 
 function drawCross(x, y) {
   ctx.beginPath();
-  ctx.strokeStyle = "#fff";
+  ctx.strokeStyle = "#888";
   ctx.lineWidth = 8;
   ctx.moveTo(x + 20, y + 20);
   ctx.lineTo(x + 80, y + 80);
@@ -315,6 +310,12 @@ function drawCross(x, y) {
   ctx.lineTo(x + 20, y + 80);
   ctx.stroke();
 }
+
+
+/*
+  touch handler
+*/
+
 
 function touchHandler(e) {
   if (!game.start) {

@@ -47,10 +47,10 @@ const Key = {
 }
 
 const Stage = {
-  OFFSET_X: 40,
-  OFFSET_Y: 50,
-  WIDTH: 420,
-  HEIGHT: 300,
+  OFFSET_X: 20,
+  OFFSET_Y: 60,
+  WIDTH: 460,
+  HEIGHT: 340,
   CELL: 20,
 }
 
@@ -80,18 +80,18 @@ for (var r = 0; r < Stage.HEIGHT / Stage.CELL; r++) {
   }
 }
 
-canvas.width = 500;
-canvas.height = 400;
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 canvas.style.backgroundColor = "#222";
 document.body.style["backgroundColor"] = "#000";
 addEventListener("keydown", keyDownHandler);
 
 
-/* run */
+/* RUN */
 startGame();
 
 
-/* FUNCTIONS */
+/* Functions */
 
 
 function startGame() {
@@ -107,7 +107,7 @@ function startGame() {
       [Stage.OFFSET_X, Stage.OFFSET_Y]
     ],
     Direction.RIGHT,
-    "#0b0"
+    "#0bf"
   );
 
   apple = new Apple(
@@ -115,7 +115,7 @@ function startGame() {
     10,
     20,
     false,
-    "#b00"
+    "#0b0"
   )
 
   time = {
@@ -136,28 +136,21 @@ function startGame() {
 }
 
 
-function draw() {
+function render() {
   clearCanvas();
+  drawTitle();
   drawStage();
   
+  // Start screen
   if (!game.start) {
-    drawStart();
+    drawMessage("Press any key to start game");
     return;
   }
 
+  // Game begin
   setTime();
   drawTime();
   drawScore();
-
-  if (game.over) {
-    drawOver();
-    initGame();
-  }
-  
-  if (game.end) {
-    drawEnd();
-    initGame()
-  }
   
   // Snake
   setSnake();
@@ -189,40 +182,27 @@ function draw() {
     
     drawApple();
   } else {
-    drawEnd();
+    game.end = true;
   } 
 
+  // Game status
+  if (game.over) {
+    drawMessage("GAME OVER");
+    initGame();
+  }
+  
+  if (game.end) {
+    drawMessage("YOU WIN!");
+    initGame()
+  }
+
+  // Store previous x, y
   prevX = snake.x;
   prevY = snake.y;
 }
 
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function drawStart() {  
-  ctx.font = "16px Arial";
-  ctx.fillStyle = "#fff";
-  ctx.fillText("Press any key to start game", 160, 200);
-}
-
-function drawScore() {
-  ctx.font = "16px Arial";
-  ctx.fillStyle = "#fff";
-  ctx.fillText(apple.count + " apples", 400, 30);
-}
-
-function drawOver() {
-  ctx.font = "20px Arial";
-  ctx.fillStyle = "#fff";
-  ctx.fillText("GAME OVER", 190, 208);
-  // ctx.globalCompositeOperation = "destination-over";
-}
-
-function drawEnd() {
-  ctx.font = "20px Arial";
-  ctx.fillStyle = "#fff";
-  ctx.fillText("YOU WIN!", 190, 208);
 }
 
 function initGame() {
@@ -234,39 +214,10 @@ function initGame() {
 }
 
 function createInterval() {
-  return setInterval(draw, 10) // 100hz
+  return setInterval(render, 10) // 100hz
 }
 
-
-/* Stage */
-
-
-function drawStage() {
-  // checker
-  ctx.fillStyle = "#333";
-  
-  for (var r = 0; r < checker.length; r++) {
-    for (var c = 0; c < checker[r].length; c++) {
-      if (checker[r][c]) {
-        ctx.fillRect(
-          Stage.OFFSET_X + (Stage.CELL * c),
-          Stage.OFFSET_Y + (Stage.CELL * r),
-          Stage.CELL, Stage.CELL);
-      }
-    }
-  }
-
-  // border
-  ctx.beginPath();
-  ctx.strokeStyle = "#ddd";
-  ctx.rect(Stage.OFFSET_X, Stage.OFFSET_Y, Stage.WIDTH, Stage.HEIGHT);
-  ctx.stroke();
-}
-
-
-/* SNAKE */
-
-
+// Snake
 function setSnake() {
   if (snake.dir === Direction.RIGHT) {
     snake._x++;
@@ -344,17 +295,7 @@ function snakeMove() {
   snake.moved = true;
 }
 
-function drawSnake() {
-  for (var i = 0; i < snake.node.length; i++) {
-    ctx.fillStyle = snake.color;
-    ctx.fillRect(snake.node[i][0], snake.node[i][1], snake.size, snake.size);
-  }
-}
-
-
-/* APPLE */
-
-
+// Apple
 function putApple() {
   var x = Stage.OFFSET_X + (Stage.CELL * (Math.floor(Math.random() * 20)));
   var y = Stage.OFFSET_Y + (Stage.CELL * (Math.floor(Math.random() * 15)));
@@ -376,6 +317,49 @@ function putApple() {
   }
 }
 
+// Time
+function setTime() {
+  time._s++
+  
+  if (time._s > 100) {
+    time.s++;
+    time._s = 0;
+  }
+}
+
+
+/* DRAW */
+
+
+function drawStage() {
+  // checker
+  ctx.fillStyle = "#333";
+  
+  for (var r = 0; r < checker.length; r++) {
+    for (var c = 0; c < checker[r].length; c++) {
+      if (checker[r][c]) {
+        ctx.fillRect(
+          Stage.OFFSET_X + (Stage.CELL * c),
+          Stage.OFFSET_Y + (Stage.CELL * r),
+          Stage.CELL, Stage.CELL);
+      }
+    }
+  }
+
+  // border
+  ctx.beginPath();
+  ctx.strokeStyle = "#ddd";
+  ctx.rect(Stage.OFFSET_X, Stage.OFFSET_Y, Stage.WIDTH, Stage.HEIGHT);
+  ctx.stroke();
+}
+
+function drawSnake() {
+  for (var i = 0; i < snake.node.length; i++) {
+    ctx.fillStyle = snake.color;
+    ctx.fillRect(snake.node[i][0], snake.node[i][1], snake.size, snake.size);
+  }
+}
+
 function drawApple() {
   ctx.beginPath();
   ctx.arc(
@@ -389,27 +373,40 @@ function drawApple() {
   ctx.fill();
 }
 
+function drawTitle() {  
+  ctx.font = "20px Monospace";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("S N A K E", Stage.OFFSET_X + (Stage.WIDTH / 2), 40);
+}
 
-/* TIME */
-
-
-function setTime() {
-  time._s++
-  
-  if (time._s > 100) {
-    time.s++;
-    time._s = 0;
-  }
+function drawScore() {
+  ctx.font = "16px Monospace";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "left";
+  ctx.fillText(apple.count + " apples", 390, 50);
 }
 
 function drawTime() {
-  ctx.font = "16px Arial";
+  ctx.font = "16px Monospace";
   ctx.fillStyle = "#fff";
-  ctx.fillText("Time: " + time.s, 20, 30);
+  ctx.textAlign = "left";
+  ctx.fillText("Time: " + time.s, 20, 50);
+}
+
+function drawMessage(message) {
+  ctx.font = "16px Monospace";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#fff";
+  ctx.fillText(
+    message, 
+    Stage.OFFSET_X + (Stage.WIDTH / 2), 
+    Stage.OFFSET_Y + ((Stage.HEIGHT + 20) / 2)
+  );
 }
 
 
-/* KEY HANDLER */
+/* Key handler */
 
 
 function keyDownHandler(e) {

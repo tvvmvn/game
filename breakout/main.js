@@ -82,9 +82,9 @@ var leftKeyPressed;
 var rightKeyPressed;
 var interval;
 
-canvas.width = 500;
-canvas.height = 500;
-canvas.style["backgroundColor"] = "#333";
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+canvas.style["backgroundColor"] = "#000";
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 
@@ -146,13 +146,9 @@ function startGame() {
   interval = createInterval();
 }
 
-function drawStage() {
-  ctx.fillStyle = "#000"
-  ctx.fillRect(STAGE_OFFSET_X, STAGE_OFFSET_Y, STAGE_WIDTH, STAGE_HEIGHT)
-}
-
 function render() {
   clearCanvas();
+  drawTitle()
   drawStage();
   setBall()
   drawBall();
@@ -162,17 +158,17 @@ function render() {
   drawPaddle();
 
   if (!game.start) {
-    drawStart(); 
+    drawMessage("Press any key to start game"); 
     return;
   }
 
   if (game.over) {
-    drawOver();
+    drawMessage("GAME OVER");
     initialize();
   }
   
   if (game.end) {
-    drawEnd();
+    drawMessage("YOU WIN!");
     initialize();
   }
 
@@ -181,47 +177,7 @@ function render() {
 }
 
 function clearCanvas() {
-  ctx.clearRect(STAGE_OFFSET_X, STAGE_OFFSET_Y, STAGE_WIDTH, STAGE_HEIGHT);
-}
-
-function drawStart() {
-  setText(
-    "16px Monospace", 
-    "#fff", 
-    "center", 
-    STAGE_OFFSET_X + (STAGE_WIDTH / 2),
-    STAGE_OFFSET_Y + 160,
-    "Press any key to start game",
-  )
-}
-
-function drawOver() {
-  setText(
-    "20px Monospace", 
-    "#fff", 
-    "center", 
-    STAGE_OFFSET_X + (STAGE_WIDTH / 2),
-    STAGE_OFFSET_Y + 170,
-    "GAME OVER"
-  )
-}
-
-function drawEnd() {
-  setText(
-    "20px Monospace", 
-    "#fff", 
-    "center", 
-    STAGE_OFFSET_X + (STAGE_WIDTH / 2),
-    STAGE_OFFSET_Y + 170,
-    "YOU WIN!"
-  )
-}
-
-function setText(font, color, align, x, y, text) {
-  ctx.font = font,
-  ctx.fillStyle = color;
-  ctx.textAlign = align;
-  ctx.fillText(text, x, y);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function initialize() {
@@ -266,11 +222,6 @@ function setBricks() {
   }
 }
 
-function drawBrick(x, y, width, height, color) {
-  ctx.fillStyle = color;
-  ctx.fillRect(x, y, width, height);
-}
-
 function setBall() {
   // right
   if (ball.x + ball.dx > STAGE_OFFSET_X + STAGE_WIDTH - ball.radius) { 
@@ -300,14 +251,6 @@ function setBall() {
   }
 }
 
-function drawBall() {
-  ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-  ctx.fillStyle = ball.color;
-  ctx.fill();
-  ctx.closePath();
-}
-
 function setPaddle() {
   if (
     rightKeyPressed 
@@ -324,10 +267,65 @@ function setPaddle() {
   }
 }
 
+
+/*
+  draw
+*/
+
+
+function drawTitle() {
+  ctx.font = "20px Monospace";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.fillText(
+    "B R E A K O U T",
+    STAGE_OFFSET_X + (STAGE_WIDTH / 2), 
+    30,
+  );
+}
+
+function drawStage() {
+  ctx.beginPath();
+  ctx.lineWidth = "4";
+  ctx.strokeStyle = "#fff";
+  ctx.rect(STAGE_OFFSET_X, STAGE_OFFSET_Y, STAGE_WIDTH, STAGE_HEIGHT)
+  ctx.stroke();
+}
+
+function drawBrick(x, y, width, height, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, width, height);
+}
+
 function drawPaddle() {
   ctx.fillStyle = paddle.color;
   ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
 }
+
+function drawBall() {
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+  ctx.fillStyle = ball.color;
+  ctx.fill();
+  ctx.closePath();
+}
+
+function drawMessage(message) {
+  ctx.font = "16px Monospace";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.fillText(
+    message,
+    STAGE_OFFSET_X + (STAGE_WIDTH / 2), 
+    STAGE_OFFSET_Y + ((STAGE_HEIGHT + 20) / 2)
+  );
+}
+
+
+/*
+  key handler
+*/
+
 
 function keyDownHandler(e) {
   if (!game.start) {
