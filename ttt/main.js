@@ -57,7 +57,7 @@ var interval;
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 canvas.style["backgroundColor"] = "#222";
-canvas.addEventListener("touchstart", touchHandler);
+canvas.addEventListener("click", handleClick);
 
 
 /*  run */
@@ -309,7 +309,7 @@ function drawCross(x, y) {
 /* touch handler */
 
 
-function touchHandler(e) {
+function handleClick(e) {
   if (!game.start) {
     game.start = true;
     return;
@@ -326,8 +326,8 @@ function touchHandler(e) {
   
   if (game.turn != USER) return;
 
-  var x = e.touches[0].clientX - GRID_OFFSET_X;
-  var y = e.touches[0].clientY - GRID_OFFSET_Y;
+  var x = e.clientX - GRID_OFFSET_X;
+  var y = e.clientY - GRID_OFFSET_Y;
   // console.log(x, y);
 
   var selected = null;
@@ -354,7 +354,7 @@ function touchHandler(e) {
     if (col3) selected = 8;
   }
 
-  if (selected !== null) {
+  if (selected != null && board[selected] == null) {
     board[selected] = USER;
     game.turn = COM;
   }
