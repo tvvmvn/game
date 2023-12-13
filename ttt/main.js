@@ -73,7 +73,7 @@ function render() {
   drawGrid();
 
   if (!game.start) {
-    drawMessage("Touch to start game");
+    drawMessage("Touch or click to start game");
     return;
   }
 
