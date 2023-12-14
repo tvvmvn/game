@@ -7,16 +7,16 @@ canvas.style["backgroundColor"] = "#000";
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-const str = "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ";
-const center_x = canvas.width / 2;
-const center_y = 240;
-const r = 120;
+const STORE = "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ";
+const CX = canvas.width / 2;
+const CY = 240;
+const RADIUS = 120;
+const TIME = 10;
 
+var q = "";
 var pass;
-var i1;
-var i2;
 var start;
-var n;
+var p;
 var s;
 var _s;
 var over;
@@ -29,16 +29,16 @@ addEventListener("click", clickHandler);
 startGame();
 
 function startGame() {
-  pass = null;
-  i1 = rd();
-  i2 = rd();
-  start = false;
-  n = 1.5;
+  q = setQuiz();
+  p = 1.5;
   s = 0;
   _s = 0;
+  
+  pass = null;
+  start = false;
   over = false;
-  interval;
 
+  interval;
   interval = setInterval(render, 10);
 }
 
@@ -52,10 +52,8 @@ function render() {
   }
 
   if (pass) {
-    i1 = rd();
-    i2 = rd();
-
-    n = 1.5;
+    q = setQuiz();
+    p = 1.5;
     s = 0;
     _s = 0;
 
@@ -66,7 +64,7 @@ function render() {
   setTimer();
   drawTimer();
 
-  if (s == 10) {
+  if (s == TIME) {
     over = true;
   }
   
@@ -89,28 +87,32 @@ function setOver() {
   }, 2000)
 }
 
-function rd() {
-  return Math.floor(Math.random() * str.length);
-}
-
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function setQuiz() {
+  function rd() {
+    return Math.floor(Math.random() * STORE.length);
+  }
+
+  return STORE[rd()] + STORE[rd()];
 }
 
 function setTime() {
   _s++ 
 
-  if (_s == 100) {
+  if (_s == 100) { // 1s
     s++;
     _s = 0;
   }
 }
 
 function setTimer() {
-  n += 0.002;
+  p += (20 / TIME) / 1000;
   
-  if (n == 2) {
-    n = 0;
+  if (p == 2) {
+    p = 0;
   }
 }
 
@@ -120,7 +122,7 @@ function drawTitle() {
   ctx.font = "30px Monospace";
   ctx.fillStyle = "#fff";
   ctx.textAlign = "center";
-  ctx.fillText("# CHOSUNG GAME", center_x, 60);
+  ctx.fillText("# CHOSUNG GAME", CX, 60);
 }
 
 function drawTimer() {
@@ -129,13 +131,13 @@ function drawTimer() {
   ctx.beginPath();
   ctx.lineWidth = 16;
   ctx.strokeStyle = "#eee";
-  ctx.arc(center_x, center_y, r, 0, 2 * Math.PI);
+  ctx.arc(CX, CY, RADIUS, 0, 2 * Math.PI);
   ctx.stroke();
 
   ctx.beginPath();
   ctx.lineWidth = 16;
   ctx.strokeStyle = "#08f";
-  ctx.arc(center_x, center_y, r, n * Math.PI, 1.5 * Math.PI);
+  ctx.arc(CX, CY, RADIUS, p * Math.PI, 1.5 * Math.PI);
   ctx.stroke();
 }
 
@@ -145,8 +147,8 @@ function drawStart() {
   ctx.textAlign = "center";
   ctx.fillText(
     "Touch or click to start game", 
-    center_x, 
-    center_y + (20 * 0.5)
+    CX, 
+    CY + (20 * 0.5)
   );
 }
 
@@ -154,17 +156,13 @@ function drawQuiz() {
   ctx.font = "100px Monospace";
   ctx.fillStyle = "#fff";
   ctx.textAlign = "center";
-  ctx.fillText(
-    `${str[i1]}${str[i2]}`, 
-    center_x, 
-    center_y + (100 * 0.35)
-  );
+  ctx.fillText(q, CX, CY + (100 * 0.35));
 }
 
 function drawOver() {
   ctx.font = "30px Monospace";
   ctx.textAlign = "center";
-  ctx.fillText("TIME OVER", center_x, center_y + (20 * 0.5));
+  ctx.fillText("TIME OVER", CX, CY + (20 * 0.5));
 }
 
 /* control */
@@ -182,11 +180,11 @@ function clickHandler(e) {
   var x = e.clientX;
   var y = e.clientY;
 
-  var circleClicked = Math.pow((x - center_x), 2) + Math.pow((y - center_y), 2) <= Math.pow(r, 2);
+  var circleClicked = Math.pow((x - CX), 2) + Math.pow((y - CY), 2) <= Math.pow(RADIUS, 2);
   
-  if (!circleClicked) return;
-
-  pass = true;
+  if (circleClicked) {
+    pass = true;
+  }
 }
 
 
