@@ -1,7 +1,4 @@
-/*
-  struct
-*/
-
+/* struct */
 
 class Ball {
   constructor(x, y, radius, dx, dy, color) {
@@ -44,11 +41,7 @@ class Game {
   }
 }
 
-
-/*
-  contants 
-*/
-
+/* contants */
 
 // Stage
 const STAGE_OFFSET_X = 10;
@@ -65,11 +58,7 @@ const COLUMN_COUNT = 5;
 const ARROW_RIGHT = "ArrowRight";
 const ARROW_LEFT = "ArrowLeft";
 
-
-/*
-  variables
-*/
-
+/* variables */
 
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
@@ -88,11 +77,7 @@ canvas.style["backgroundColor"] = "#000";
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 
-
-/* 
-  functions
-*/
-
+/* run the game */
 
 startGame();
 
@@ -194,6 +179,8 @@ function createInterval() {
   return setInterval(render, 10); // 100hz
 }
 
+/* functions */
+
 // Bricks
 function setBricks() {
   for (var r = 0; r < ROW_COUNT; r++) {
@@ -272,11 +259,7 @@ function setPaddle() {
   }
 }
 
-
-/*
-  draw
-*/
-
+/* draw */
 
 function drawTitle() {
   ctx.font = "20px Monospace";
@@ -326,11 +309,7 @@ function drawMessage(message) {
   );
 }
 
-
-/*
-  key handler
-*/
-
+/* control */
 
 function keyDownHandler(e) {
   if (!game.start) {

@@ -1,6 +1,5 @@
 /* struct */
 
-
 class Snake {
   constructor(x, y, _x, _y, size, movingPoint, moved, node, dir, color) {
     this.x = x;
@@ -27,9 +26,7 @@ class Apple {
   }
 }
 
-
 /* enums */
-
 
 const Direction = {
   UP: 0,
@@ -54,9 +51,7 @@ const Stage = {
   CELL: 20,
 }
 
-
 /* variables */
-
 
 var ctx = canvas.getContext("2d");
 var snake;
@@ -86,13 +81,9 @@ canvas.style.backgroundColor = "#222";
 document.body.style["backgroundColor"] = "#000";
 addEventListener("keydown", keyDownHandler);
 
+/* run the game */
 
-/* RUN */
 startGame();
-
-
-/* Functions */
-
 
 function startGame() {
   snake = new Snake(
@@ -200,6 +191,8 @@ function render() {
   prevX = snake.x;
   prevY = snake.y;
 }
+
+/* functions */
 
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -327,9 +320,7 @@ function setTime() {
   }
 }
 
-
-/* DRAW */
-
+/* draw */
 
 function drawStage() {
   // checker
@@ -405,9 +396,7 @@ function drawMessage(message) {
   );
 }
 
-
-/* Key handler */
-
+/* control */
 
 function keyDownHandler(e) {
   if (!snake.moved) return;

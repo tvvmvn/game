@@ -92,11 +92,10 @@ function clearCanvas() {
 }
 
 function setQuiz() {
-  function rd() {
-    return Math.floor(Math.random() * STORE.length);
-  }
+  var i1 = Math.floor(Math.random() * STORE.length);
+  var i2 = Math.floor(Math.random() * STORE.length);
 
-  return STORE[rd()] + STORE[rd()];
+  return STORE[i1] + STORE[i2];
 }
 
 function setTime() {

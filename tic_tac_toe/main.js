@@ -1,6 +1,5 @@
 /* struct */
 
-
 class Game {
   constructor(start, turn, decided, outcome, winner) {
     this.start = start;
@@ -11,9 +10,7 @@ class Game {
   }
 }
 
-
 /* constants  */
-
 
 const GRID_SIZE = 300;
 const GRID_OFFSET_X = (innerWidth - GRID_SIZE) / 2;
@@ -41,9 +38,7 @@ function createItems() {
   return items.flat();
 }
 
-
 /* variables */
-
 
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
@@ -59,13 +54,23 @@ canvas.height = innerHeight;
 canvas.style["backgroundColor"] = "#222";
 canvas.addEventListener("click", handleClick);
 
+/* run the game */
 
-/*  run */
 startGame();
 
+function startGame() {
+  board = new Array(9);
+  game = new Game(
+    false, 
+    Math.ceil(Math.random() * 2), 
+    false, 
+    null, 
+    null
+  );
+  initialized = false;
 
-/* functions */
-
+  interval = setInterval(render, 10);
+}
 
 function render() {
   clearCanvas();
@@ -116,19 +121,7 @@ function render() {
   }
 }
 
-function startGame() {
-  board = new Array(9);
-  game = new Game(
-    false, 
-    Math.ceil(Math.random() * 2), 
-    false, 
-    null, 
-    null
-  );
-  initialized = false;
-
-  interval = setInterval(render, 10);
-}
+/* functions */
 
 function com() {
   setAlg();
@@ -244,9 +237,7 @@ function clearCanvas() {
   ctx.clearRect(0, 0, innerWidth, innerHeight);
 }
 
-
 /* draw */
-
 
 function drawTitle() {
   ctx.font = "30px Monospace";
@@ -305,9 +296,7 @@ function drawCross(x, y) {
   ctx.stroke();
 }
 
-
-/* touch handler */
-
+/* control */
 
 function handleClick(e) {
   if (!game.start) {
