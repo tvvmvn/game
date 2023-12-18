@@ -36,25 +36,21 @@
   var target;
   var points = [];
 
-  var han = [
-    { name: "졸", x: 2, y: 3, size: 15, color: "#f00" },
-    { name: "졸", x: 6, y: 3, size: 15, color: "#f00" },
-    { name: "차", x: 0, y: 0, size: 20, color: "#f00" },
-    { name: "차", x: 8, y: 0, size: 20, color: "#f00" },
-    { name: "마", x: 6, y: 0, size: 20, color: "#f00" },
-    { name: "마", x: 2, y: 0, size: 20, color: "#f00" },
-    { name: "궁", x: 4, y: 1, size: 30, color: "#f00" },
-  ]
-
-  // below
-  var cho = [
-    { name: "졸", x: 2, y: 6, size: 15, color: "#0b0" },
-    { name: "졸", x: 6, y: 6, size: 15, color: "#0b0" },
-    { name: "차", x: 0, y: 9, size: 20, color: "#0b0" },
-    { name: "차", x: 8, y: 9, size: 20, color: "#0b0" },
-    { name: "마", x: 2, y: 9, size: 20, color: "#0b0" },
-    { name: "마", x: 6, y: 9, size: 20, color: "#0b0" },
-    { name: "궁", x: 4, y: 8, size: 30, color: "#0b0" },
+  var pieces = [
+    { name: "졸", x: 2, y: 3, size: 15, team: "han", color: "#f00" },
+    { name: "졸", x: 6, y: 3, size: 15, team: "han", color: "#f00" },
+    { name: "차", x: 0, y: 0, size: 20, team: "han", color: "#f00" },
+    { name: "차", x: 8, y: 0, size: 20, team: "han", color: "#f00" },
+    { name: "마", x: 6, y: 0, size: 20, team: "han", color: "#f00" },
+    { name: "마", x: 2, y: 0, size: 20, team: "han", color: "#f00" },
+    { name: "궁", x: 4, y: 1, size: 30, team: "han", color: "#f00" },
+    { name: "졸", x: 2, y: 6, size: 15, team: "cho", color: "#0b0" },
+    { name: "졸", x: 6, y: 6, size: 15, team: "cho", color: "#0b0" },
+    { name: "차", x: 0, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { name: "차", x: 8, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { name: "마", x: 2, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { name: "마", x: 6, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { name: "궁", x: 4, y: 8, size: 30, team: "cho", color: "#0b0" },
   ]
 
   addEventListener("click", clickHandler);
@@ -71,12 +67,10 @@
     move();
 
     drawBoard();
-    drawPieces(han);
-    drawPieces(cho);
+    drawTarget();
+    drawPieces();
     drawPoints();
     drawCursor();
-
-    ctx.globalAlpha = 1;
   }
 
   function clearCanvas() {
@@ -86,9 +80,9 @@
   /* functions */
   
   function setTarget() {
-    for (var i = 0; i < cho.length; i++) {
-      var piece = cho[i];
-      
+    for (var i = 0; i < pieces.length; i++) {
+      var piece = pieces[i];
+
       if (x == piece.x && y == piece.y) {
         target = piece;
         break;
@@ -143,6 +137,7 @@
       points = [];
     }
   }
+
 
   function move() {
     for (var i=0; i<points.length; i++) {
@@ -252,8 +247,8 @@
       return false;
     } 
 
-    for (var i=0; i<cho.length; i++) {
-      if (cho[i].x == x && cho[i].y == y) {
+    for (var i=0; i<pieces.length; i++) {
+      if (pieces[i].x == x && pieces[i].y == y) {
         empty = false;
         break;
       }   
@@ -264,7 +259,7 @@
 
   /* draw */
   
-  function drawPieces(pieces) {
+  function drawPieces() {
     for (var i = 0; i < pieces.length; i++) {
       var piece = pieces[i];
 
@@ -334,6 +329,19 @@
       10, 0, 2 * Math.PI
     );
     ctx.stroke();
+  }
+
+  function drawTarget() {
+    if (!target) return;
+    ctx.beginPath();
+    ctx.fillStyle = "#fff";
+    ctx.arc(
+      OFFSET_X + (target.x * CELL_WIDTH),
+      OFFSET_Y + (target.y * CELL_HEIGHT),
+      10, 0, 2 * Math.PI
+    );
+    ctx.fill();
+    ctx.closePath();
   }
 
   /* control */
