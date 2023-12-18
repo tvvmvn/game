@@ -9,7 +9,7 @@
   /* constants */
 
   const OFFSET_X = 20;
-  const OFFSET_Y = 20;
+  const OFFSET_Y = 40;
   const ROW_COUNT = 9;
   const COL_COUNT = 8;
   const WIDTH = 460;
@@ -35,22 +35,24 @@
   var y = -1;
   var target;
   var points = [];
+  var turn = "cho";
 
   var pieces = [
-    { name: "졸", x: 2, y: 3, size: 15, team: "han", color: "#f00" },
-    { name: "졸", x: 6, y: 3, size: 15, team: "han", color: "#f00" },
-    { name: "차", x: 0, y: 0, size: 20, team: "han", color: "#f00" },
-    { name: "차", x: 8, y: 0, size: 20, team: "han", color: "#f00" },
-    { name: "마", x: 6, y: 0, size: 20, team: "han", color: "#f00" },
-    { name: "마", x: 2, y: 0, size: 20, team: "han", color: "#f00" },
-    { name: "궁", x: 4, y: 1, size: 30, team: "han", color: "#f00" },
-    { name: "졸", x: 2, y: 6, size: 15, team: "cho", color: "#0b0" },
-    { name: "졸", x: 6, y: 6, size: 15, team: "cho", color: "#0b0" },
-    { name: "차", x: 0, y: 9, size: 20, team: "cho", color: "#0b0" },
-    { name: "차", x: 8, y: 9, size: 20, team: "cho", color: "#0b0" },
-    { name: "마", x: 2, y: 9, size: 20, team: "cho", color: "#0b0" },
-    { name: "마", x: 6, y: 9, size: 20, team: "cho", color: "#0b0" },
-    { name: "궁", x: 4, y: 8, size: 30, team: "cho", color: "#0b0" },
+    { id: "hz1", name: "졸", x: 2, y: 3, size: 15, team: "han", color: "#f00" },
+    { id: "hz2", name: "졸", x: 6, y: 3, size: 15, team: "han", color: "#f00" },
+    { id: "hc1", name: "차", x: 0, y: 0, size: 20, team: "han", color: "#f00" },
+    { id: "hc2", name: "차", x: 8, y: 0, size: 20, team: "han", color: "#f00" },
+    { id: "hm1", name: "마", x: 6, y: 0, size: 20, team: "han", color: "#f00" },
+    { id: "hm2", name: "마", x: 2, y: 0, size: 20, team: "han", color: "#f00" },
+    { id: "h", name: "궁", x: 4, y: 1, size: 30, team: "han", color: "#f00" },
+    // VS
+    { id: "cz1", name: "졸", x: 2, y: 6, size: 15, team: "cho", color: "#0b0" },
+    { id: "cz2", name: "졸", x: 6, y: 6, size: 15, team: "cho", color: "#0b0" },
+    { id: "cc1", name: "차", x: 0, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { id: "cc2", name: "차", x: 8, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { id: "cm1", name: "마", x: 2, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { id: "cm2", name: "마", x: 6, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { id: "c", name: "궁", x: 4, y: 8, size: 30, team: "cho", color: "#0b0" },
   ]
 
   addEventListener("click", clickHandler);
@@ -66,6 +68,7 @@
     setPoints();
     move();
 
+    drawTurn();
     drawBoard();
     drawTarget();
     drawPieces();
@@ -83,30 +86,33 @@
     for (var i = 0; i < pieces.length; i++) {
       var piece = pieces[i];
 
-      if (x == piece.x && y == piece.y) {
-        target = piece;
-        break;
+      if (piece.team == turn) {
+        if (x == piece.x && y == piece.y) {
+          target = piece;
+          break;
+        }
       }
     }
   }
 
   function setPoints() {
     if (!target) {
+      points = [];
       return;
     }
 
     if (target.name == "졸") {
       var _points = [];
 
-      if (isEmpty(target.x, target.y - 1)) {
+      if (isTakeable(target.x, target.y - 1)) {
         _points.push([target.x, target.y - 1])
       }
 
-      if (isEmpty(target.x - 1, target.y)) {
+      if (isTakeable(target.x - 1, target.y)) {
         _points.push([target.x - 1, target.y])
       }
 
-      if (isEmpty(target.x + 1, target.y)) {
+      if (isTakeable(target.x + 1, target.y)) {
         _points.push([target.x + 1, target.y])
       }
 
@@ -138,12 +144,27 @@
     }
   }
 
-
   function move() {
     for (var i=0; i<points.length; i++) {
       if (x == points[i][0] && y == points[i][1]) {
+        
+        var victim = getPieceByCrds(x, y);
+
         target.x = x;
         target.y = y;
+
+        // remove victim from pieces
+        if (victim) {
+          for (var j=0; j<pieces.length; j++) {
+            if (victim.id == pieces[j].id) {
+              pieces.splice(j, 1);
+            }
+          }
+        }
+
+        // after move
+        target = null;
+        turn = turn == "cho" ? "han" : "cho";
       }
     }
   }
@@ -153,7 +174,7 @@
 
     // up
     for (var i = target.y - 1; i >= 0; i--) {
-      if (isEmpty(target.x, i)) {
+      if (isTakeable(target.x, i)) {
         _points.push([target.x, i]);
       } else {
         break;
@@ -162,7 +183,7 @@
 
     // right
     for (var i = target.x + 1; i <= COL_COUNT; i++) {
-      if (isEmpty(i, target.y)) {
+      if (isTakeable(i, target.y)) {
         _points.push([i, target.y]);
       } else {
         break;
@@ -171,7 +192,7 @@
 
     // down
     for (var i = target.y + 1; i <= ROW_COUNT; i++) {
-      if (isEmpty(target.x, i)) {
+      if (isTakeable(target.x, i)) {
         _points.push([target.x, i]);
       } else {
         break;
@@ -180,7 +201,7 @@
 
     // left
     for (var i = target.x - 1; i >= 0; i--) {
-      if (isEmpty(i, target.y)) {
+      if (isTakeable(i, target.y)) {
         _points.push([i, target.y]);
       } else {
         break;
@@ -194,41 +215,41 @@
     var _points = [];
 
     // up
-    if (isEmpty(target.x, target.y - 1)) {
-      if (isEmpty(target.x - 1, target.y - 2)) {
+    if (isTakeable(target.x, target.y - 1)) {
+      if (isTakeable(target.x - 1, target.y - 2)) {
         _points.push([target.x - 1, target.y - 2]);
       }
-      if (isEmpty(target.x + 1, target.y - 2)) {
+      if (isTakeable(target.x + 1, target.y - 2)) {
         _points.push([target.x + 1, target.y - 2]);
       }
     }
 
     // right
-    if (isEmpty(target.x + 1, target.y)) {
-      if (isEmpty(target.x + 2, target.y - 1)) {
+    if (isTakeable(target.x + 1, target.y)) {
+      if (isTakeable(target.x + 2, target.y - 1)) {
         _points.push([target.x + 2, target.y - 1]);
       }
-      if (isEmpty(target.x + 2, target.y + 1)) {
+      if (isTakeable(target.x + 2, target.y + 1)) {
         _points.push([target.x + 2, target.y + 1]);
       }
     }
 
     // down
-    if (isEmpty(target.x, target.y + 1)) {
-      if (isEmpty(target.x + 1, target.y + 2)) {
+    if (isTakeable(target.x, target.y + 1)) {
+      if (isTakeable(target.x + 1, target.y + 2)) {
         _points.push([target.x + 1, target.y + 2]);
       }
-      if (isEmpty(target.x - 1, target.y + 2)) {
+      if (isTakeable(target.x - 1, target.y + 2)) {
         _points.push([target.x - 1, target.y + 2]);
       }
     }
 
     // left
-    if (isEmpty(target.x - 1, target.y)) {
-      if (isEmpty(target.x - 2, target.y + 1)) {
+    if (isTakeable(target.x - 1, target.y)) {
+      if (isTakeable(target.x - 2, target.y + 1)) {
         _points.push([target.x - 2, target.y + 1]);
       }
-      if (isEmpty(target.x - 2, target.y - 1)) {
+      if (isTakeable(target.x - 2, target.y - 1)) {
         _points.push([target.x - 2, target.y - 1]);
       }
     }
@@ -236,8 +257,8 @@
     return _points;
   }
 
-  function isEmpty(x, y) {
-    var empty = true;
+  function isTakeable(x, y) {
+    var takeable = true;
 
     if (x < 0 || x > COL_COUNT) {
       return false;
@@ -248,13 +269,33 @@
     } 
 
     for (var i=0; i<pieces.length; i++) {
-      if (pieces[i].x == x && pieces[i].y == y) {
-        empty = false;
+      var piece = pieces[i];
+
+      // if (piece.team != turn && piece.x == x - 1 && piece.y == y - 1) {
+      //   takeable = false;
+      //   break;  
+      // }
+
+      if (piece.team == turn && piece.x == x && piece.y == y) {
+        takeable = false;
         break;
-      }   
+      }
     }
 
-    return empty;
+    return takeable;
+  }
+
+  function getPieceByCrds(x, y) {
+    var _piece = null;
+
+    for (var i=0; i<pieces.length; i++) {
+      if (pieces[i].x == x && pieces[i].y == y) {
+        _piece = pieces[i];
+        break;
+      }
+    }
+
+    return _piece;
   }
 
   /* draw */
@@ -273,10 +314,20 @@
     }
   }
 
+  function drawTurn() {
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#fff";
+    ctx.fillText(
+      "turn: " + turn, 
+      20, 
+      20,
+    );
+  }
+
   function drawPoints() {
     for (var i=0; i<points.length; i++) {
       ctx.beginPath();
-      ctx.strokeStyle = "#f00";
+      ctx.strokeStyle = "#ff0";
       ctx.lineWidth = 2;
       ctx.arc(
         OFFSET_X + (points[i][0] * CELL_WIDTH),
