@@ -104,8 +104,15 @@
     if (target.name == "졸") {
       var _points = [];
 
-      if (isTakeable(target.x, target.y - 1)) {
-        _points.push([target.x, target.y - 1])
+      // front - cho 
+      if (target.team == "cho") {
+        if (isTakeable(target.x, target.y - 1)) {
+          _points.push([target.x, target.y - 1])
+        }
+      } else { // han
+        if (isTakeable(target.x, target.y + 1)) {
+          _points.push([target.x, target.y + 1])
+        }
       }
 
       if (isTakeable(target.x - 1, target.y)) {
@@ -127,20 +134,12 @@
       points = getCha();
     }
 
-    if (target.name == "sang") {
-      points = [];
-    }
-
-    if (target.name == "po") {
-      points = [];
-    }
-
-    if (target.name == "sa") {
-      points = [];
-    }
-
     if (target.name == "궁") {
-      points = [];
+      if (target.team == "cho") {
+        points = [];
+      } else {
+        points = [];
+      }
     }
   }
 
@@ -176,6 +175,12 @@
     for (var i = target.y - 1; i >= 0; i--) {
       if (isTakeable(target.x, i)) {
         _points.push([target.x, i]);
+
+        var piece = getPieceByCrds(target.x, i);
+
+        if (piece) {
+          break;
+        }
       } else {
         break;
       }
@@ -185,6 +190,13 @@
     for (var i = target.x + 1; i <= COL_COUNT; i++) {
       if (isTakeable(i, target.y)) {
         _points.push([i, target.y]);
+
+        var piece = getPieceByCrds(i, target.y);
+
+        if (piece) {
+          break;
+        }
+
       } else {
         break;
       }
@@ -194,6 +206,12 @@
     for (var i = target.y + 1; i <= ROW_COUNT; i++) {
       if (isTakeable(target.x, i)) {
         _points.push([target.x, i]);
+
+        var piece = getPieceByCrds(target.x, i);
+
+        if (piece) {
+          break;
+        }
       } else {
         break;
       }
@@ -203,6 +221,12 @@
     for (var i = target.x - 1; i >= 0; i--) {
       if (isTakeable(i, target.y)) {
         _points.push([i, target.y]);
+
+        var piece = getPieceByCrds(i, target.y);
+
+        if (piece) {
+          break;
+        }
       } else {
         break;
       }
@@ -268,18 +292,10 @@
       return false;
     } 
 
-    for (var i=0; i<pieces.length; i++) {
-      var piece = pieces[i];
+    var piece = getPieceByCrds(x, y);
 
-      // if (piece.team != turn && piece.x == x - 1 && piece.y == y - 1) {
-      //   takeable = false;
-      //   break;  
-      // }
-
-      if (piece.team == turn && piece.x == x && piece.y == y) {
-        takeable = false;
-        break;
-      }
+    if (piece && piece.team == turn) {
+      takeable = false;
     }
 
     return takeable;
