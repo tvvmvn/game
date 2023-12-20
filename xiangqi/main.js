@@ -18,6 +18,17 @@
   const CELL_HEIGHT = HEIGHT / ROW_COUNT;
   const SPOTS = [];
 
+  for (var r = 0; r <= ROW_COUNT; r++) {
+    SPOTS[r] = [];
+
+    for (var c = 0; c <= COL_COUNT; c++) {
+      SPOTS[r][c] = [
+        OFFSET_X + (c * CELL_WIDTH),
+        OFFSET_Y + (r * CELL_HEIGHT)
+      ]
+    }
+  }
+
   /* enums */
 
   const HAN = {
@@ -25,7 +36,11 @@
     TR: [5, 0],
     BR: [5, 2],
     BL: [3, 2],
-    CENTER: [4, 1]
+    CENTER: [4, 1],
+    TM: [4, 0],
+    RM: [5, 1],
+    BM: [4, 2],
+    LM: [3, 1],
   }
 
   const CHO = {
@@ -40,42 +55,51 @@
     LM: [3, 8],
   }
 
-  for (var r = 0; r <= ROW_COUNT; r++) {
-    SPOTS[r] = [];
-
-    for (var c = 0; c <= COL_COUNT; c++) {
-      SPOTS[r][c] = [
-        OFFSET_X + (c * CELL_WIDTH),
-        OFFSET_Y + (r * CELL_HEIGHT)
-      ]
-    }
-  }
-
   /* variables */
 
-  var x, y = 0;
-  var piece = [4, 1];
-  var points;
+  var x = -1;
+  var y = -1;
+  var target;
+  var points = [];
+  var turn = "cho";
+
+  var pieces = [
+    { id: "hz1", name: "졸", x: 2, y: 3, size: 15, team: "han", color: "#f00" },
+    { id: "hz2", name: "졸", x: 6, y: 3, size: 15, team: "han", color: "#f00" },
+    { id: "hc1", name: "차", x: 0, y: 0, size: 20, team: "han", color: "#f00" },
+    { id: "hc2", name: "차", x: 8, y: 0, size: 20, team: "han", color: "#f00" },
+    { id: "hm1", name: "마", x: 6, y: 0, size: 20, team: "han", color: "#f00" },
+    { id: "hm2", name: "마", x: 2, y: 0, size: 20, team: "han", color: "#f00" },
+    { id: "h", name: "궁", x: 4, y: 1, size: 30, team: "han", color: "#f00" },
+    // VS
+    { id: "cz1", name: "졸", x: 2, y: 6, size: 15, team: "cho", color: "#0b0" },
+    { id: "cz2", name: "졸", x: 6, y: 6, size: 15, team: "cho", color: "#0b0" },
+    { id: "cc1", name: "차", x: 0, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { id: "cc2", name: "차", x: 8, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { id: "cm1", name: "마", x: 2, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { id: "cm2", name: "마", x: 6, y: 9, size: 20, team: "cho", color: "#0b0" },
+    { id: "c", name: "궁", x: 4, y: 8, size: 30, team: "cho", color: "#0b0" },
+  ]
+
+  addEventListener("click", clickHandler);
 
   /* run the game */
 
   setInterval(interval, 10);
-  addEventListener("click", clickHandler);
 
   function interval() {
     clearCanvas();
+    
+    setTarget();
+    setPoints();
+    move();
 
-    // # set different pieces here
-    // setZol();
-    // setMa()
-    // setCha()
-    setGung()
-
-    setMove();
-
+    drawTurn();
     drawBoard();
-    drawPiece();
-    drawPoints()
+    drawTarget();
+    drawPieces();
+    drawPoints();
+    drawCursor();
   }
 
   function clearCanvas() {
@@ -83,140 +107,295 @@
   }
 
   /* functions */
-
+  
   function eqlcrds(a, b) {
     return a[0] == b[0] && a[1] == b[1];
   }
 
-  function setMa() {
-    // not additional task is needed.
+  function isTakeable(x, y) {
+    var takeable = true;
+
+    if (x < 0 || x > COL_COUNT) {
+      return false;
+    }
+
+    if (y < 0 || y > ROW_COUNT) {
+      return false;
+    } 
+
+    var piece = getPieceByCrds(x, y);
+
+    if (piece && piece.team == turn) {
+      takeable = false;
+    }
+
+    return takeable;
   }
 
-  function setGung() {
-    var _points = [];
+  function getPieceByCrds(x, y) {
+    var _piece = null;
 
-    if (eqlcrds(piece, CHO.CENTER)) {
-      _points.push(
-        CHO.TL, CHO.TM, CHO.TR, CHO.RM,
-        CHO.BR, CHO.BM, CHO.BL, CHO.LM
-      );
+    for (var i=0; i<pieces.length; i++) {
+      if (pieces[i].x == x && pieces[i].y == y) {
+        _piece = pieces[i];
+        break;
+      }
     }
 
-    if (eqlcrds(piece, CHO.TL)) {
-      _points.push(CHO.TM, CHO.CENTER, CHO.LM)
-    }
-
-    points = _points;
+    return _piece;
   }
+  
+  function setTarget() {
+    for (var i = 0; i < pieces.length; i++) {
+      var piece = pieces[i];
 
-  function setCha() {
-    var _points = [];
-
-    // up
-    for (var i = piece[1] - 1; i >= 0; i--) {
-      _points.push([piece[0], i]);
-    }
-
-    // right
-    for (var i = piece[0] + 1; i <= COL_COUNT; i++) {
-      _points.push([i, piece[1]]);
-    }
-
-    // bottom
-    for (var i = piece[1] + 1; i <= ROW_COUNT; i++) {
-      _points.push([piece[0], i]);
-    }
-
-    // left
-    for (var i = piece[0] - 1; i >= 0; i--) {
-      _points.push([i, piece[1]]);
-    }
-
-    // on the castle
-    if (eqlcrds(piece, CHO.TL)) {
-      _points.push(CHO.CENTER, CHO.BR)
-    }
-
-    if (eqlcrds(piece, CHO.TR)) {
-      _points.push(CHO.CENTER, CHO.BL)
-    }
-
-    if (eqlcrds(piece, CHO.BR)) {
-      _points.push(CHO.CENTER, CHO.TL)
-    }
-
-    if (eqlcrds(piece, CHO.BL)) {
-      _points.push(CHO.CENTER, CHO.TR)
-    }
-
-    if (eqlcrds(piece, CHO.CENTER)) {
-      _points.push(CHO.TL, CHO.TR, CHO.BR, CHO.BL)
-    }
-
-    // on the enemy castle 
-    if (eqlcrds(piece, HAN.TL)) {
-      _points.push(HAN.CENTER, HAN.BR)
-    }
-
-    if (eqlcrds(piece, HAN.TR)) {
-      _points.push(HAN.CENTER, HAN.BL)
-    }
-
-    if (eqlcrds(piece, HAN.BR)) {
-      _points.push(HAN.CENTER, HAN.TL)
-    }
-
-    if (eqlcrds(piece, HAN.BL)) {
-      _points.push(HAN.CENTER, HAN.TR)
-    }
-
-    if (eqlcrds(piece, HAN.CENTER)) {
-      _points.push(HAN.TL, HAN.TR, HAN.BR, HAN.BL)
-    }
-
-    points = _points;
-  }
-
-  function setZol() {
-    var _points = [];
-
-    _points.push(
-      [piece[0], piece[1] - 1],
-      [piece[0] - 1, piece[1]],
-      [piece[0] + 1, piece[1]],
-    )
-
-    // on the castle area
-    if (eqlcrds(piece, HAN.BL)) {
-      _points.push(HAN.CENTER);
-    }
-
-    if (eqlcrds(piece, HAN.CENTER)) {
-      _points.push(HAN.TL, HAN.TR)
-    }
-
-    if (eqlcrds(piece, HAN.BR)) {
-      _points.push(HAN.CENTER)
-    }
-
-    points = _points;
-  }
-
-  function setMove() {
-    for (var i = 0; i < points.length; i++) {
-      if (eqlcrds([x, y], points[i])) {
-        piece[0] = x;
-        piece[1] = y;
+      if (piece.team == turn) {
+        if (x == piece.x && y == piece.y) {
+          target = piece;
+          break;
+        }
       }
     }
   }
 
+  function setPoints() {
+    if (!target) {
+      points = [];
+      return;
+    }
+
+    if (target.name == "졸") {
+      var _points = [];
+
+      // front - cho 
+      if (target.team == "cho") {
+        if (isTakeable(target.x, target.y - 1)) {
+          _points.push([target.x, target.y - 1])
+        }
+      } else { // han
+        if (isTakeable(target.x, target.y + 1)) {
+          _points.push([target.x, target.y + 1])
+        }
+      }
+
+      if (isTakeable(target.x - 1, target.y)) {
+        _points.push([target.x - 1, target.y])
+      }
+
+      if (isTakeable(target.x + 1, target.y)) {
+        _points.push([target.x + 1, target.y])
+      }
+
+      points = _points;
+    }
+
+    if (target.name == "마") {
+      points = getMa()
+    }
+
+    if (target.name == "차") {
+      points = getCha();
+    }
+
+    if (target.name == "궁") {
+      if (target.team == "cho") {
+        points = getChoGung();
+      } else {
+        points = [];
+      }
+    }
+  }
+
+  function move() {
+    for (var i=0; i<points.length; i++) {
+      if (x == points[i][0] && y == points[i][1]) {
+        
+        var victim = getPieceByCrds(x, y);
+
+        target.x = x;
+        target.y = y;
+
+        // remove victim from pieces
+        if (victim) {
+          for (var j=0; j<pieces.length; j++) {
+            if (victim.id == pieces[j].id) {
+              pieces.splice(j, 1);
+            }
+          }
+        }
+
+        // after move
+        target = null;
+        turn = turn == "cho" ? "han" : "cho";
+      }
+    }
+  }
+
+  function getChoGung() {
+    var _points = [];
+
+    if (isTakeable(target.x, target.y - 1)) {
+      _points.push([target.x, target.y - 1])
+    }
+    if (isTakeable(target.x, target.y + 1)) {
+      _points.push([target.x, target.y + 1])
+    }
+
+    if (isTakeable(target.x - 1, target.y)) {
+      _points.push([target.x - 1, target.y])
+    }
+
+    if (isTakeable(target.x + 1, target.y)) {
+      _points.push([target.x + 1, target.y])
+    }
+
+    return _points;
+  }
+
+
+  function getCha() {
+    var _points = [];
+
+    // up
+    for (var i = target.y - 1; i >= 0; i--) {
+      if (isTakeable(target.x, i)) {
+        _points.push([target.x, i]);
+
+        var piece = getPieceByCrds(target.x, i);
+
+        if (piece) {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    // right
+    for (var i = target.x + 1; i <= COL_COUNT; i++) {
+      if (isTakeable(i, target.y)) {
+        _points.push([i, target.y]);
+
+        var piece = getPieceByCrds(i, target.y);
+
+        if (piece) {
+          break;
+        }
+
+      } else {
+        break;
+      }
+    }
+
+    // down
+    for (var i = target.y + 1; i <= ROW_COUNT; i++) {
+      if (isTakeable(target.x, i)) {
+        _points.push([target.x, i]);
+
+        var piece = getPieceByCrds(target.x, i);
+
+        if (piece) {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    // left
+    for (var i = target.x - 1; i >= 0; i--) {
+      if (isTakeable(i, target.y)) {
+        _points.push([i, target.y]);
+
+        var piece = getPieceByCrds(i, target.y);
+
+        if (piece) {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    return _points;
+  }
+
+  function getMa() {
+    var _points = [];
+
+    // up
+    if (isTakeable(target.x, target.y - 1)) {
+      if (isTakeable(target.x - 1, target.y - 2)) {
+        _points.push([target.x - 1, target.y - 2]);
+      }
+      if (isTakeable(target.x + 1, target.y - 2)) {
+        _points.push([target.x + 1, target.y - 2]);
+      }
+    }
+
+    // right
+    if (isTakeable(target.x + 1, target.y)) {
+      if (isTakeable(target.x + 2, target.y - 1)) {
+        _points.push([target.x + 2, target.y - 1]);
+      }
+      if (isTakeable(target.x + 2, target.y + 1)) {
+        _points.push([target.x + 2, target.y + 1]);
+      }
+    }
+
+    // down
+    if (isTakeable(target.x, target.y + 1)) {
+      if (isTakeable(target.x + 1, target.y + 2)) {
+        _points.push([target.x + 1, target.y + 2]);
+      }
+      if (isTakeable(target.x - 1, target.y + 2)) {
+        _points.push([target.x - 1, target.y + 2]);
+      }
+    }
+
+    // left
+    if (isTakeable(target.x - 1, target.y)) {
+      if (isTakeable(target.x - 2, target.y + 1)) {
+        _points.push([target.x - 2, target.y + 1]);
+      }
+      if (isTakeable(target.x - 2, target.y - 1)) {
+        _points.push([target.x - 2, target.y - 1]);
+      }
+    }
+
+    return _points;
+  }
+
   /* draw */
+  
+  function drawPieces() {
+    for (var i = 0; i < pieces.length; i++) {
+      var piece = pieces[i];
+
+      ctx.font = piece.size + "px Arial";
+      ctx.fillStyle = piece.color;
+      ctx.fillText(
+        piece.name, 
+        OFFSET_X + (piece.x * CELL_WIDTH) - piece.size / 2.5, 
+        OFFSET_Y + (piece.y * CELL_HEIGHT) + piece.size / 3,
+      );
+    }
+  }
+
+  function drawTurn() {
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#fff";
+    ctx.fillText(
+      "turn: " + turn, 
+      20, 
+      20,
+    );
+  }
 
   function drawPoints() {
-    for (var i = 0; i < points.length; i++) {
+    for (var i=0; i<points.length; i++) {
       ctx.beginPath();
-      ctx.strokeStyle = "#f00";
+      ctx.strokeStyle = "#ff0";
       ctx.lineWidth = 2;
       ctx.arc(
         OFFSET_X + (points[i][0] * CELL_WIDTH),
@@ -225,18 +404,6 @@
       );
       ctx.stroke();
     }
-  }
-
-  function drawPiece() {
-    ctx.fillStyle = "#ddd";
-    ctx.beginPath();
-    ctx.arc(
-      OFFSET_X + (piece[0] * CELL_WIDTH),
-      OFFSET_Y + (piece[1] * CELL_HEIGHT),
-      15, 0, 2 * Math.PI
-    );
-    ctx.fill();
-    ctx.closePath();
   }
 
   function drawBoard() {
@@ -271,6 +438,31 @@
     ctx.stroke();
   }
 
+  function drawCursor() {
+    ctx.beginPath();
+    ctx.strokeStyle = "#00f";
+    ctx.lineWidth = 2;
+    ctx.arc(
+      OFFSET_X + (x * CELL_WIDTH),
+      OFFSET_Y + (y * CELL_HEIGHT),
+      10, 0, 2 * Math.PI
+    );
+    ctx.stroke();
+  }
+
+  function drawTarget() {
+    if (!target) return;
+    ctx.beginPath();
+    ctx.fillStyle = "#fff";
+    ctx.arc(
+      OFFSET_X + (target.x * CELL_WIDTH),
+      OFFSET_Y + (target.y * CELL_HEIGHT),
+      10, 0, 2 * Math.PI
+    );
+    ctx.fill();
+    ctx.closePath();
+  }
+
   /* control */
 
   function clickHandler(e) {
@@ -284,8 +476,6 @@
         if (a <= b) {
           x = c;
           y = r;
-
-          console.log(x, y);
         }
       }
     }
