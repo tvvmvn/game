@@ -20,12 +20,24 @@
 
   /* enums */
 
-  const Castle = {
+  const HAN = {
     TL: [3, 0],
     TR: [5, 0],
     BR: [5, 2],
     BL: [3, 2],
     CENTER: [4, 1]
+  }
+
+  const CHO = {
+    TL: [3, 7],
+    TR: [5, 7],
+    BR: [5, 9],
+    BL: [3, 9],
+    CENTER: [4, 8],
+    TM: [4, 7],
+    RM: [5, 8],
+    BM: [4, 9],
+    LM: [3, 8],
   }
 
   for (var r = 0; r <= ROW_COUNT; r++) {
@@ -42,21 +54,22 @@
   /* variables */
 
   var x, y = 0;
-  var piece = { x: 0, y: 9 };
+  var piece = [4, 1];
   var points;
 
   /* run the game */
-  
+
   setInterval(interval, 10);
   addEventListener("click", clickHandler);
 
   function interval() {
     clearCanvas();
-    
+
     // # set different pieces here
     // setZol();
     // setMa()
-    setCha()
+    // setCha()
+    setGung()
 
     setMove();
 
@@ -71,69 +84,94 @@
 
   /* functions */
 
+  function eqlcrds(a, b) {
+    return a[0] == b[0] && a[1] == b[1];
+  }
+
   function setMa() {
     // not additional task is needed.
+  }
+
+  function setGung() {
+    var _points = [];
+
+    if (eqlcrds(piece, CHO.CENTER)) {
+      _points.push(
+        CHO.TL, CHO.TM, CHO.TR, CHO.RM,
+        CHO.BR, CHO.BM, CHO.BL, CHO.LM
+      );
+    }
+
+    if (eqlcrds(piece, CHO.TL)) {
+      _points.push(CHO.TM, CHO.CENTER, CHO.LM)
+    }
+
+    points = _points;
   }
 
   function setCha() {
     var _points = [];
 
     // up
-    for (var i=piece.y - 1; i>=0; i--) {
-      _points.push([piece.x, i]);
+    for (var i = piece[1] - 1; i >= 0; i--) {
+      _points.push([piece[0], i]);
     }
 
     // right
-    for (var i=piece.x + 1; i<=COL_COUNT; i++) {
-      _points.push([i, piece.y]);
+    for (var i = piece[0] + 1; i <= COL_COUNT; i++) {
+      _points.push([i, piece[1]]);
     }
 
     // bottom
-    for (var i=piece.y + 1; i<=ROW_COUNT; i++) {
-      _points.push([piece.x, i]);
+    for (var i = piece[1] + 1; i <= ROW_COUNT; i++) {
+      _points.push([piece[0], i]);
     }
 
     // left
-    for (var i=piece.x - 1; i>=0; i--) {
-      _points.push([i, piece.y]);
+    for (var i = piece[0] - 1; i >= 0; i--) {
+      _points.push([i, piece[1]]);
     }
 
-    // on the castle area
-    if (piece.x == Castle.TL[0] && piece.y == Castle.TL[1]) {
-      _points.push(
-        [piece.x + 1, piece.y + 1],
-        [piece.x + 2, piece.y + 2],
-      )
+    // on the castle
+    if (eqlcrds(piece, CHO.TL)) {
+      _points.push(CHO.CENTER, CHO.BR)
     }
 
-    if (piece.x == Castle.TR[0] && piece.y == Castle.TR[1]) {
-      _points.push(
-        [piece.x - 1, piece.y + 1],
-        [piece.x - 2, piece.y + 2],
-      )
+    if (eqlcrds(piece, CHO.TR)) {
+      _points.push(CHO.CENTER, CHO.BL)
     }
 
-    if (piece.x == Castle.BR[0] && piece.y == Castle.BR[1]) {
-      _points.push(
-        [piece.x - 1, piece.y - 1],
-        [piece.x - 2, piece.y - 2],
-      )
-    }
-    
-    if (piece.x == Castle.BL[0] && piece.y == Castle.BL[1]) {
-      _points.push(
-        [piece.x + 1, piece.y - 1],
-        [piece.x + 2, piece.y - 2],
-      )
+    if (eqlcrds(piece, CHO.BR)) {
+      _points.push(CHO.CENTER, CHO.TL)
     }
 
-    if (piece.x == Castle.CENTER[0] && piece.y == Castle.CENTER[1]) {
-      _points.push(
-        [piece.x - 1, piece.y - 1],
-        [piece.x + 1, piece.y - 1],
-        [piece.x - 1, piece.y + 1],
-        [piece.x + 1, piece.y + 1],
-      )
+    if (eqlcrds(piece, CHO.BL)) {
+      _points.push(CHO.CENTER, CHO.TR)
+    }
+
+    if (eqlcrds(piece, CHO.CENTER)) {
+      _points.push(CHO.TL, CHO.TR, CHO.BR, CHO.BL)
+    }
+
+    // on the enemy castle 
+    if (eqlcrds(piece, HAN.TL)) {
+      _points.push(HAN.CENTER, HAN.BR)
+    }
+
+    if (eqlcrds(piece, HAN.TR)) {
+      _points.push(HAN.CENTER, HAN.BL)
+    }
+
+    if (eqlcrds(piece, HAN.BR)) {
+      _points.push(HAN.CENTER, HAN.TL)
+    }
+
+    if (eqlcrds(piece, HAN.BL)) {
+      _points.push(HAN.CENTER, HAN.TR)
+    }
+
+    if (eqlcrds(piece, HAN.CENTER)) {
+      _points.push(HAN.TL, HAN.TR, HAN.BR, HAN.BL)
     }
 
     points = _points;
@@ -143,35 +181,32 @@
     var _points = [];
 
     _points.push(
-      [piece.x, piece.y - 1],
-      [piece.x - 1, piece.y],
-      [piece.x + 1, piece.y],
-    ) 
+      [piece[0], piece[1] - 1],
+      [piece[0] - 1, piece[1]],
+      [piece[0] + 1, piece[1]],
+    )
 
     // on the castle area
-    if (piece.x == Castle.BL[0] && piece.y == Castle.BL[1]) {
-      _points.push([piece.x + 1, piece.y - 1]);
+    if (eqlcrds(piece, HAN.BL)) {
+      _points.push(HAN.CENTER);
     }
 
-    if (piece.x == Castle.CENTER[0] && piece.y == Castle.CENTER[1]) {
-      _points.push(
-        [piece.x - 1, piece.y - 1],
-        [piece.x + 1, piece.y - 1],
-      )
+    if (eqlcrds(piece, HAN.CENTER)) {
+      _points.push(HAN.TL, HAN.TR)
     }
 
-    if (piece.x == Castle.BR[0] && piece.y == Castle.BR[1]) {
-      _points.push([piece.x - 1, piece.y - 1])
+    if (eqlcrds(piece, HAN.BR)) {
+      _points.push(HAN.CENTER)
     }
 
     points = _points;
   }
 
   function setMove() {
-    for (var i=0; i<points.length; i++) {
-      if (x == points[i][0] && y == points[i][1]) {
-        piece.x = x;
-        piece.y = y;
+    for (var i = 0; i < points.length; i++) {
+      if (eqlcrds([x, y], points[i])) {
+        piece[0] = x;
+        piece[1] = y;
       }
     }
   }
@@ -179,7 +214,7 @@
   /* draw */
 
   function drawPoints() {
-    for (var i=0; i<points.length; i++) {
+    for (var i = 0; i < points.length; i++) {
       ctx.beginPath();
       ctx.strokeStyle = "#f00";
       ctx.lineWidth = 2;
@@ -191,13 +226,13 @@
       ctx.stroke();
     }
   }
-  
+
   function drawPiece() {
+    ctx.fillStyle = "#ddd";
     ctx.beginPath();
-    ctx.fillStyle = "green";
     ctx.arc(
-      OFFSET_X + (piece.x * CELL_WIDTH),
-      OFFSET_Y + (piece.y * CELL_HEIGHT),
+      OFFSET_X + (piece[0] * CELL_WIDTH),
+      OFFSET_Y + (piece[1] * CELL_HEIGHT),
       15, 0, 2 * Math.PI
     );
     ctx.fill();
@@ -232,7 +267,7 @@
 
     ctx.moveTo(OFFSET_X + (CELL_WIDTH * 5), OFFSET_Y + (CELL_HEIGHT * 7));
     ctx.lineTo(OFFSET_X + (CELL_WIDTH * 3), OFFSET_Y + (CELL_HEIGHT * 9));
-    
+
     ctx.stroke();
   }
 
