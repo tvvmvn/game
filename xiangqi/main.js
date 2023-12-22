@@ -120,11 +120,11 @@
     return crds1[0] == crds2[0] && crds1[1] == crds2[1];
   }
 
-  function getPieceByCrds(x, y) {
+  function getPieceByCrds(crds) {
     var _piece = null;
 
     for (var i=0; i<pieces.length; i++) {
-      if (eqlcrds(pieces[i].crds, [x, y])) {
+      if (eqlcrds(pieces[i].crds, crds)) {
         _piece = pieces[i];
         break;
       }
@@ -134,7 +134,7 @@
   }
   
   function setTarget() {
-    var piece = getPieceByCrds(x, y);
+    var piece = getPieceByCrds([x, y]);
 
     if (piece && piece.team == turn) {
       target = piece;
@@ -146,12 +146,17 @@
       return;
     }
 
+    points = [];
+
     if (target.name == "졸") {
       points = getZol();
     }
 
     if (target.name == "마") {
-      points = getMa()
+      ma([0, - 1], [-1, -2], [1, -2]);
+      ma([1, 0], [2, -1], [2, 1]);
+      ma([0, 1], [1, 2], [-1, 2]);
+      ma([-1, 0], [-2, -1], [-2, 1]);
     }
 
     if (target.name == "차") {
@@ -175,7 +180,7 @@
     for (var i=0; i<points.length; i++) {
       if (eqlcrds([x, y], points[i])) {
         
-        var victim = getPieceByCrds(x, y);
+        var victim = getPieceByCrds([x, y]);
 
         target.crds[0] = x;
         target.crds[1] = y;
@@ -206,7 +211,7 @@
 
     for (var y = target.crds[1] - 1; y >= 0; y--) {
       if (!arrived) {
-        bridge = getPieceByCrds(target.crds[0], y);
+        bridge = getPieceByCrds([target.crds[0], y]);
 
         
         if (bridge) {
@@ -221,7 +226,7 @@
 
       // start to add
       if (arrived) {
-        var piece = getPieceByCrds(target.crds[0], y);
+        var piece = getPieceByCrds([target.crds[0], y]);
 
         if (piece) {
           if (piece.name == "포") {
@@ -247,7 +252,7 @@
 
     // front
     if (target.team == "cho") {
-      var piece = getPieceByCrds(target.crds[0], target.crds[1] - 1)
+      var piece = getPieceByCrds([target.crds[0], target.crds[1] - 1])
       
       if (piece == null || piece.team != target.team) {
         _points.push([target.crds[0], target.crds[1] - 1])
@@ -255,7 +260,7 @@
     } 
     
     if (target.team == "han") { 
-      var piece = getPieceByCrds(target.crds[0], target.crds[1] + 1)
+      var piece = getPieceByCrds([target.crds[0], target.crds[1] + 1])
       
       if (piece == null || piece.team != target.team) {
         _points.push([target.crds[0], target.crds[1] + 1])
@@ -263,14 +268,14 @@
     }
 
     // side
-    var piece = getPieceByCrds(target.crds[0] - 1, target.crds[1]);
+    var piece = getPieceByCrds([target.crds[0] - 1, target.crds[1]]);
     
     if (piece == null || piece.team != target.team) {
       _points.push([target.crds[0] - 1, target.crds[1]])
     }
 
     // side
-    var piece = getPieceByCrds(target.crds[0] + 1, target.crds[1]);
+    var piece = getPieceByCrds([target.crds[0] + 1, target.crds[1]]);
 
     if (!piece || piece.team != target.team) {
       _points.push([target.crds[0] + 1, target.crds[1]])
@@ -293,7 +298,7 @@
         var arr = [];
   
         for (var i=0; i<tmp.length; i++) {
-          var piece = getPieceByCrds(tmp[i][0], tmp[i][1]);
+          var piece = getPieceByCrds(tmp[i]);
   
           if (!piece || piece.team != target.team) {
             arr.push(tmp[i]);
@@ -309,7 +314,7 @@
         var arr = [];
         
         for (var i=0; i<tmp.length; i++) {
-          var piece = getPieceByCrds(tmp[i][0], tmp[i][1]);
+          var piece = getPieceByCrds(tmp[i]);
   
           if (!piece || piece.team != target.team) {
             arr.push(tmp[i]);
@@ -330,7 +335,7 @@
         var arr = [];
   
         for (var i=0; i<tmp.length; i++) {
-          var piece = getPieceByCrds(tmp[i][0], tmp[i][1]);
+          var piece = getPieceByCrds(tmp[i]);
   
           if (!piece || piece.team != target.team) {
             arr.push(tmp[i]);
@@ -346,7 +351,7 @@
         var arr = [];
         
         for (var i=0; i<tmp.length; i++) {
-          var piece = getPieceByCrds(tmp[i][0], tmp[i][1]);
+          var piece = getPieceByCrds(tmp[i]);
   
           if (!piece || piece.team != target.team) {
             arr.push(tmp[i]);
@@ -365,7 +370,7 @@
 
     // north
     for (var y = target.crds[1] - 1; y >= 0; y--) {
-      var piece = getPieceByCrds(target.crds[0], y);
+      var piece = getPieceByCrds([target.crds[0], y]);
 
       if (piece == null) {
         _points.push([target.crds[0], y]);
@@ -381,7 +386,7 @@
 
     // right
     for (var x = target.crds[0] + 1; x <= COL_COUNT; x++) {
-      var piece = getPieceByCrds(x, target.crds[1]);
+      var piece = getPieceByCrds([x, target.crds[1]]);
 
       if (piece == null) {
         _points.push([x, target.crds[1]]);        
@@ -397,7 +402,7 @@
 
     // south
     for (var y = target.crds[1] + 1; y <= ROW_COUNT; y++) {
-      var piece = getPieceByCrds(target.crds[0], y);
+      var piece = getPieceByCrds([target.crds[0], y]);
 
       if (piece == null) {
         _points.push([target.crds[0], y]);
@@ -413,7 +418,7 @@
 
     // left
     for (var x = target.crds[0] - 1; x >= 0; x--) {
-      var piece = getPieceByCrds(x, target.crds[1]);
+      var piece = getPieceByCrds([x, target.crds[1]]);
 
       if (piece == null) {
         _points.push([x, target.crds[1]]);
@@ -429,7 +434,7 @@
 
     // on the Cho castle 
     if (eqlcrds(target.crds, Cho.TL)) {
-      var piece = getPieceByCrds(Cho.CENTER[0], Cho.CENTER[1]);
+      var piece = getPieceByCrds(Cho.CENTER);
 
       if (piece == null || piece.team != target.team) {
         _points.push(Cho.CENTER);
@@ -441,7 +446,7 @@
     }
 
     if (eqlcrds(target.crds, Cho.TR)) {
-      var piece = getPieceByCrds(Cho.CENTER[0], Cho.CENTER[1]);
+      var piece = getPieceByCrds(Cho.CENTER);
 
       if (piece == null || piece.team != target.team) {
         _points.push(Cho.CENTER);
@@ -453,7 +458,7 @@
     }
 
     if (eqlcrds(target.crds, Cho.BR)) {
-      var piece = getPieceByCrds(Cho.CENTER[0], Cho.CENTER[1]);
+      var piece = getPieceByCrds(Cho.CENTER);
 
       if (piece == null || piece.team != target.team) {
         _points.push(Cho.CENTER);
@@ -465,7 +470,7 @@
     }
 
     if (eqlcrds(target.crds, Cho.BL)) {
-      var piece = getPieceByCrds(Cho.CENTER[0], Cho.CENTER[1]);
+      var piece = getPieceByCrds(Cho.CENTER);
 
       if (piece == null || piece.team != target.team) {
         _points.push(Cho.CENTER);
@@ -480,7 +485,7 @@
       var arr = [Cho.TL, Cho.TR, Cho.BR, Cho.BL];
 
       for (var i=0; i<arr.length; i++) {
-        var piece = getPieceByCrds(arr[i][0], arr[[i][1]]);
+        var piece = getPieceByCrds(arr[i]);
 
         if (piece == null || piece.team != target.team) {
           _points.push(arr[i]);
@@ -490,7 +495,7 @@
 
     // on the Han castle
     if (eqlcrds(target.crds, Han.TL)) {
-      var piece = getPieceByCrds(Han.CENTER[0], Han.CENTER[1]);
+      var piece = getPieceByCrds(Han.CENTER);
 
       if (piece == null || piece.team != target.team) {
         _points.push(Han.CENTER);
@@ -502,7 +507,7 @@
     }
 
     if (eqlcrds(target.crds, Han.TR)) {
-      var piece = getPieceByCrds(Han.CENTER[0], Han.CENTER[1]);
+      var piece = getPieceByCrds(Han.CENTER);
 
       if (piece == null || piece.team != target.team) {
         _points.push(Han.CENTER);
@@ -514,7 +519,7 @@
     }
 
     if (eqlcrds(target.crds, Han.BR)) {
-      var piece = getPieceByCrds(Han.CENTER[0], Han.CENTER[1]);
+      var piece = getPieceByCrds(Han.CENTER);
 
       if (piece == null || piece.team != target.team) {
         _points.push(Han.CENTER);
@@ -526,7 +531,7 @@
     }
 
     if (eqlcrds(target.crds, Han.BL)) {
-      var piece = getPieceByCrds(Han.CENTER[0], Han.CENTER[1]);
+      var piece = getPieceByCrds(Han.CENTER);
 
       if (piece == null || piece.team != target.team) {
         _points.push(Han.CENTER);
@@ -541,7 +546,7 @@
       var arr = [Han.TL, Han.TR, Han.BR, Han.BL];
 
       for (var i=0; i<arr.length; i++) {
-        var piece = getPieceByCrds(arr[i][0], arr[[i][1]]);
+        var piece = getPieceByCrds(arr[i]);
 
         if (piece == null || piece.team != target.team) {
           _points.push(arr[i]);
@@ -550,6 +555,24 @@
     }
 
     return _points;
+  }
+
+  function ma(a, b, c) {
+    var piece = getPieceByCrds([target.crds[0] + a[0], target.crds[1] + a[1]]);
+    
+    if (piece == null) {
+      var piece = getPieceByCrds([target.crds[0] + b[0], target.crds[1] + b[1]]);
+
+      if (piece == null || piece.team != target.team) {
+        points.push([target.crds[0] + b[0], target.crds[1] + b[1]]);
+      }
+
+      var piece = getPieceByCrds([target.crds[0] + c[0], target.crds[1] + c[1]]);
+
+      if (piece == null || piece.team != target.team) {
+        points.push([target.crds[0] + c[0], target.crds[1] + c[1]]);
+      }
+    }
   }
 
   function getMa() {
