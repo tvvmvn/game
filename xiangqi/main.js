@@ -158,6 +158,10 @@
       points = getCha();
     }
 
+    if (target.name == "포") {
+      points = getPo();
+    }
+
     if (target.name == "궁") {
       points = getGung();
     }
@@ -196,18 +200,42 @@
   function getPo() {
     var _points = [];
 
-    var bridge = null;
-
     // north
-    for (var y = target.crds[1] - 1; y >= 0; y--) {
-      var piece = getPieceByCrds(target.crds[0], y);
+    var arrived = false;
+    var bridge;
 
-      if (piece) {
-        bridge = true;
-      } 
-      
-      if (piece.team != target.team) {
-        _points.push([target.crds[0], y]);
+    for (var y = target.crds[1] - 1; y >= 0; y--) {
+      if (!arrived) {
+        bridge = getPieceByCrds(target.crds[0], y);
+
+        
+        if (bridge) {
+          if (bridge.name == "포") {
+            break;
+          }
+
+          arrived = true;
+          continue;
+        } 
+      }
+
+      // start to add
+      if (arrived) {
+        var piece = getPieceByCrds(target.crds[0], y);
+
+        if (piece) {
+          if (piece.name == "포") {
+            break;
+          }
+
+          if (piece.team != target.team) {
+            _points.push([target.crds[0], y]);
+          }
+          
+          break;
+        } else {
+          _points.push([target.crds[0], y]);
+        }
       }
     }
 
