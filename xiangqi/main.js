@@ -70,6 +70,8 @@
     { id: "hc2", name: "차", crds: [8, 0], size: 20, team: "han", color: "#f00" },
     { id: "hm1", name: "마", crds: [6, 0], size: 20, team: "han", color: "#f00" },
     { id: "hm2", name: "마", crds: [2, 0], size: 20, team: "han", color: "#f00" },
+    { id: "hs2", name: "상", crds: [1, 0], size: 20, team: "han", color: "#f00" },
+    { id: "hs1", name: "상", crds: [7, 0], size: 20, team: "han", color: "#f00" },
     { id: "hp1", name: "포", crds: [1, 2], size: 20, team: "han", color: "#f00" },
     { id: "hp2", name: "포", crds: [7, 2], size: 20, team: "han", color: "#f00" },
     { id: "h", name: "궁", crds: [4, 1], size: 30, team: "han", color: "#f00" },
@@ -82,6 +84,8 @@
     { id: "cc2", name: "차", crds: [8, 9], size: 20, team: "cho", color: "#0b0" },
     { id: "cm1", name: "마", crds: [2, 9], size: 20, team: "cho", color: "#0b0" },
     { id: "cm2", name: "마", crds: [6, 9], size: 20, team: "cho", color: "#0b0" },
+    { id: "cs1", name: "상", crds: [1, 9], size: 20, team: "cho", color: "#0b0" },
+    { id: "cs2", name: "상", crds: [7, 9], size: 20, team: "cho", color: "#0b0" },
     { id: "cp1", name: "포", crds: [1, 7], size: 20, team: "cho", color: "#0b0" },
     { id: "cp2", name: "포", crds: [7, 7], size: 20, team: "cho", color: "#0b0" },
     { id: "c", name: "궁", crds: [4, 8], size: 30, team: "cho", color: "#0b0" },
@@ -149,30 +153,37 @@
     points = [];
 
     if (target.name == "졸") {
-      points = getZol();
+      getZol();
     }
 
     if (target.name == "마") {
-      ma([0, - 1], [-1, -2], [1, -2]);
-      ma([1, 0], [2, -1], [2, 1]);
-      ma([0, 1], [1, 2], [-1, 2]);
-      ma([-1, 0], [-2, -1], [-2, 1]);
+      getMa([0, -1], [-1, -2], [1, -2]);
+      getMa([1, 0], [2, -1], [2, 1]);
+      getMa([0, 1], [1, 2], [-1, 2]);
+      getMa([-1, 0], [-2, -1], [-2, 1]);
+    }
+
+    if (target.name == "상") {
+      getSang([0, -1], [-1, -2], [-2, -3], [1, -2], [2, -3]);
+      getSang([1, 0], [2, -1], [3, -2], [2, 1], [3, 2]);
+      getSang([0, 1], [1, 2], [2, 3], [-1, 2], [-2, 3]);
+      getSang([-1, 0], [-2, -1], [-3, -2], [-2, 1], [-3, 2]);
     }
 
     if (target.name == "차") {
-      points = getCha();
+      getCha();
     }
 
     if (target.name == "포") {
-      points = getPo();
+      getPo();
     }
 
     if (target.name == "궁") {
-      points = getGung();
+      getGung();
     }
 
     if (target.name == "사") {
-      points = getGung();
+      getGung();
     }
   }
 
@@ -203,8 +214,6 @@
   }
 
   function getPo() {
-    var _points = [];
-
     // north
     var arrived = false;
     var bridge;
@@ -213,7 +222,6 @@
       if (!arrived) {
         bridge = getPieceByCrds([target.crds[0], y]);
 
-        
         if (bridge) {
           if (bridge.name == "포") {
             break;
@@ -234,150 +242,139 @@
           }
 
           if (piece.team != target.team) {
-            _points.push([target.crds[0], y]);
+            points.push([target.crds[0], y]);
           }
           
           break;
         } else {
-          _points.push([target.crds[0], y]);
+          points.push([target.crds[0], y]);
         }
       }
     }
-
-    return _points;
   }
 
   function getZol() {
-    var _points = [];
+    function zol(a, b) {
+      var _x = target.crds[0];
+      var _y = target.crds[1];
+  
+      var piece = getPieceByCrds([_x + a, _y + b])
+        
+      if (piece == null || piece.team != target.team) {
+        points.push([_x + a, _y + b])
+      }
+    }
 
-    // front
     if (target.team == "cho") {
-      var piece = getPieceByCrds([target.crds[0], target.crds[1] - 1])
-      
+      zol(0, -1)
+    } else {
+      zol(0, 1)
+    }
+    zol(-1, 0)
+    zol(1, 0)
+
+    function v(dest) {
+      var piece = getPieceByCrds(dest);
+
       if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0], target.crds[1] - 1])
-      }
-    } 
-    
-    if (target.team == "han") { 
-      var piece = getPieceByCrds([target.crds[0], target.crds[1] + 1])
-      
-      if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0], target.crds[1] + 1])
+        points.push(dest);
       }
     }
-
-    // side
-    var piece = getPieceByCrds([target.crds[0] - 1, target.crds[1]]);
     
-    if (piece == null || piece.team != target.team) {
-      _points.push([target.crds[0] - 1, target.crds[1]])
+    // on Han castle
+    if (eqlcrds(target.crds, Han.BL)) {
+      v(Han.CENTER);
     }
 
-    // side
-    var piece = getPieceByCrds([target.crds[0] + 1, target.crds[1]]);
-
-    if (!piece || piece.team != target.team) {
-      _points.push([target.crds[0] + 1, target.crds[1]])
+    if (eqlcrds(target.crds, Han.CENTER)) {
+      v(Han.TL)
+      v(Han.TR)
     }
 
-    return _points;
+    if (eqlcrds(target.crds, Han.BR)) {
+      v(Han.CENTER)
+    }
+
+    // on Cho castle
+    if (eqlcrds(target.crds, Cho.TL)) {
+      v(Cho.CENTER)
+    }
+
+    if (eqlcrds(target.crds, Cho.CENTER)) {
+      v(Cho.BL)
+      v(Cho.BR)
+    }
+
+    if (eqlcrds(target.crds, Cho.TR)) {
+      v(Cho.CENTER)
+    }
   }
 
   function getGung() {
-    var _points = [];
-
-    if (target.team == "cho") {
-      if (eqlcrds(target.crds, Cho.CENTER)) {
-        
-        var tmp = [
-          Cho.TL, Cho.TM, Cho.TR, Cho.RM,
-          Cho.BR, Cho.BM, Cho.BL, Cho.LM
-        ];
-
+    function f(current, dests) {
+      if (eqlcrds(target.crds, current)) {
         var arr = [];
   
-        for (var i=0; i<tmp.length; i++) {
-          var piece = getPieceByCrds(tmp[i]);
+        for (var i = 0; i < dests.length; i++) {
+          var piece = getPieceByCrds(dests[i]);
   
           if (!piece || piece.team != target.team) {
-            arr.push(tmp[i]);
+            arr.push(dests[i]);
           }
         }
   
-        _points = arr;
-      }
-  
-      if (eqlcrds(target.crds, Cho.TL)) {
-        var tmp = [Cho.TM, Cho.CENTER, Cho.LM];
-        
-        var arr = [];
-        
-        for (var i=0; i<tmp.length; i++) {
-          var piece = getPieceByCrds(tmp[i]);
-  
-          if (!piece || piece.team != target.team) {
-            arr.push(tmp[i]);
-          }
-        }
-  
-        _points = arr;
-      }
-    } 
-
-    if (target.team == "han") {
-      if (eqlcrds(target.crds, Han.CENTER)) {
-        var tmp = [
-          Han.TL, Han.TM, Han.TR, Han.RM,
-          Han.BR, Han.BM, Han.BL, Han.LM
-        ];
-
-        var arr = [];
-  
-        for (var i=0; i<tmp.length; i++) {
-          var piece = getPieceByCrds(tmp[i]);
-  
-          if (!piece || piece.team != target.team) {
-            arr.push(tmp[i]);
-          }
-        }
-  
-        _points = arr;
-      }
-  
-      if (eqlcrds(target.crds, Han.TL)) {
-        var tmp = [Han.TM, Han.CENTER, Han.LM];
-        
-        var arr = [];
-        
-        for (var i=0; i<tmp.length; i++) {
-          var piece = getPieceByCrds(tmp[i]);
-  
-          if (!piece || piece.team != target.team) {
-            arr.push(tmp[i]);
-          }
-        }
-  
-        _points = arr;
+        points = arr;
       }
     }
 
-    return _points;
+    // Cho
+    if (target.team == "cho") {
+      f(
+        Cho.CENTER, 
+        [Cho.TL, Cho.TM, Cho.TR, Cho.RM, Cho.BR, Cho.BM, Cho.BL, Cho.LM]
+      )
+  
+      f(Cho.TL, [Cho.TM, Cho.CENTER, Cho.LM])
+      f(Cho.TM, [Cho.TL, Cho.CENTER, Cho.TR])
+      f(Cho.TR, [Cho.TM, Cho.CENTER, Cho.RM])
+      f(Cho.RM, [Cho.TR, Cho.CENTER, Cho.BR])
+
+      f(Cho.BR, [Cho.RM, Cho.CENTER, Cho.BM])
+      f(Cho.BM, [Cho.BL, Cho.CENTER, Cho.BR])
+      f(Cho.BL, [Cho.LM, Cho.CENTER, Cho.BM])
+      f(Cho.LM, [Cho.TL, Cho.CENTER, Cho.BL])
+    } 
+
+    // Han
+    if (target.team == "han") {
+      f(
+        Han.CENTER,
+        [Han.TL, Han.TM, Han.TR, Han.RM, Han.BR, Han.BM, Han.BL, Han.LM]
+      )
+
+      f(Han.TL, [Han.TM, Han.CENTER, Han.LM])
+      f(Han.TM, [Han.TL, Han.CENTER, Han.TR])
+      f(Han.TR, [Han.TM, Han.CENTER, Han.RM])
+      f(Han.RM, [Han.TR, Han.CENTER, Han.BR])
+
+      f(Han.BR, [Han.RM, Han.CENTER, Han.BM])
+      f(Han.BM, [Han.BL, Han.CENTER, Han.BR])
+      f(Han.BL, [Han.LM, Han.CENTER, Han.BM])
+      f(Han.LM, [Han.TL, Han.CENTER, Han.BL])
+    }
   }
 
   function getCha() {
-    var _points = [];
-
     // north
     for (var y = target.crds[1] - 1; y >= 0; y--) {
       var piece = getPieceByCrds([target.crds[0], y]);
 
       if (piece == null) {
-        _points.push([target.crds[0], y]);
+        points.push([target.crds[0], y]);
 
       } else {
         if (piece.team != target.team) {
-          _points.push([target.crds[0], y]);
+          points.push([target.crds[0], y]);
         }
 
         break;
@@ -389,11 +386,11 @@
       var piece = getPieceByCrds([x, target.crds[1]]);
 
       if (piece == null) {
-        _points.push([x, target.crds[1]]);        
+        points.push([x, target.crds[1]]);        
 
       } else {
         if (piece.team != target.team) {
-          _points.push([x, target.crds[1]]);        
+          points.push([x, target.crds[1]]);        
         }
 
         break;
@@ -405,11 +402,11 @@
       var piece = getPieceByCrds([target.crds[0], y]);
 
       if (piece == null) {
-        _points.push([target.crds[0], y]);
+        points.push([target.crds[0], y]);
 
       } else {
         if (piece.team != target.team) {
-          _points.push([target.crds[0], y]);
+          points.push([target.crds[0], y]);
         }
 
         break;
@@ -421,65 +418,36 @@
       var piece = getPieceByCrds([x, target.crds[1]]);
 
       if (piece == null) {
-        _points.push([x, target.crds[1]]);
+        points.push([x, target.crds[1]]);
 
       } else {
         if (piece.team != target.team) {
-          _points.push([x, target.crds[1]]);
+          points.push([x, target.crds[1]]);
         }
 
         break;
       }
     }
 
+    function f(current, dest) {
+      if (eqlcrds(target.crds, current)) {
+        var piece = getPieceByCrds(Cho.CENTER);
+    
+        if (piece == null || piece.team != target.team) {
+          points.push(Cho.CENTER);
+        }
+    
+        if (piece == null) {
+          points.push(dest);
+        }
+      }
+    }
+
     // on the Cho castle 
-    if (eqlcrds(target.crds, Cho.TL)) {
-      var piece = getPieceByCrds(Cho.CENTER);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push(Cho.CENTER);
-      }
-
-      if (piece == null) {
-        _points.push(Cho.BR);
-      }
-    }
-
-    if (eqlcrds(target.crds, Cho.TR)) {
-      var piece = getPieceByCrds(Cho.CENTER);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push(Cho.CENTER);
-      }
-
-      if (piece == null) {
-        _points.push(Cho.BL);
-      }
-    }
-
-    if (eqlcrds(target.crds, Cho.BR)) {
-      var piece = getPieceByCrds(Cho.CENTER);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push(Cho.CENTER);
-      }
-
-      if (piece == null) {
-        _points.push(Cho.TL);
-      }
-    }
-
-    if (eqlcrds(target.crds, Cho.BL)) {
-      var piece = getPieceByCrds(Cho.CENTER);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push(Cho.CENTER);
-      }
-
-      if (piece == null) {
-        _points.push(Cho.TR);
-      }
-    }
+    f(Cho.TL, Cho.BR);
+    f(Cho.TR, Cho.BL);
+    f(Cho.BR, Cho.TL);
+    f(Cho.BL, Cho.TR);
 
     if (eqlcrds(target.crds, Cho.CENTER)) {
       var arr = [Cho.TL, Cho.TR, Cho.BR, Cho.BL];
@@ -488,59 +456,16 @@
         var piece = getPieceByCrds(arr[i]);
 
         if (piece == null || piece.team != target.team) {
-          _points.push(arr[i]);
+          points.push(arr[i]);
         }
       }
     }
 
     // on the Han castle
-    if (eqlcrds(target.crds, Han.TL)) {
-      var piece = getPieceByCrds(Han.CENTER);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push(Han.CENTER);
-      }
-
-      if (piece == null) {
-        _points.push(Han.BR);
-      }
-    }
-
-    if (eqlcrds(target.crds, Han.TR)) {
-      var piece = getPieceByCrds(Han.CENTER);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push(Han.CENTER);
-      }
-
-      if (piece == null) {
-        _points.push(Han.BL);
-      }
-    }
-
-    if (eqlcrds(target.crds, Han.BR)) {
-      var piece = getPieceByCrds(Han.CENTER);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push(Han.CENTER);
-      }
-
-      if (piece == null) {
-        _points.push(Han.TL);
-      }
-    }
-
-    if (eqlcrds(target.crds, Han.BL)) {
-      var piece = getPieceByCrds(Han.CENTER);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push(Han.CENTER);
-      }
-
-      if (piece == null) {
-        _points.push(Han.TR);
-      }
-    }
+    f(Han.TL, Han.BR);
+    f(Han.TR, Han.BL);
+    f(Han.BR, Han.TL);
+    f(Han.BL, Han.TR);
 
     if (eqlcrds(target.crds, Han.CENTER)) {
       var arr = [Han.TL, Han.TR, Han.BR, Han.BL];
@@ -549,104 +474,62 @@
         var piece = getPieceByCrds(arr[i]);
 
         if (piece == null || piece.team != target.team) {
-          _points.push(arr[i]);
+          points.push(arr[i]);
         }
       }
     }
-
-    return _points;
   }
 
-  function ma(a, b, c) {
-    var piece = getPieceByCrds([target.crds[0] + a[0], target.crds[1] + a[1]]);
+  function getMa(root, a, b) {
+    var _x = target.crds[0];
+    var _y = target.crds[1];
+
+    var piece = getPieceByCrds([_x + root[0], _y + root[1]]);
     
     if (piece == null) {
-      var piece = getPieceByCrds([target.crds[0] + b[0], target.crds[1] + b[1]]);
+      var piece = getPieceByCrds([_x + a[0], _y + a[1]]);
 
       if (piece == null || piece.team != target.team) {
-        points.push([target.crds[0] + b[0], target.crds[1] + b[1]]);
+        points.push([_x + a[0], _y + a[1]]);
       }
 
-      var piece = getPieceByCrds([target.crds[0] + c[0], target.crds[1] + c[1]]);
+      var piece = getPieceByCrds([_x + b[0], _y + b[1]]);
 
       if (piece == null || piece.team != target.team) {
-        points.push([target.crds[0] + c[0], target.crds[1] + c[1]]);
+        points.push([_x + b[0], _y + b[1]]);
       }
     }
   }
 
-  function getMa() {
-    var _points = [];
+  function getSang(root, a1, a2, b1, b2) {
+    var _x = target.crds[0];
+    var _y = target.crds[1];
 
-    // up
-    var piece = getPieceByCrds(target.crds[0], target.crds[1] - 1);
+    var piece = getPieceByCrds([_x + root[0], _y + root[1]]);
     
     if (piece == null) {
-      var piece = getPieceByCrds(target.crds[0] - 1, target.crds[1] - 2);
+      // a
+      var piece = getPieceByCrds([_x + a1[0], _y + a1[1]]);
 
-      if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0] - 1, target.crds[1] - 2]);
+      if (piece == null) {
+        var piece = getPieceByCrds([_x + a2[0], _y + a2[1]]);
+
+        if (piece == null || piece.team != target.team) {
+          points.push([_x + a2[0], _y + a2[1]]);
+        }
       }
 
-      var piece = getPieceByCrds(target.crds[0] + 1, target.crds[1] - 2);
+      // b
+      var piece = getPieceByCrds([_x + b1[0], _y + b1[1]]);
 
-      if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0] + 1, target.crds[1] - 2]);
-      }
-    }
+      if (piece == null) {
+        var piece = getPieceByCrds([_x + b2[0], _y + b2[1]]);
 
-    // right
-    var piece = getPieceByCrds(target.crds[0] + 1, target.crds[1]);
-
-    if (piece == null) {
-      var piece = getPieceByCrds(target.crds[0] + 2, target.crds[1] - 1);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0] + 2, target.crds[1] - 1]);
-      }
-
-      var piece = getPieceByCrds(target.crds[0] + 2, target.crds[1] + 1);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0] + 2, target.crds[1] + 1]);
+        if (piece == null || piece.team != target.team) {
+          points.push([_x + b2[0], _y + b2[1]]);
+        }
       }
     }
-
-    // down
-    var piece = getPieceByCrds(target.crds[0], target.crds[1] + 1);
-
-    if (piece == null) {
-      var piece = getPieceByCrds(target.crds[0], target.crds[1] + 1);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0] + 1, target.crds[1] + 2]);
-      }
-
-      var piece = getPieceByCrds(target.crds[0] - 1, target.crds[1] + 2);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0] - 1, target.crds[1] + 2]);
-      }
-    }
-
-    // left
-    var piece = getPieceByCrds(target.crds[0] - 1, target.crds[1]);
-
-    if (piece == null) {
-      var piece = getPieceByCrds(target.crds[0] - 2, target.crds[1] + 1);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0] - 2, target.crds[1] + 1]);
-      }
-
-      var piece = getPieceByCrds(target.crds[0] - 2, target.crds[1] - 1);
-
-      if (piece == null || piece.team != target.team) {
-        _points.push([target.crds[0] - 2, target.crds[1] - 1]);
-      }
-    }
-
-    return _points;
   }
 
   /* draw */
@@ -764,3 +647,4 @@
     }
   }
 })();
+
