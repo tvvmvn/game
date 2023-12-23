@@ -1,7 +1,7 @@
 (function () {
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
-  const image = new Image();
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
+  var image = new Image();
   image.src = "./pieces.png";
   
   canvas.width = innerWidth;
@@ -18,22 +18,29 @@
   const HEIGHT = 400;
   const CELL_WIDTH = WIDTH / COL_COUNT;
   const CELL_HEIGHT = HEIGHT / ROW_COUNT;
+  
   const SPOTS = [];
-
   for (var r = 0; r <= ROW_COUNT; r++) {
     SPOTS[r] = [];
 
     for (var c = 0; c <= COL_COUNT; c++) {
-      SPOTS[r][c] = [
-        OFFSET_X + (c * CELL_WIDTH),
-        OFFSET_Y + (r * CELL_HEIGHT)
-      ]
+      SPOTS[r][c] = [OFFSET_X + (c * CELL_WIDTH), OFFSET_Y + (r * CELL_HEIGHT)]
     }
   }
 
+  const HAN = 1
+  const CHO = 2
+  const ZOL = "zol"
+  const PO = "po"
+  const CHA = "cha"
+  const SANG = "sang"
+  const MA = "ma"
+  const SA = "sa"
+  const GUNG = "gung"
+
   /* enums */
 
-  const Han = {
+  const HanCastle = {
     TL: [3, 0],
     TM: [4, 0],
     TR: [5, 0],
@@ -45,7 +52,7 @@
     CENTER: [4, 1],
   }
 
-  const Cho = {
+  const ChoCastle = {
     TL: [3, 7],
     TM: [4, 7],
     TR: [5, 7],
@@ -57,57 +64,58 @@
     CENTER: [4, 8],
   }
 
+  /* struct */
+
+  class Piece {
+    constructor (name, crds, src, team) {
+      this.name = name;
+      this.crds = crds;
+      this.src = src; 
+      this.team = team;
+    }
+  }
+
   /* variables */
 
   var x = -1;
   var y = -1;
   var target;
   var points = [];
-  var turn = "cho";
-
-  class Piece {
-    constructor (id, name, crds, size, team) {
-      this.id = id;
-      this.name = name;
-      this.crds = crds;
-      this.size = size;
-      this.team = team;
-    }
-  }
-
+  var turn = CHO;
+  
   var pieces = [
-    { id: "hz1", name: "졸", crds: [2, 3], src:[120, 80], team: "han" },
-    { id: "hz2", name: "졸", crds: [6, 3], src:[120, 80], team: "han" },
-    { id: "hz3", name: "졸", crds: [0, 3], src:[120, 80], team: "han" },
-    { id: "hz4", name: "졸", crds: [4, 3], src:[120, 80], team: "han" },
-    { id: "hz5", name: "졸", crds: [8, 3], src:[120, 80], team: "han" },
-    { id: "hc1", name: "차", crds: [0, 0], src:[120, 40], team: "han" },
-    { id: "hc2", name: "차", crds: [8, 0], src:[120, 40], team: "han" },
-    { id: "hm1", name: "마", crds: [6, 0], src:[80, 80], team: "han" },
-    { id: "hm2", name: "마", crds: [2, 0], src:[80, 80], team: "han" },
-    { id: "hs2", name: "상", crds: [1, 0], src:[120, 0], team: "han" },
-    { id: "hs1", name: "상", crds: [7, 0], src:[120, 0], team: "han" },
-    { id: "hp1", name: "포", crds: [1, 2], src:[80, 120], team: "han" },
-    { id: "hp2", name: "포", crds: [7, 2], src:[80, 120], team: "han" },
-    { id: "hsa2", name: "사", crds: [3, 0], src: [80, 40], team: "han" },
-    { id: "hsa1", name: "사", crds: [5, 0], src: [80, 40], team: "han" },
-    { id: "h", name: "궁", crds: [4, 1], src: [80, 0], team: "han", },
-    { id: "cz1", name: "졸", crds: [2, 6], src: [40, 80], team: "cho" },
-    { id: "cz2", name: "졸", crds: [6, 6], src: [40, 80], team: "cho" },
-    { id: "cz3", name: "졸", crds: [0, 6], src: [40, 80], team: "cho" },
-    { id: "cz4", name: "졸", crds: [4, 6], src: [40, 80], team: "cho" },
-    { id: "cz5", name: "졸", crds: [8, 6], src: [40, 80], team: "cho" },
-    { id: "cc1", name: "차", crds: [0, 9], src: [40, 40], team: "cho" },
-    { id: "cc2", name: "차", crds: [8, 9], src: [40, 40], team: "cho" },
-    { id: "cm1", name: "마", crds: [2, 9], src: [0, 80], team: "cho" },
-    { id: "cm2", name: "마", crds: [6, 9], src: [0, 80], team: "cho" },
-    { id: "cs1", name: "상", crds: [1, 9], src: [40, 0], team: "cho" },
-    { id: "cs2", name: "상", crds: [7, 9], src: [40, 0], team: "cho" },
-    { id: "cp1", name: "포", crds: [1, 7], src: [0, 120], team: "cho" },
-    { id: "cp2", name: "포", crds: [7, 7], src: [0, 120], team: "cho" },
-    { id: "csa1", name: "사", crds: [3, 9], src: [0, 40], team: "cho" },
-    { id: "csa2", name: "사", crds: [5, 9], src: [0, 40], team: "cho" },
-    { id: "c", name: "궁", crds: [4, 8], src: [0, 0], team: "cho" },
+    new Piece(ZOL, [2, 3], [120, 80], HAN),
+    new Piece(ZOL, [6, 3], [120, 80], HAN),
+    new Piece(ZOL, [0, 3], [120, 80], HAN),
+    new Piece(ZOL, [4, 3], [120, 80], HAN),
+    new Piece(ZOL, [8, 3], [120, 80], HAN),
+    new Piece(CHA, [0, 0], [120, 40], HAN),
+    new Piece(CHA, [8, 0], [120, 40], HAN),
+    new Piece(MA, [6, 0], [80, 80], HAN),
+    new Piece(MA, [2, 0], [80, 80], HAN),
+    new Piece(SANG, [1, 0], [120, 0], HAN),
+    new Piece(SANG, [7, 0], [120, 0], HAN),
+    new Piece(PO, [1, 2], [80, 120], HAN),
+    new Piece(PO, [7, 2], [80, 120], HAN),
+    new Piece(SA, [3, 0], [80, 40], HAN),
+    new Piece(SA, [5, 0], [80, 40], HAN),
+    new Piece(GUNG, [4, 1], [80, 0],  HAN),
+    new Piece(ZOL, [2, 6], [40, 80], CHO),
+    new Piece(ZOL, [6, 6], [40, 80], CHO),
+    new Piece(ZOL, [0, 6], [40, 80], CHO),
+    new Piece(ZOL, [4, 6], [40, 80], CHO),
+    new Piece(ZOL, [8, 6], [40, 80], CHO),
+    new Piece(CHA, [0, 9], [40, 40], CHO),
+    new Piece(CHA, [8, 9], [40, 40], CHO),
+    new Piece(MA, [2, 9], [0, 80], CHO),
+    new Piece(MA, [6, 9], [0, 80], CHO),
+    new Piece(SANG, [1, 9], [40, 0], CHO),
+    new Piece(SANG, [7, 9], [40, 0], CHO),
+    new Piece(PO, [1, 7], [0, 120], CHO),
+    new Piece(PO, [7, 7], [0, 120], CHO),
+    new Piece(SA, [3, 9], [0, 40], CHO),
+    new Piece(SA, [5, 9], [0, 40], CHO),
+    new Piece(GUNG, [4, 8], [0, 0], CHO),
   ]
 
   addEventListener("click", clickHandler);
@@ -176,37 +184,37 @@
 
     points = [];
 
-    if (target.name == "졸") {
+    if (target.name == ZOL) {
       getZol();
     }
 
-    if (target.name == "마") {
+    if (target.name == MA) {
       getMa([0, -1], [-1, -2], [1, -2]);
       getMa([1, 0], [2, -1], [2, 1]);
       getMa([0, 1], [1, 2], [-1, 2]);
       getMa([-1, 0], [-2, -1], [-2, 1]);
     }
 
-    if (target.name == "상") {
+    if (target.name == SANG) {
       getSang([0, -1], [-1, -2], [-2, -3], [1, -2], [2, -3]);
       getSang([1, 0], [2, -1], [3, -2], [2, 1], [3, 2]);
       getSang([0, 1], [1, 2], [2, 3], [-1, 2], [-2, 3]);
       getSang([-1, 0], [-2, -1], [-3, -2], [-2, 1], [-3, 2]);
     }
 
-    if (target.name == "차") {
+    if (target.name == CHA) {
       getCha();
     }
 
-    if (target.name == "포") {
+    if (target.name == PO) {
       getPo()
     }
 
-    if (target.name == "궁") {
+    if (target.name == GUNG) {
       getGung();
     }
 
-    if (target.name == "사") {
+    if (target.name == SA) {
       getGung();
     }
   }
@@ -228,7 +236,7 @@
         // after move
         target = null;
         points = [];
-        turn = turn == "cho" ? "han" : "cho";
+        turn = turn == CHO ? HAN : CHO;
       }
     }
   }
@@ -247,7 +255,7 @@
         if (add) {
           if (piece) {
             if (piece.team != turn) {
-              if (piece.name != "포") {
+              if (piece.name != PO) {
                 points.push([x, y]); 
               }
             }
@@ -257,7 +265,7 @@
           }
         } else {
           if (piece) {
-            if (piece.name != "포") {
+            if (piece.name != PO) {
               po(x, y, dir, true);
             }
           } else {
@@ -272,12 +280,12 @@
         var piece = getPieceByCrds(center);
   
         if (piece) {
-          if (piece.name != "포") {
+          if (piece.name != PO) {
             var piece = getPieceByCrds(dest);
     
             if (piece) {
               if (piece.team != turn) {
-                if (piece.name != "포") {
+                if (piece.name != PO) {
                   points.push(dest);
                 }
               }
@@ -295,16 +303,16 @@
     po(target.crds[0], target.crds[1], 3, false);
 
     // Cho castle
-    z(Cho.TL, Cho.CENTER, Cho.BR);
-    z(Cho.TR, Cho.CENTER, Cho.BL);
-    z(Cho.BR, Cho.CENTER, Cho.TL);
-    z(Cho.BL, Cho.CENTER, Cho.TR);
+    z(ChoCastle.TL, ChoCastle.CENTER, ChoCastle.BR);
+    z(ChoCastle.TR, ChoCastle.CENTER, ChoCastle.BL);
+    z(ChoCastle.BR, ChoCastle.CENTER, ChoCastle.TL);
+    z(ChoCastle.BL, ChoCastle.CENTER, ChoCastle.TR);
 
     // Han castle
-    z(Han.TL, Han.CENTER, Han.BR);
-    z(Han.TR, Han.CENTER, Han.BL);
-    z(Han.BR, Han.CENTER, Han.TL);
-    z(Han.BL, Han.CENTER, Han.TR);
+    z(HanCastle.TL, HanCastle.CENTER, HanCastle.BR);
+    z(HanCastle.TR, HanCastle.CENTER, HanCastle.BL);
+    z(HanCastle.BR, HanCastle.CENTER, HanCastle.TL);
+    z(HanCastle.BL, HanCastle.CENTER, HanCastle.TR);
   }
 
   function getZol() {
@@ -320,7 +328,7 @@
       }
     }
 
-    if (target.team == "cho") {
+    if (target.team == CHO) {
       v([target.crds[0], target.crds[1] - 1])
     } else {
       v([target.crds[0], target.crds[1] + 1])
@@ -329,31 +337,31 @@
     v([target.crds[0] + 1, target.crds[1]])
     
     // on Han castle
-    if (eqlcrds(target.crds, Han.BL)) {
-      v(Han.CENTER);
+    if (eqlcrds(target.crds, HanCastle.BL)) {
+      v(HanCastle.CENTER);
     }
 
-    if (eqlcrds(target.crds, Han.CENTER)) {
-      v(Han.TL)
-      v(Han.TR)
+    if (eqlcrds(target.crds, HanCastle.CENTER)) {
+      v(HanCastle.TL)
+      v(HanCastle.TR)
     }
 
-    if (eqlcrds(target.crds, Han.BR)) {
-      v(Han.CENTER)
+    if (eqlcrds(target.crds, HanCastle.BR)) {
+      v(HanCastle.CENTER)
     }
 
     // on Cho castle
-    if (eqlcrds(target.crds, Cho.TL)) {
-      v(Cho.CENTER)
+    if (eqlcrds(target.crds, ChoCastle.TL)) {
+      v(ChoCastle.CENTER)
     }
 
-    if (eqlcrds(target.crds, Cho.CENTER)) {
-      v(Cho.BL)
-      v(Cho.BR)
+    if (eqlcrds(target.crds, ChoCastle.CENTER)) {
+      v(ChoCastle.BL)
+      v(ChoCastle.BR)
     }
 
-    if (eqlcrds(target.crds, Cho.TR)) {
-      v(Cho.CENTER)
+    if (eqlcrds(target.crds, ChoCastle.TR)) {
+      v(ChoCastle.CENTER)
     }
   }
 
@@ -367,123 +375,123 @@
     }
 
     // Cho
-    if (eqlcrds(target.crds, Cho.CENTER)) {
-      f(Cho.TL)
-      f(Cho.TM)
-      f(Cho.TR)
-      f(Cho.RM)
-      f(Cho.BR)
-      f(Cho.BM)
-      f(Cho.BL)
-      f(Cho.LM)
+    if (eqlcrds(target.crds, ChoCastle.CENTER)) {
+      f(ChoCastle.TL)
+      f(ChoCastle.TM)
+      f(ChoCastle.TR)
+      f(ChoCastle.RM)
+      f(ChoCastle.BR)
+      f(ChoCastle.BM)
+      f(ChoCastle.BL)
+      f(ChoCastle.LM)
     }
 
-    if (eqlcrds(target.crds, Cho.TL)) {
-      f(Cho.TM)
-      f(Cho.CENTER)
-      f(Cho.LM)
+    if (eqlcrds(target.crds, ChoCastle.TL)) {
+      f(ChoCastle.TM)
+      f(ChoCastle.CENTER)
+      f(ChoCastle.LM)
     } 
 
-    if (eqlcrds(target.crds, Cho.TM)) {
-      f(Cho.TL)
-      f(Cho.CENTER)
-      f(Cho.TR)
+    if (eqlcrds(target.crds, ChoCastle.TM)) {
+      f(ChoCastle.TL)
+      f(ChoCastle.CENTER)
+      f(ChoCastle.TR)
     } 
 
-    if (eqlcrds(target.crds, Cho.TR)) {
-      f(Cho.TM)
-      f(Cho.CENTER)
-      f(Cho.RM)
+    if (eqlcrds(target.crds, ChoCastle.TR)) {
+      f(ChoCastle.TM)
+      f(ChoCastle.CENTER)
+      f(ChoCastle.RM)
     }
 
-    if (eqlcrds(target.crds, Cho.RM)) {
-      f(Cho.TR)
-      f(Cho.CENTER)
-      f(Cho.BR)
+    if (eqlcrds(target.crds, ChoCastle.RM)) {
+      f(ChoCastle.TR)
+      f(ChoCastle.CENTER)
+      f(ChoCastle.BR)
     } 
 
-    if (eqlcrds(target.crds, Cho.BR)) {
-      f(Cho.RM)
-      f(Cho.CENTER)
-      f(Cho.BM)
+    if (eqlcrds(target.crds, ChoCastle.BR)) {
+      f(ChoCastle.RM)
+      f(ChoCastle.CENTER)
+      f(ChoCastle.BM)
     } 
 
-    if (eqlcrds(target.crds, Cho.BM)) {
-      f(Cho.BL)
-      f(Cho.CENTER)
-      f(Cho.BR)
+    if (eqlcrds(target.crds, ChoCastle.BM)) {
+      f(ChoCastle.BL)
+      f(ChoCastle.CENTER)
+      f(ChoCastle.BR)
     } 
 
-    if (eqlcrds(target.crds, Cho.BL)) {
-      f(Cho.LM)
-      f(Cho.CENTER)
-      f(Cho.BM)
+    if (eqlcrds(target.crds, ChoCastle.BL)) {
+      f(ChoCastle.LM)
+      f(ChoCastle.CENTER)
+      f(ChoCastle.BM)
     } 
 
-    if (eqlcrds(target.crds, Cho.LM)) {
-      f(Cho.TL)
-      f(Cho.CENTER)
-      f(Cho.BL)
+    if (eqlcrds(target.crds, ChoCastle.LM)) {
+      f(ChoCastle.TL)
+      f(ChoCastle.CENTER)
+      f(ChoCastle.BL)
     } 
 
     // Han
-    if (eqlcrds(target.crds, Han.CENTER)) {
-      f(Han.TL)
-      f(Han.TM)
-      f(Han.TR)
-      f(Han.RM)
-      f(Han.BR)
-      f(Han.BM)
-      f(Han.BL)
-      f(Han.LM)
+    if (eqlcrds(target.crds, HanCastle.CENTER)) {
+      f(HanCastle.TL)
+      f(HanCastle.TM)
+      f(HanCastle.TR)
+      f(HanCastle.RM)
+      f(HanCastle.BR)
+      f(HanCastle.BM)
+      f(HanCastle.BL)
+      f(HanCastle.LM)
     }
 
-    if (eqlcrds(target.crds, Han.TL)) {
-      f(Han.TM)
-      f(Han.CENTER)
-      f(Han.LM)
+    if (eqlcrds(target.crds, HanCastle.TL)) {
+      f(HanCastle.TM)
+      f(HanCastle.CENTER)
+      f(HanCastle.LM)
     } 
 
-    if (eqlcrds(target.crds, Han.TM)) {
-      f(Han.TL)
-      f(Han.CENTER)
-      f(Han.TR)
+    if (eqlcrds(target.crds, HanCastle.TM)) {
+      f(HanCastle.TL)
+      f(HanCastle.CENTER)
+      f(HanCastle.TR)
     } 
 
-    if (eqlcrds(target.crds, Han.TR)) {
-      f(Han.TM)
-      f(Han.CENTER)
-      f(Han.RM)
+    if (eqlcrds(target.crds, HanCastle.TR)) {
+      f(HanCastle.TM)
+      f(HanCastle.CENTER)
+      f(HanCastle.RM)
     }
 
-    if (eqlcrds(target.crds, Han.RM)) {
-      f(Han.TR)
-      f(Han.CENTER)
-      f(Han.BR)
+    if (eqlcrds(target.crds, HanCastle.RM)) {
+      f(HanCastle.TR)
+      f(HanCastle.CENTER)
+      f(HanCastle.BR)
     } 
 
-    if (eqlcrds(target.crds, Han.BR)) {
-      f(Han.RM)
-      f(Han.CENTER)
-      f(Han.BM)
+    if (eqlcrds(target.crds, HanCastle.BR)) {
+      f(HanCastle.RM)
+      f(HanCastle.CENTER)
+      f(HanCastle.BM)
     } 
 
-    if (eqlcrds(target.crds, Han.BM)) {
-      f(Han.BL)
-      f(Han.CENTER)
-      f(Han.BR)
+    if (eqlcrds(target.crds, HanCastle.BM)) {
+      f(HanCastle.BL)
+      f(HanCastle.CENTER)
+      f(HanCastle.BR)
     } 
 
-    if (eqlcrds(target.crds, Han.BL)) {
-      f(Han.LM)
-      f(Han.CENTER)
-      f(Han.BM)
+    if (eqlcrds(target.crds, HanCastle.BL)) {
+      f(HanCastle.LM)
+      f(HanCastle.CENTER)
+      f(HanCastle.BM)
     } 
 
-    if (eqlcrds(target.crds, Han.LM)) {
-      f(Han.TL)
-      f(Han.CENTER)
-      f(Han.BL)
+    if (eqlcrds(target.crds, HanCastle.LM)) {
+      f(HanCastle.TL)
+      f(HanCastle.CENTER)
+      f(HanCastle.BL)
     } 
   }
   
@@ -546,29 +554,29 @@
     }
     
     // on the Cho castle 
-    f(Cho.TL, Cho.CENTER, Cho.BR);
-    f(Cho.TR, Cho.CENTER, Cho.BL);
-    f(Cho.BR, Cho.CENTER, Cho.TL);
-    f(Cho.BL, Cho.CENTER, Cho.TR);
+    f(ChoCastle.TL, ChoCastle.CENTER, ChoCastle.BR);
+    f(ChoCastle.TR, ChoCastle.CENTER, ChoCastle.BL);
+    f(ChoCastle.BR, ChoCastle.CENTER, ChoCastle.TL);
+    f(ChoCastle.BL, ChoCastle.CENTER, ChoCastle.TR);
 
-    if (eqlcrds(target.crds, Cho.CENTER)) {
-      v(Cho.TL);
-      v(Cho.TR);
-      v(Cho.BR);
-      v(Cho.BL);
+    if (eqlcrds(target.crds, ChoCastle.CENTER)) {
+      v(ChoCastle.TL);
+      v(ChoCastle.TR);
+      v(ChoCastle.BR);
+      v(ChoCastle.BL);
     }
 
     // on the Han castle
-    f(Han.TL, Han.CENTER, Han.BR);
-    f(Han.TR, Han.CENTER, Han.BL);
-    f(Han.BR, Han.CENTER, Han.TL);
-    f(Han.BL, Han.CENTER, Han.TR);
+    f(HanCastle.TL, HanCastle.CENTER, HanCastle.BR);
+    f(HanCastle.TR, HanCastle.CENTER, HanCastle.BL);
+    f(HanCastle.BR, HanCastle.CENTER, HanCastle.TL);
+    f(HanCastle.BL, HanCastle.CENTER, HanCastle.TR);
 
-    if (eqlcrds(target.crds, Han.CENTER)) {
-      v(Han.TL);
-      v(Han.TR);
-      v(Han.BR);
-      v(Han.BL);
+    if (eqlcrds(target.crds, HanCastle.CENTER)) {
+      v(HanCastle.TL);
+      v(HanCastle.TR);
+      v(HanCastle.BR);
+      v(HanCastle.BL);
     }
   }
 
