@@ -1,19 +1,21 @@
 (function () {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
-
+  const image = new Image();
+  image.src = "./pieces.png";
+  
   canvas.width = innerWidth;
   canvas.height = innerHeight;
-  canvas.style.backgroundColor = "#333";
+  canvas.style.backgroundColor = "#eee";
 
   /* constants */
 
-  const OFFSET_X = 20;
-  const OFFSET_Y = 40;
+  const OFFSET_X = 40;
+  const OFFSET_Y = 80;
   const ROW_COUNT = 9;
   const COL_COUNT = 8;
-  const WIDTH = 460;
-  const HEIGHT = 345;
+  const WIDTH = 420;
+  const HEIGHT = 400;
   const CELL_WIDTH = WIDTH / COL_COUNT;
   const CELL_HEIGHT = HEIGHT / ROW_COUNT;
   const SPOTS = [];
@@ -63,39 +65,49 @@
   var points = [];
   var turn = "cho";
 
+  class Piece {
+    constructor (id, name, crds, size, team) {
+      this.id = id;
+      this.name = name;
+      this.crds = crds;
+      this.size = size;
+      this.team = team;
+    }
+  }
+
   var pieces = [
-    { id: "hz1", name: "졸", crds: [2, 3], size: 15, team: "han", color: "#f00" },
-    { id: "hz2", name: "졸", crds: [6, 3], size: 15, team: "han", color: "#f00" },
-    { id: "hz3", name: "졸", crds: [0, 3], size: 15, team: "han", color: "#f00" },
-    { id: "hz4", name: "졸", crds: [4, 3], size: 15, team: "han", color: "#f00" },
-    { id: "hz5", name: "졸", crds: [8, 3], size: 15, team: "han", color: "#f00" },
-    { id: "hc1", name: "차", crds: [0, 0], size: 20, team: "han", color: "#f00" },
-    { id: "hc2", name: "차", crds: [8, 0], size: 20, team: "han", color: "#f00" },
-    { id: "hm1", name: "마", crds: [6, 0], size: 20, team: "han", color: "#f00" },
-    { id: "hm2", name: "마", crds: [2, 0], size: 20, team: "han", color: "#f00" },
-    { id: "hs2", name: "상", crds: [1, 0], size: 20, team: "han", color: "#f00" },
-    { id: "hs1", name: "상", crds: [7, 0], size: 20, team: "han", color: "#f00" },
-    { id: "hp1", name: "포", crds: [1, 2], size: 20, team: "han", color: "#f00" },
-    { id: "hp2", name: "포", crds: [7, 2], size: 20, team: "han", color: "#f00" },
-    { id: "hsa2", name: "사", crds: [3, 0], size: 15, team: "han", color: "#f00" },
-    { id: "hsa1", name: "사", crds: [5, 0], size: 15, team: "han", color: "#f00" },
-    { id: "h", name: "궁", crds: [4, 1], size: 30, team: "han", color: "#f00" },
-    { id: "cz1", name: "졸", crds: [2, 6], size: 15, team: "cho", color: "#0b0" },
-    { id: "cz2", name: "졸", crds: [6, 6], size: 15, team: "cho", color: "#0b0" },
-    { id: "cz3", name: "졸", crds: [0, 6], size: 15, team: "cho", color: "#0b0" },
-    { id: "cz4", name: "졸", crds: [4, 6], size: 15, team: "cho", color: "#0b0" },
-    { id: "cz5", name: "졸", crds: [8, 6], size: 15, team: "cho", color: "#0b0" },
-    { id: "cc1", name: "차", crds: [0, 9], size: 20, team: "cho", color: "#0b0" },
-    { id: "cc2", name: "차", crds: [8, 9], size: 20, team: "cho", color: "#0b0" },
-    { id: "cm1", name: "마", crds: [2, 9], size: 20, team: "cho", color: "#0b0" },
-    { id: "cm2", name: "마", crds: [6, 9], size: 20, team: "cho", color: "#0b0" },
-    { id: "cs1", name: "상", crds: [1, 9], size: 20, team: "cho", color: "#0b0" },
-    { id: "cs2", name: "상", crds: [7, 9], size: 20, team: "cho", color: "#0b0" },
-    { id: "cp1", name: "포", crds: [1, 7], size: 20, team: "cho", color: "#0b0" },
-    { id: "cp2", name: "포", crds: [7, 7], size: 20, team: "cho", color: "#0b0" },
-    { id: "csa1", name: "사", crds: [3, 9], size: 15, team: "cho", color: "#0b0" },
-    { id: "csa2", name: "사", crds: [5, 9], size: 15, team: "cho", color: "#0b0" },
-    { id: "c", name: "궁", crds: [4, 8], size: 30, team: "cho", color: "#0b0" },
+    { id: "hz1", name: "졸", crds: [2, 3], src:[120, 80], team: "han" },
+    { id: "hz2", name: "졸", crds: [6, 3], src:[120, 80], team: "han" },
+    { id: "hz3", name: "졸", crds: [0, 3], src:[120, 80], team: "han" },
+    { id: "hz4", name: "졸", crds: [4, 3], src:[120, 80], team: "han" },
+    { id: "hz5", name: "졸", crds: [8, 3], src:[120, 80], team: "han" },
+    { id: "hc1", name: "차", crds: [0, 0], src:[120, 40], team: "han" },
+    { id: "hc2", name: "차", crds: [8, 0], src:[120, 40], team: "han" },
+    { id: "hm1", name: "마", crds: [6, 0], src:[80, 80], team: "han" },
+    { id: "hm2", name: "마", crds: [2, 0], src:[80, 80], team: "han" },
+    { id: "hs2", name: "상", crds: [1, 0], src:[120, 0], team: "han" },
+    { id: "hs1", name: "상", crds: [7, 0], src:[120, 0], team: "han" },
+    { id: "hp1", name: "포", crds: [1, 2], src:[80, 120], team: "han" },
+    { id: "hp2", name: "포", crds: [7, 2], src:[80, 120], team: "han" },
+    { id: "hsa2", name: "사", crds: [3, 0], src: [80, 40], team: "han" },
+    { id: "hsa1", name: "사", crds: [5, 0], src: [80, 40], team: "han" },
+    { id: "h", name: "궁", crds: [4, 1], src: [80, 0], team: "han", },
+    { id: "cz1", name: "졸", crds: [2, 6], src: [40, 80], team: "cho" },
+    { id: "cz2", name: "졸", crds: [6, 6], src: [40, 80], team: "cho" },
+    { id: "cz3", name: "졸", crds: [0, 6], src: [40, 80], team: "cho" },
+    { id: "cz4", name: "졸", crds: [4, 6], src: [40, 80], team: "cho" },
+    { id: "cz5", name: "졸", crds: [8, 6], src: [40, 80], team: "cho" },
+    { id: "cc1", name: "차", crds: [0, 9], src: [40, 40], team: "cho" },
+    { id: "cc2", name: "차", crds: [8, 9], src: [40, 40], team: "cho" },
+    { id: "cm1", name: "마", crds: [2, 9], src: [0, 80], team: "cho" },
+    { id: "cm2", name: "마", crds: [6, 9], src: [0, 80], team: "cho" },
+    { id: "cs1", name: "상", crds: [1, 9], src: [40, 0], team: "cho" },
+    { id: "cs2", name: "상", crds: [7, 9], src: [40, 0], team: "cho" },
+    { id: "cp1", name: "포", crds: [1, 7], src: [0, 120], team: "cho" },
+    { id: "cp2", name: "포", crds: [7, 7], src: [0, 120], team: "cho" },
+    { id: "csa1", name: "사", crds: [3, 9], src: [0, 40], team: "cho" },
+    { id: "csa2", name: "사", crds: [5, 9], src: [0, 40], team: "cho" },
+    { id: "c", name: "궁", crds: [4, 8], src: [0, 0], team: "cho" },
   ]
 
   addEventListener("click", clickHandler);
@@ -202,14 +214,11 @@
   function move() {
     for (var i=0; i<points.length; i++) {
       if (eqlcrds([x, y], points[i])) {
+
         // remove victim from pieces
-        var victim = getPieceByCrds([x, y]);
-        
-        if (victim) {
-          for (var j=0; j<pieces.length; j++) {
-            if (victim.id == pieces[j].id) {
-              pieces.splice(j, 1);
-            }
+        for (var j=0; j<pieces.length; j++) {
+          if (pieces[j].crds[0] == x && pieces[j].crds[1] == y) {
+            pieces.splice(j, 1);
           }
         }
 
@@ -572,13 +581,17 @@
       var piece = getPieceByCrds([x + a[0], y + a[1]]);
 
       if (piece == null || piece.team != target.team) {
-        points.push([x + a[0], y + a[1]]);
+        if (inBoard(x + a[0], y + a[1])) {
+          points.push([x + a[0], y + a[1]]);
+        }
       }
 
       var piece = getPieceByCrds([x + b[0], y + b[1]]);
 
       if (piece == null || piece.team != target.team) {
-        points.push([x + b[0], y + b[1]]);
+        if (inBoard(x + b[0], y + b[1])) {
+          points.push([x + b[0], y + b[1]]);
+        }
       }
     }
   }
@@ -596,7 +609,9 @@
         var piece = getPieceByCrds([x + a2[0], y + a2[1]]);
 
         if (piece == null || piece.team != target.team) {
-          points.push([x + a2[0], y + a2[1]]);
+          if (inBoard(x + a2[0], y + a2[1])) {
+            points.push([x + a2[0], y + a2[1]]);
+          }
         }
       }
 
@@ -607,7 +622,9 @@
         var piece = getPieceByCrds([x + b2[0], y + b2[1]]);
 
         if (piece == null || piece.team != target.team) {
-          points.push([x + b2[0], y + b2[1]]);
+          if (inBoard(x + b2[0], y + b2[1])) {
+            points.push([x + b2[0], y + b2[1]]);
+          }
         }
       }
     }
@@ -619,30 +636,32 @@
     for (var i = 0; i < pieces.length; i++) {
       var piece = pieces[i];
 
-      ctx.font = piece.size + "px Arial";
-      ctx.fillStyle = piece.color;
-      ctx.fillText(
-        piece.name, 
-        OFFSET_X + (piece.crds[0] * CELL_WIDTH) - piece.size / 2.5, 
-        OFFSET_Y + (piece.crds[1] * CELL_HEIGHT) + piece.size / 3,
-      );
+      // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+      ctx.drawImage(
+        image, 
+        piece.src[0], piece.src[1], 
+        40, 40, 
+        OFFSET_X + (piece.crds[0] * CELL_WIDTH) - 20, 
+        OFFSET_Y + (piece.crds[1] * CELL_HEIGHT) - 20, 
+        40, 40
+      )
     }
   }
 
   function drawTurn() {
     ctx.font = "20px Arial";
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = "#000";
     ctx.fillText(
       "turn: " + turn, 
-      20, 
-      20,
+      40, 
+      40,
     );
   }
 
   function drawPoints() {
     for (var i=0; i<points.length; i++) {
       ctx.beginPath();
-      ctx.strokeStyle = "#ff0";
+      ctx.strokeStyle = "#f00";
       ctx.lineWidth = 2;
       ctx.arc(
         OFFSET_X + (points[i][0] * CELL_WIDTH),
@@ -687,7 +706,7 @@
 
   function drawCursor() {
     ctx.beginPath();
-    ctx.strokeStyle = "#00f";
+    ctx.strokeStyle = "#888";
     ctx.lineWidth = 2;
     ctx.arc(
       OFFSET_X + (x * CELL_WIDTH),
