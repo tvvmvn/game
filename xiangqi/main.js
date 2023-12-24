@@ -6,7 +6,7 @@
   
   canvas.width = innerWidth;
   canvas.height = innerHeight;
-  canvas.style.backgroundColor = "#eee";
+  canvas.style.backgroundColor = "#ddd";
 
   /* constants */
 
@@ -28,8 +28,8 @@
     }
   }
 
-  const HAN = 1
-  const CHO = 2
+  const CHO = 1
+  const HAN = 2
   const ZOL = "zol"
   const PO = "po"
   const CHA = "cha"
@@ -67,7 +67,8 @@
   /* struct */
 
   class Piece {
-    constructor (name, crds, src, team) {
+    constructor (id, name, crds, src, team) {
+      this.id = id
       this.name = name;
       this.crds = crds;
       this.src = src; 
@@ -77,66 +78,93 @@
 
   /* variables */
 
-  var x = -1;
-  var y = -1;
+  var x;
+  var y;
   var target;
-  var points = [];
-  var turn = CHO;
+  var points;
+  var turn;
+  var over;
+  var win;
+  var message = "";
+  var interval;
   
-  var pieces = [
-    new Piece(ZOL, [2, 3], [120, 80], HAN),
-    new Piece(ZOL, [6, 3], [120, 80], HAN),
-    new Piece(ZOL, [0, 3], [120, 80], HAN),
-    new Piece(ZOL, [4, 3], [120, 80], HAN),
-    new Piece(ZOL, [8, 3], [120, 80], HAN),
-    new Piece(CHA, [0, 0], [120, 40], HAN),
-    new Piece(CHA, [8, 0], [120, 40], HAN),
-    new Piece(MA, [6, 0], [80, 80], HAN),
-    new Piece(MA, [2, 0], [80, 80], HAN),
-    new Piece(SANG, [1, 0], [120, 0], HAN),
-    new Piece(SANG, [7, 0], [120, 0], HAN),
-    new Piece(PO, [1, 2], [80, 120], HAN),
-    new Piece(PO, [7, 2], [80, 120], HAN),
-    new Piece(SA, [3, 0], [80, 40], HAN),
-    new Piece(SA, [5, 0], [80, 40], HAN),
-    new Piece(GUNG, [4, 1], [80, 0],  HAN),
-    new Piece(ZOL, [2, 6], [40, 80], CHO),
-    new Piece(ZOL, [6, 6], [40, 80], CHO),
-    new Piece(ZOL, [0, 6], [40, 80], CHO),
-    new Piece(ZOL, [4, 6], [40, 80], CHO),
-    new Piece(ZOL, [8, 6], [40, 80], CHO),
-    new Piece(CHA, [0, 9], [40, 40], CHO),
-    new Piece(CHA, [8, 9], [40, 40], CHO),
-    new Piece(MA, [2, 9], [0, 80], CHO),
-    new Piece(MA, [6, 9], [0, 80], CHO),
-    new Piece(SANG, [1, 9], [40, 0], CHO),
-    new Piece(SANG, [7, 9], [40, 0], CHO),
-    new Piece(PO, [1, 7], [0, 120], CHO),
-    new Piece(PO, [7, 7], [0, 120], CHO),
-    new Piece(SA, [3, 9], [0, 40], CHO),
-    new Piece(SA, [5, 9], [0, 40], CHO),
-    new Piece(GUNG, [4, 8], [0, 0], CHO),
-  ]
+  var pieces;
 
   addEventListener("click", clickHandler);
 
   /* run the game */
 
-  setInterval(interval, 10);
+  startGame();
 
-  function interval() {
+  function startGame() {
+    x = -1;
+    y = -1;
+    target = null;
+    points = [];
+    turn = CHO;
+    over = false;
+    win = null;
+    pieces = [
+      new Piece("cz1", ZOL, [2, 6], [40, 80], CHO),
+      new Piece("cz2", ZOL, [6, 6], [40, 80], CHO),
+      new Piece("cz3", ZOL, [0, 6], [40, 80], CHO),
+      new Piece("cz4", ZOL, [4, 6], [40, 80], CHO),
+      new Piece("cz5", ZOL, [8, 6], [40, 80], CHO),
+      new Piece("cc1", CHA, [0, 9], [40, 40], CHO),
+      new Piece("cc2", CHA, [8, 9], [40, 40], CHO),
+      new Piece("cm1", MA, [2, 9], [0, 80], CHO),
+      new Piece("cm2", MA, [6, 9], [0, 80], CHO),
+      new Piece("cs1", SANG, [1, 9], [40, 0], CHO),
+      new Piece("cs2", SANG, [7, 9], [40, 0], CHO),
+      new Piece("cp1", PO, [1, 7], [0, 120], CHO),
+      new Piece("cp2", PO, [7, 7], [0, 120], CHO),
+      new Piece("ca1", SA, [3, 9], [0, 40], CHO),
+      new Piece("ca2", SA, [5, 9], [0, 40], CHO),
+      new Piece("c00", GUNG, [4, 8], [0, 0], CHO),
+      new Piece("hz1", ZOL, [2, 3], [120, 80], HAN),
+      new Piece("hz2", ZOL, [6, 3], [120, 80], HAN),
+      new Piece("hz3", ZOL, [0, 3], [120, 80], HAN),
+      new Piece("hz4", ZOL, [4, 3], [120, 80], HAN),
+      new Piece("hz5", ZOL, [8, 3], [120, 80], HAN),
+      new Piece("hc1", CHA, [0, 0], [120, 40], HAN),
+      new Piece("hc2", CHA, [8, 0], [120, 40], HAN),
+      new Piece("hm1", MA, [6, 0], [80, 80], HAN),
+      new Piece("hm2", MA, [2, 0], [80, 80], HAN),
+      new Piece("hs1", SANG, [1, 0], [120, 0], HAN),
+      new Piece("hs2", SANG, [7, 0], [120, 0], HAN),
+      new Piece("hp1", PO, [1, 2], [80, 120], HAN),
+      new Piece("hp2", PO, [7, 2], [80, 120], HAN),
+      new Piece("ha1", SA, [3, 0], [80, 40], HAN),
+      new Piece("ha2", SA, [5, 0], [80, 40], HAN),
+      new Piece("h00", GUNG, [4, 1], [80, 0], HAN),
+    ]
+
+    interval = setInterval(render, 10);
+  }
+
+  function render() {
     clearCanvas();
     
     setTarget();
     setPoints();
     move();
+    
+    if (!over) {
+      message = turn == CHO ? "CHO" : "HAN";
+    } else {
+      message = win == CHO ? "CHO WIN!" : "HAN WIN!";
 
-    drawTurn();
+      clearInterval(interval);
+      setTimeout(() => {
+        startGame();
+      }, 3000)
+    }
+
+    drawMessage();
     drawBoard();
-    drawTarget();
     drawPieces();
     drawPoints();
-    drawCursor();
+    // drawCursor();
   }
 
   function clearCanvas() {
@@ -226,6 +254,12 @@
         // remove victim from pieces
         for (var j=0; j<pieces.length; j++) {
           if (pieces[j].crds[0] == x && pieces[j].crds[1] == y) {
+            // GAME END
+            if (pieces[j].name == GUNG) {
+              over = true;
+              win = turn;
+            }
+
             pieces.splice(j, 1);
           }
         }
@@ -236,7 +270,10 @@
         // after move
         target = null;
         points = [];
-        turn = turn == CHO ? HAN : CHO;
+        
+        if (over == false) {
+          turn = turn == CHO ? HAN : CHO;
+        }
       }
     }
   }
@@ -643,8 +680,11 @@
   function drawPieces() {
     for (var i = 0; i < pieces.length; i++) {
       var piece = pieces[i];
-
+      
       // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+      if (target && piece.id == target.id) {
+        ctx.globalAlpha = 0.5;
+      }
       ctx.drawImage(
         image, 
         piece.src[0], piece.src[1], 
@@ -653,24 +693,21 @@
         OFFSET_Y + (piece.crds[1] * CELL_HEIGHT) - 20, 
         40, 40
       )
+      ctx.globalAlpha = 1.0;
     }
   }
 
-  function drawTurn() {
+  function drawMessage() {
     ctx.font = "20px Arial";
     ctx.fillStyle = "#000";
-    ctx.fillText(
-      "turn: " + turn, 
-      40, 
-      40,
-    );
+    ctx.fillText(message, 40, 40);
   }
 
   function drawPoints() {
     for (var i=0; i<points.length; i++) {
       ctx.beginPath();
-      ctx.strokeStyle = "#f00";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 4;
       ctx.arc(
         OFFSET_X + (points[i][0] * CELL_WIDTH),
         OFFSET_Y + (points[i][1] * CELL_HEIGHT),
@@ -722,19 +759,6 @@
       10, 0, 2 * Math.PI
     );
     ctx.stroke();
-  }
-
-  function drawTarget() {
-    if (!target) return;
-    ctx.beginPath();
-    ctx.fillStyle = "#fff";
-    ctx.arc(
-      OFFSET_X + (target.crds[0] * CELL_WIDTH),
-      OFFSET_Y + (target.crds[1] * CELL_HEIGHT),
-      10, 0, 2 * Math.PI
-    );
-    ctx.fill();
-    ctx.closePath();
   }
 
   /* control */
