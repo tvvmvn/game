@@ -31,7 +31,7 @@
   const CHO = 1
   const HAN = 2
   const ZOL = "zol"
-  const PO = "po"
+  const PO = "linear"
   const CHA = "cha"
   const SANG = "sang"
   const MA = "ma"
@@ -217,17 +217,11 @@
     }
 
     if (target.name == MA) {
-      getMa([0, -1], [-1, -2], [1, -2]);
-      getMa([1, 0], [2, -1], [2, 1]);
-      getMa([0, 1], [1, 2], [-1, 2]);
-      getMa([-1, 0], [-2, -1], [-2, 1]);
+      getMa();
     }
 
     if (target.name == SANG) {
-      getSang([0, -1], [-1, -2], [-2, -3], [1, -2], [2, -3]);
-      getSang([1, 0], [2, -1], [3, -2], [2, 1], [3, 2]);
-      getSang([0, 1], [1, 2], [2, 3], [-1, 2], [-2, 3]);
-      getSang([-1, 0], [-2, -1], [-3, -2], [-2, 1], [-3, 2]);
+      getSang();
     }
 
     if (target.name == CHA) {
@@ -280,7 +274,7 @@
 
   
   function getPo() {
-    function po(x, y, dir, add) {
+    function linear(x, y, dir, add) {
       if (dir == 0) y--;
       if (dir == 1) x++;
       if (dir == 2) y++;
@@ -298,21 +292,21 @@
             }
           } else {
             points.push([x, y]); 
-            po(x, y, dir, true);
+            linear(x, y, dir, true);
           }
         } else {
           if (piece) {
             if (piece.name != PO) {
-              po(x, y, dir, true);
+              linear(x, y, dir, true);
             }
           } else {
-            po(x, y, dir, false);
+            linear(x, y, dir, false);
           }
         }
       }
     }
 
-    function z(current, center, dest) {
+    function castle(current, center, dest) {
       if (eqlcrds(target.crds, current)) {
         var piece = getPieceByCrds(center);
   
@@ -334,29 +328,26 @@
       }
     }
 
-    po(target.crds[0], target.crds[1], 0, false);
-    po(target.crds[0], target.crds[1], 1, false);
-    po(target.crds[0], target.crds[1], 2, false);
-    po(target.crds[0], target.crds[1], 3, false);
+    // linear
+    linear(target.crds[0], target.crds[1], 0, false);
+    linear(target.crds[0], target.crds[1], 1, false);
+    linear(target.crds[0], target.crds[1], 2, false);
+    linear(target.crds[0], target.crds[1], 3, false);
 
-    // Cho castle
-    z(ChoCastle.TL, ChoCastle.CENTER, ChoCastle.BR);
-    z(ChoCastle.TR, ChoCastle.CENTER, ChoCastle.BL);
-    z(ChoCastle.BR, ChoCastle.CENTER, ChoCastle.TL);
-    z(ChoCastle.BL, ChoCastle.CENTER, ChoCastle.TR);
-
-    // Han castle
-    z(HanCastle.TL, HanCastle.CENTER, HanCastle.BR);
-    z(HanCastle.TR, HanCastle.CENTER, HanCastle.BL);
-    z(HanCastle.BR, HanCastle.CENTER, HanCastle.TL);
-    z(HanCastle.BL, HanCastle.CENTER, HanCastle.TR);
+    // castle
+    castle(ChoCastle.TL, ChoCastle.CENTER, ChoCastle.BR);
+    castle(ChoCastle.TR, ChoCastle.CENTER, ChoCastle.BL);
+    castle(ChoCastle.BR, ChoCastle.CENTER, ChoCastle.TL);
+    castle(ChoCastle.BL, ChoCastle.CENTER, ChoCastle.TR);
+    castle(HanCastle.TL, HanCastle.CENTER, HanCastle.BR);
+    castle(HanCastle.TR, HanCastle.CENTER, HanCastle.BL);
+    castle(HanCastle.BR, HanCastle.CENTER, HanCastle.TL);
+    castle(HanCastle.BL, HanCastle.CENTER, HanCastle.TR);
   }
 
   function getZol() {
-    function v(crds) {
-      var [x, y] = crds;
-
-      if (inBoard(x, y)) {
+    function linear(crds) {
+      if (inBoard(crds[0], crds[1])) {
         var piece = getPieceByCrds(crds);
   
         if (piece == null || piece.team != target.team) {
@@ -365,176 +356,120 @@
       }
     }
 
+    function castle(current, dest) {
+      if (eqlcrds(target.crds, current)) {
+        var piece = getPieceByCrds(dest);
+  
+        if (piece == null || piece.team != target.team) {
+          points.push(dest);
+        }
+      }
+    }
+
+    // linear
     if (target.team == CHO) {
-      v([target.crds[0], target.crds[1] - 1])
+      linear([target.crds[0], target.crds[1] - 1])
     } else {
-      v([target.crds[0], target.crds[1] + 1])
+      linear([target.crds[0], target.crds[1] + 1])
     }
-    v([target.crds[0] - 1, target.crds[1]])
-    v([target.crds[0] + 1, target.crds[1]])
-    
-    // on Han castle
-    if (eqlcrds(target.crds, HanCastle.BL)) {
-      v(HanCastle.CENTER);
-    }
+    linear([target.crds[0] - 1, target.crds[1]])
+    linear([target.crds[0] + 1, target.crds[1]])
 
-    if (eqlcrds(target.crds, HanCastle.CENTER)) {
-      v(HanCastle.TL)
-      v(HanCastle.TR)
-    }
+    // castle
+    castle(HanCastle.BL, HanCastle.CENTER);
+    castle(HanCastle.CENTER, HanCastle.TL);
+    castle(HanCastle.CENTER, HanCastle.TR);
+    castle(HanCastle.BR, HanCastle.CENTER);
 
-    if (eqlcrds(target.crds, HanCastle.BR)) {
-      v(HanCastle.CENTER)
-    }
-
-    // on Cho castle
-    if (eqlcrds(target.crds, ChoCastle.TL)) {
-      v(ChoCastle.CENTER)
-    }
-
-    if (eqlcrds(target.crds, ChoCastle.CENTER)) {
-      v(ChoCastle.BL)
-      v(ChoCastle.BR)
-    }
-
-    if (eqlcrds(target.crds, ChoCastle.TR)) {
-      v(ChoCastle.CENTER)
-    }
+    castle(ChoCastle.TL, ChoCastle.CENTER);
+    castle(ChoCastle.CENTER, ChoCastle.BL);
+    castle(ChoCastle.CENTER, ChoCastle.BR);
+    castle(ChoCastle.TR, ChoCastle.CENTER);
   }
 
   function getGung() {
-    function f(dest) {
-      var piece = getPieceByCrds(dest);
-
-      if (!piece || piece.team != target.team) {
-        points.push(dest);
+    function castle(current, dest) {
+      if (eqlcrds(target.crds, current)) {
+        var piece = getPieceByCrds(dest);
+  
+        if (!piece || piece.team != target.team) {
+          points.push(dest);
+        }
       }
     }
 
     // Cho
-    if (eqlcrds(target.crds, ChoCastle.CENTER)) {
-      f(ChoCastle.TL)
-      f(ChoCastle.TM)
-      f(ChoCastle.TR)
-      f(ChoCastle.RM)
-      f(ChoCastle.BR)
-      f(ChoCastle.BM)
-      f(ChoCastle.BL)
-      f(ChoCastle.LM)
-    }
-
-    if (eqlcrds(target.crds, ChoCastle.TL)) {
-      f(ChoCastle.TM)
-      f(ChoCastle.CENTER)
-      f(ChoCastle.LM)
-    } 
-
-    if (eqlcrds(target.crds, ChoCastle.TM)) {
-      f(ChoCastle.TL)
-      f(ChoCastle.CENTER)
-      f(ChoCastle.TR)
-    } 
-
-    if (eqlcrds(target.crds, ChoCastle.TR)) {
-      f(ChoCastle.TM)
-      f(ChoCastle.CENTER)
-      f(ChoCastle.RM)
-    }
-
-    if (eqlcrds(target.crds, ChoCastle.RM)) {
-      f(ChoCastle.TR)
-      f(ChoCastle.CENTER)
-      f(ChoCastle.BR)
-    } 
-
-    if (eqlcrds(target.crds, ChoCastle.BR)) {
-      f(ChoCastle.RM)
-      f(ChoCastle.CENTER)
-      f(ChoCastle.BM)
-    } 
-
-    if (eqlcrds(target.crds, ChoCastle.BM)) {
-      f(ChoCastle.BL)
-      f(ChoCastle.CENTER)
-      f(ChoCastle.BR)
-    } 
-
-    if (eqlcrds(target.crds, ChoCastle.BL)) {
-      f(ChoCastle.LM)
-      f(ChoCastle.CENTER)
-      f(ChoCastle.BM)
-    } 
-
-    if (eqlcrds(target.crds, ChoCastle.LM)) {
-      f(ChoCastle.TL)
-      f(ChoCastle.CENTER)
-      f(ChoCastle.BL)
-    } 
+    castle(ChoCastle.CENTER, ChoCastle.TL)
+    castle(ChoCastle.CENTER, ChoCastle.TM)
+    castle(ChoCastle.CENTER, ChoCastle.TR)
+    castle(ChoCastle.CENTER, ChoCastle.RM)
+    castle(ChoCastle.CENTER, ChoCastle.BR)
+    castle(ChoCastle.CENTER, ChoCastle.BM)
+    castle(ChoCastle.CENTER, ChoCastle.BL)
+    castle(ChoCastle.CENTER, ChoCastle.LM)
+    castle(ChoCastle.TL, ChoCastle.TM)
+    castle(ChoCastle.TL, ChoCastle.CENTER)
+    castle(ChoCastle.TL, ChoCastle.LM)
+    castle(ChoCastle.TM, ChoCastle.TL)
+    castle(ChoCastle.TM, ChoCastle.CENTER)
+    castle(ChoCastle.TM, ChoCastle.TR)
+    castle(ChoCastle.TR, ChoCastle.TM)
+    castle(ChoCastle.TR, ChoCastle.CENTER)
+    castle(ChoCastle.TR, ChoCastle.RM)
+    castle(ChoCastle.RM, ChoCastle.TR)
+    castle(ChoCastle.RM, ChoCastle.CENTER)
+    castle(ChoCastle.RM, ChoCastle.BR)
+    castle(ChoCastle.BR, ChoCastle.RM)
+    castle(ChoCastle.BR, ChoCastle.CENTER)
+    castle(ChoCastle.BR, ChoCastle.BM)
+    castle(ChoCastle.BM, ChoCastle.BL)
+    castle(ChoCastle.BM, ChoCastle.CENTER)
+    castle(ChoCastle.BM, ChoCastle.BR)
+    castle(ChoCastle.BL, ChoCastle.LM)
+    castle(ChoCastle.BL, ChoCastle.CENTER)
+    castle(ChoCastle.BL, ChoCastle.BM)
+    castle(ChoCastle.LM, ChoCastle.TL)
+    castle(ChoCastle.LM, ChoCastle.CENTER)
+    castle(ChoCastle.LM, ChoCastle.BL)
 
     // Han
-    if (eqlcrds(target.crds, HanCastle.CENTER)) {
-      f(HanCastle.TL)
-      f(HanCastle.TM)
-      f(HanCastle.TR)
-      f(HanCastle.RM)
-      f(HanCastle.BR)
-      f(HanCastle.BM)
-      f(HanCastle.BL)
-      f(HanCastle.LM)
-    }
-
-    if (eqlcrds(target.crds, HanCastle.TL)) {
-      f(HanCastle.TM)
-      f(HanCastle.CENTER)
-      f(HanCastle.LM)
-    } 
-
-    if (eqlcrds(target.crds, HanCastle.TM)) {
-      f(HanCastle.TL)
-      f(HanCastle.CENTER)
-      f(HanCastle.TR)
-    } 
-
-    if (eqlcrds(target.crds, HanCastle.TR)) {
-      f(HanCastle.TM)
-      f(HanCastle.CENTER)
-      f(HanCastle.RM)
-    }
-
-    if (eqlcrds(target.crds, HanCastle.RM)) {
-      f(HanCastle.TR)
-      f(HanCastle.CENTER)
-      f(HanCastle.BR)
-    } 
-
-    if (eqlcrds(target.crds, HanCastle.BR)) {
-      f(HanCastle.RM)
-      f(HanCastle.CENTER)
-      f(HanCastle.BM)
-    } 
-
-    if (eqlcrds(target.crds, HanCastle.BM)) {
-      f(HanCastle.BL)
-      f(HanCastle.CENTER)
-      f(HanCastle.BR)
-    } 
-
-    if (eqlcrds(target.crds, HanCastle.BL)) {
-      f(HanCastle.LM)
-      f(HanCastle.CENTER)
-      f(HanCastle.BM)
-    } 
-
-    if (eqlcrds(target.crds, HanCastle.LM)) {
-      f(HanCastle.TL)
-      f(HanCastle.CENTER)
-      f(HanCastle.BL)
-    } 
+    castle(HanCastle.CENTER, HanCastle.TL)
+    castle(HanCastle.CENTER, HanCastle.TM)
+    castle(HanCastle.CENTER, HanCastle.TR)
+    castle(HanCastle.CENTER, HanCastle.RM)
+    castle(HanCastle.CENTER, HanCastle.BR)
+    castle(HanCastle.CENTER, HanCastle.BM)
+    castle(HanCastle.CENTER, HanCastle.BL)
+    castle(HanCastle.CENTER, HanCastle.LM)
+    castle(HanCastle.TL, HanCastle.TM)
+    castle(HanCastle.TL, HanCastle.CENTER)
+    castle(HanCastle.TL, HanCastle.LM)
+    castle(HanCastle.TM, HanCastle.TL)
+    castle(HanCastle.TM, HanCastle.CENTER)
+    castle(HanCastle.TM, HanCastle.TR)
+    castle(HanCastle.TR, HanCastle.TM)
+    castle(HanCastle.TR, HanCastle.CENTER)
+    castle(HanCastle.TR, HanCastle.RM)
+    castle(HanCastle.RM, HanCastle.TR)
+    castle(HanCastle.RM, HanCastle.CENTER)
+    castle(HanCastle.RM, HanCastle.BR)
+    castle(HanCastle.BR, HanCastle.RM)
+    castle(HanCastle.BR, HanCastle.CENTER)
+    castle(HanCastle.BR, HanCastle.BM)
+    castle(HanCastle.BM, HanCastle.BL)
+    castle(HanCastle.BM, HanCastle.CENTER)
+    castle(HanCastle.BM, HanCastle.BR)
+    castle(HanCastle.BL, HanCastle.LM)
+    castle(HanCastle.BL, HanCastle.CENTER)
+    castle(HanCastle.BL, HanCastle.BM)
+    castle(HanCastle.LM, HanCastle.TL)
+    castle(HanCastle.LM, HanCastle.CENTER)
+    castle(HanCastle.LM, HanCastle.BL)
   }
   
   function getCha() {
-
-    function rc(x, y, dir) {
+    // linear
+    function linear(x, y, dir) {
       if (dir == 0) y--;
       if (dir == 1) x++;
       if (dir == 2) y++;
@@ -545,7 +480,7 @@
       
         if (piece == null) {
           points.push([x, y]);
-          rc(x, y, dir);
+          linear(x, y, dir);
         } else {
           if (piece.team != target.team) {
             points.push([x, y]);
@@ -554,17 +489,13 @@
       }
     }
 
-    // north
-    rc(target.crds[0], target.crds[1], 0);
-    // east
-    rc(target.crds[0], target.crds[1], 1);
-    // south
-    rc(target.crds[0], target.crds[1], 2);
-    // west
-    rc(target.crds[0], target.crds[1], 3);
-    
+    linear(target.crds[0], target.crds[1], 0);
+    linear(target.crds[0], target.crds[1], 1);
+    linear(target.crds[0], target.crds[1], 2);
+    linear(target.crds[0], target.crds[1], 3);
 
-    function f(current, mid, dest) {
+    // castle 
+    function castle(current, mid, dest) {
       if (eqlcrds(target.crds, current)) {
         var piece = getPieceByCrds(mid);
     
@@ -582,7 +513,7 @@
       }
     }
 
-    function v(crds) {
+    function f(crds) {
       var piece = getPieceByCrds(crds);
 
       if (piece == null || piece.team != target.team) {
@@ -590,89 +521,101 @@
       }
     }
     
-    // on the Cho castle 
-    f(ChoCastle.TL, ChoCastle.CENTER, ChoCastle.BR);
-    f(ChoCastle.TR, ChoCastle.CENTER, ChoCastle.BL);
-    f(ChoCastle.BR, ChoCastle.CENTER, ChoCastle.TL);
-    f(ChoCastle.BL, ChoCastle.CENTER, ChoCastle.TR);
+    castle(ChoCastle.TL, ChoCastle.CENTER, ChoCastle.BR);
+    castle(ChoCastle.TR, ChoCastle.CENTER, ChoCastle.BL);
+    castle(ChoCastle.BR, ChoCastle.CENTER, ChoCastle.TL);
+    castle(ChoCastle.BL, ChoCastle.CENTER, ChoCastle.TR);
 
     if (eqlcrds(target.crds, ChoCastle.CENTER)) {
-      v(ChoCastle.TL);
-      v(ChoCastle.TR);
-      v(ChoCastle.BR);
-      v(ChoCastle.BL);
+      f(ChoCastle.TL);
+      f(ChoCastle.TR);
+      f(ChoCastle.BR);
+      f(ChoCastle.BL);
     }
 
-    // on the Han castle
-    f(HanCastle.TL, HanCastle.CENTER, HanCastle.BR);
-    f(HanCastle.TR, HanCastle.CENTER, HanCastle.BL);
-    f(HanCastle.BR, HanCastle.CENTER, HanCastle.TL);
-    f(HanCastle.BL, HanCastle.CENTER, HanCastle.TR);
+    castle(HanCastle.TL, HanCastle.CENTER, HanCastle.BR);
+    castle(HanCastle.TR, HanCastle.CENTER, HanCastle.BL);
+    castle(HanCastle.BR, HanCastle.CENTER, HanCastle.TL);
+    castle(HanCastle.BL, HanCastle.CENTER, HanCastle.TR);
 
     if (eqlcrds(target.crds, HanCastle.CENTER)) {
-      v(HanCastle.TL);
-      v(HanCastle.TR);
-      v(HanCastle.BR);
-      v(HanCastle.BL);
+      f(HanCastle.TL);
+      f(HanCastle.TR);
+      f(HanCastle.BR);
+      f(HanCastle.BL);
     }
   }
 
-  function getMa(root, a, b) {
-    var [x, y] = target.crds;
-
-    var piece = getPieceByCrds([x + root[0], y + root[1]]);
-    
-    if (piece == null) {
-      var piece = getPieceByCrds([x + a[0], y + a[1]]);
-
-      if (piece == null || piece.team != target.team) {
-        if (inBoard(x + a[0], y + a[1])) {
-          points.push([x + a[0], y + a[1]]);
-        }
-      }
-
-      var piece = getPieceByCrds([x + b[0], y + b[1]]);
-
-      if (piece == null || piece.team != target.team) {
-        if (inBoard(x + b[0], y + b[1])) {
-          points.push([x + b[0], y + b[1]]);
-        }
-      }
-    }
-  }
-
-  function getSang(root, a1, a2, b1, b2) {
-    var [x, y] = target.crds;
-
-    var piece = getPieceByCrds([x + root[0], y + root[1]]);
-    
-    if (piece == null) {
-      // a
-      var piece = getPieceByCrds([x + a1[0], y + a1[1]]);
-
+  function getMa() {
+    function f(root, a, b) {
+      var [x, y] = target.crds;
+  
+      var piece = getPieceByCrds([x + root[0], y + root[1]]);
+      
       if (piece == null) {
-        var piece = getPieceByCrds([x + a2[0], y + a2[1]]);
-
+        var piece = getPieceByCrds([x + a[0], y + a[1]]);
+  
         if (piece == null || piece.team != target.team) {
-          if (inBoard(x + a2[0], y + a2[1])) {
-            points.push([x + a2[0], y + a2[1]]);
+          if (inBoard(x + a[0], y + a[1])) {
+            points.push([x + a[0], y + a[1]]);
           }
         }
-      }
-
-      // b
-      var piece = getPieceByCrds([x + b1[0], y + b1[1]]);
-
-      if (piece == null) {
-        var piece = getPieceByCrds([x + b2[0], y + b2[1]]);
-
+  
+        var piece = getPieceByCrds([x + b[0], y + b[1]]);
+  
         if (piece == null || piece.team != target.team) {
-          if (inBoard(x + b2[0], y + b2[1])) {
-            points.push([x + b2[0], y + b2[1]]);
+          if (inBoard(x + b[0], y + b[1])) {
+            points.push([x + b[0], y + b[1]]);
           }
         }
       }
     }
+
+    f([0, -1], [-1, -2], [1, -2]);
+    f([1, 0], [2, -1], [2, 1]);
+    f([0, 1], [1, 2], [-1, 2]);
+    f([-1, 0], [-2, -1], [-2, 1]);
+  }
+
+  function getSang() {
+    function f(root, a1, a2, b1, b2) {
+      var [x, y] = target.crds;
+  
+      var piece = getPieceByCrds([x + root[0], y + root[1]]);
+      
+      if (piece == null) {
+        // a
+        var piece = getPieceByCrds([x + a1[0], y + a1[1]]);
+  
+        if (piece == null) {
+          var piece = getPieceByCrds([x + a2[0], y + a2[1]]);
+  
+          if (piece == null || piece.team != target.team) {
+            if (inBoard(x + a2[0], y + a2[1])) {
+              points.push([x + a2[0], y + a2[1]]);
+            }
+          }
+        }
+  
+        // b
+        var piece = getPieceByCrds([x + b1[0], y + b1[1]]);
+  
+        if (piece == null) {
+          var piece = getPieceByCrds([x + b2[0], y + b2[1]]);
+  
+          if (piece == null || piece.team != target.team) {
+            if (inBoard(x + b2[0], y + b2[1])) {
+              points.push([x + b2[0], y + b2[1]]);
+            }
+          }
+        }
+      }
+    }
+
+    f([0, -1], [-1, -2], [-2, -3], [1, -2], [2, -3]);
+    f([1, 0], [2, -1], [3, -2], [2, 1], [3, 2]);
+    f([0, 1], [1, 2], [2, 3], [-1, 2], [-2, 3]);
+    f([-1, 0], [-2, -1], [-3, -2], [-2, 1], [-3, 2]);
   }
 
   /* draw */
