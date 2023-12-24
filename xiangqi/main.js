@@ -196,6 +196,18 @@
 
     return _piece;
   }
+
+  function push(crds) {
+    var [x, y] = crds;
+    
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9) {
+      var piece = getPieceByCrds(crds);
+  
+      if (!piece || piece.team != target.team) {
+        points.push(crds);
+      }
+    }
+  }
   
   function setTarget() {
     var piece = getPieceByCrds([x, y]);
