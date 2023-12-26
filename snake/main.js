@@ -79,7 +79,6 @@
   canvas.width = innerWidth;
   canvas.height = innerHeight;
   canvas.style.backgroundColor = "#222";
-  document.body.style["backgroundColor"] = "#000";
   addEventListener("keydown", keyDownHandler);
 
   /* run the game */

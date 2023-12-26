@@ -31,7 +31,7 @@
   const CHO = 1
   const HAN = 2
   const ZOL = "zol"
-  const PO = "linear"
+  const PO = "po"
   const CHA = "cha"
   const SANG = "sang"
   const MA = "ma"
