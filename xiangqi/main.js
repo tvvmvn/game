@@ -29,7 +29,6 @@
   ]
 
   var board;
-  var dest;
   var row = 0;
   var col = 0;
   var turn = 2;
@@ -40,7 +39,6 @@
   startGame();
 
   function startGame() {
-    dest = [];
     board = [
       [0, 1, 0, 2],
       [0, 0, 0, 0],
@@ -79,7 +77,7 @@
     return piece;
   }
 
-  function f() { }
+  function f() {}
 
   /* draw */
 
@@ -123,7 +121,7 @@
           ctx.arc(
             OFFSET_X + (c * CELL),
             OFFSET_Y + (r * CELL),
-            10,
+            (piece.name == "zol" ? 10 : 15),
             0,
             2 * Math.PI
           );
@@ -141,10 +139,12 @@
       for (var c = 0; c < board[r].length; c++) {
         var id = board[r][c];
 
-        var piece = getPieceById(id);
+        if (id) {
+          var piece = getPieceById(id);
 
-        if (id != 0 && piece.team != turn) {
-          end = false;
+          if (piece.team == turn) {
+            end = false;
+          }
         }
       }
     }
@@ -156,6 +156,16 @@
 
   /* control */
 
+  function v(piece, row_d, col_d) {
+    var p = getPieceById(board[row_d][col_d])
+
+    if (p && p.team == turn) return 0;
+
+    // define movement 
+
+    return 1;
+  }
+
   function clickHandler(e) {
     for (var r = 0; r <= COUNT; r++) {
       for (var c = 0; c <= COUNT; c++) {
@@ -165,25 +175,34 @@
         var b = Math.pow(CELL / 2, 2);
 
         if (a <= b) {
-          if (board[row][col]) {
-            var id = board[row][col];
+          var id = board[row][col];
 
+          if (id) {
             var piece = getPieceById(id);
 
             if (piece.team == turn) {
-              // move
-              var tmp = board[row][col];
-              board[row][col] = 0;
-              board[r][c] = tmp;
+              // validate
+              var takeable = v(piece, r, c);
 
-              setEnd();
-
-              turn = turn == 1 ? 2 : 1;
+              if (takeable) {
+                // move
+                var tmp = board[row][col];
+                board[row][col] = 0;
+                board[r][c] = tmp;
+  
+                // change turn
+                turn = turn == 1 ? 2 : 1;
+                
+                // check end
+                setEnd();
+              }
             }
           }
 
           col = c;
           row = r;
+
+          console.log(col, row);
         }
       }
     }
