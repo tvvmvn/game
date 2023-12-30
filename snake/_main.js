@@ -2,10 +2,11 @@
   /* struct */
 
   class Snake {
-    constructor(x, y, m, size, movingPoint, moved, node, dir, color) {
+    constructor(x, y, _x, _y, size, movingPoint, moved, node, dir, color) {
       this.x = x;
       this.y = y;
-      this.m = m;
+      this._x = _x;
+      this._y = _y;
       this.size = size;
       this.movingPoint = movingPoint;
       this.moved = moved;
@@ -87,7 +88,7 @@
   function startGame() {
     snake = new Snake(
       Stage.OFFSET_X + (Stage.CELL * 2), Stage.OFFSET_Y,
-      0,
+      0, 0,
       Stage.CELL,
       20,
       true,
@@ -136,15 +137,44 @@
       drawMessage("Press any key to start game");
       return;
     }
-    
-    setSnake();
-    drawSnake();
-    
-    setApple();
-    
+
+    // Game begin
     setTime();
     drawTime();
     drawScore();
+
+    // Snake
+    setSnake();
+
+    var crdsUpdated = prevX !== snake.x || prevY !== snake.y;
+
+    if (crdsUpdated) {
+      if (wallCrash()) {
+        game.over = true;
+      } else if (selfCrash()) {
+        game.over = true;
+      } else {
+        snakeMove()
+      }
+    }
+
+    drawSnake();
+
+    // Apple
+    if (apple.count) {
+      apple.eaten = (snake.x === apple.x) && (snake.y === apple.y)
+
+      if (apple.eaten) {
+        snake.node.push([snake.x, snake.y]);
+        apple.count--;
+        putApple();
+        snake.movingPoint--;
+      }
+
+      drawApple();
+    } else {
+      game.end = true;
+    }
 
     // Game status
     if (game.over) {
@@ -156,9 +186,17 @@
       drawMessage("YOU WIN!");
       initGame()
     }
+
+    // Store previous x, y
+    prevX = snake.x;
+    prevY = snake.y;
   }
 
   /* functions */
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
 
   function initGame() {
     clearInterval(interval);
@@ -174,54 +212,48 @@
 
   // Snake
   function setSnake() {
-    snake.m++;
-    
-    if (snake.m > snake.movingPoint) {
-      if (snake.dir == Direction.RIGHT) {
+    if (snake.dir === Direction.RIGHT) {
+      snake._x++;
+
+      if (snake._x > snake.movingPoint) {
         snake.x += Stage.CELL;
+        snake._x = 0;
       }
-      if (snake.dir == Direction.DOWN) {
+    }
+
+    if (snake.dir === Direction.DOWN) {
+      snake._y++;
+
+      if (snake._y > snake.movingPoint) {
         snake.y += Stage.CELL;
+        snake._y = 0;
       }
-      if (snake.dir == Direction.LEFT) {
+    }
+
+    if (snake.dir === Direction.LEFT) {
+      snake._x--;
+
+      if (snake._x < -snake.movingPoint) {
         snake.x -= Stage.CELL;
+        snake._x = 0;
       }
-      if (snake.dir == Direction.UP) {
+    }
+
+    if (snake.dir === Direction.UP) {
+      snake._y--;
+
+      if (snake._y < -snake.movingPoint) {
         snake.y -= Stage.CELL;
+        snake._y = 0;
       }
     }
-
-    if (prevX !== snake.x || prevY !== snake.y) {
-      snake.m = 0;
-      
-      if (wallCrash()) {
-        game.over = true;
-      } else if (selfCrash()) {
-        game.over = true;
-      } else { // movement
-        // body
-        for (var j = snake.node.length - 1; j > 0; j--) {
-          snake.node[j][0] = snake.node[j - 1][0];
-          snake.node[j][1] = snake.node[j - 1][1];
-        }
-        // head
-        snake.node[0][0] = snake.x;
-        snake.node[0][1] = snake.y;
-
-        // crds update of each node has been completed, so
-        snake.moved = true;
-      }
-    }
-
-    prevX = snake.x;
-    prevY = snake.y;
   }
 
   function selfCrash() {
     var value = false;
 
     for (var h = 3; h < snake.node.length; h++) {
-      if (snake.x == snake.node[h][0] && snake.y == snake.node[h][1]) {
+      if (snake.x === snake.node[h][0] && snake.y === snake.node[h][1]) {
         value = true;
       }
     }
@@ -241,25 +273,22 @@
 
     return false;
   }
-  
-  // Apple
-  function setApple() {
-    if (apple.count) {
-      apple.eaten = (snake.x == apple.x) && (snake.y == apple.y)
 
-      if (apple.eaten) {
-        snake.node.push([snake.x, snake.y]);
-        apple.count--;
-        putApple();
-        snake.movingPoint--;
-      }
-
-      drawApple();
-    } else {
-      game.end = true;
+  function snakeMove() {
+    // body
+    for (var j = snake.node.length - 1; j > 0; j--) {
+      snake.node[j][0] = snake.node[j - 1][0];
+      snake.node[j][1] = snake.node[j - 1][1];
     }
+    // head
+    snake.node[0][0] = snake.x;
+    snake.node[0][1] = snake.y;
+
+    // crds update of each node has been completed, so
+    snake.moved = true;
   }
 
+  // Apple
   function putApple() {
     var x = Stage.OFFSET_X + (Stage.CELL * (Math.floor(Math.random() * 20)));
     var y = Stage.OFFSET_Y + (Stage.CELL * (Math.floor(Math.random() * 15)));
@@ -268,7 +297,7 @@
 
     // detect apple on snake body
     for (var i = 0; i < snake.node.length; i++) {
-      if (snake.node[i][0] == x && snake.node[i][1] == y) {
+      if (snake.node[i][0] === x && snake.node[i][1] === y) {
         putAgain = true;
       }
     }
@@ -293,10 +322,6 @@
 
   /* draw */
 
-  function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-  
   function drawStage() {
     // checker
     ctx.fillStyle = "#333";
@@ -374,8 +399,6 @@
   /* control */
 
   function keyDownHandler(e) {
-    var key = e.key; 
-
     if (!snake.moved) return;
 
     if (!game.start) {
@@ -383,40 +406,47 @@
     }
 
     // prevent accel and u-turn 
-    if (snake.dir == Direction.RIGHT) {
-      if (key == Key.RIGHT || key == Key.LEFT) return;
+    if (snake.dir === Direction.RIGHT) {
+      if (e.key === Key.RIGHT) return;
+      if (e.key === Key.LEFT) return;
     }
 
-    if (snake.dir == Direction.DOWN) {
-      if (key == Key.DOWN || key == Key.UP) return;
+    if (snake.dir === Direction.DOWN) {
+      if (e.key === Key.DOWN) return;
+      if (e.key === Key.UP) return;
     }
 
-    if (snake.dir == Direction.LEFT) {
-      if (key == Key.LEFT || key == Key.RIGHT) return;
+    if (snake.dir === Direction.LEFT) {
+      if (e.key === Key.LEFT) return;
+      if (e.key === Key.RIGHT) return;
     }
 
-    if (snake.dir == Direction.UP) {
-      if (key == Key.UP || key == Key.DOWN) return;
+    if (snake.dir === Direction.UP) {
+      if (e.key === Key.UP) return;
+      if (e.key === Key.DOWN) return;
     }
 
     // turn 
-    if (key == Key.UP) {
+    if (e.key === Key.UP) {
+      snake._y -= snake.movingPoint;
       snake.dir = Direction.UP;
     }
 
-    if (key == Key.LEFT) {
+    if (e.key === Key.LEFT) {
+      snake._x -= snake.movingPoint;
       snake.dir = Direction.LEFT;
     }
 
-    if (key == Key.RIGHT) {
+    if (e.key === Key.RIGHT) {
+      snake._x += snake.movingPoint;
       snake.dir = Direction.RIGHT;
     }
 
-    if (key == Key.DOWN) {
+    if (e.key === Key.DOWN) {
+      snake._y += snake.movingPoint;
       snake.dir = Direction.DOWN;
     }
-    
-    snake.m += snake.movingPoint;
+
     snake.moved = false;
   }
 })()

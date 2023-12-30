@@ -39,13 +39,12 @@
   var col = 0;
   var turn = 2;
   var end;
-  var win;
   var interval;
 
   /* functions */
 
   function getPieceById(id) {
-    var piece = null;
+    var piece;
 
     for (var i = 0; i < pieces.length; i++) {
       if (pieces[i].id == id) {
@@ -84,47 +83,14 @@
     }
   }
 
-  /* main */
-
-  function clickHandler(e) {
-    var r = Math.floor((e.clientY - OFFSET_Y) / CELL);
-    var c = Math.floor((e.clientX - OFFSET_X) / CELL);
-
-    if (r > -1 && r < COUNT && c > -1 && c < COUNT) {
-      var id = board[row][col];
-
-      if (id) {
-        var piece = getPieceById(id);
-
-        if (piece.team == turn) {
-          // validate
-          var takeable = isTakeable(piece, r, c);
-
-          if (takeable) {
-            // move
-            var tmp = board[row][col];
-            board[row][col] = 0;
-            board[r][c] = tmp;
-
-            // end check
-            setEnd();
-
-            if (!end) {
-              // turn change
-              turn = turn == 1 ? 2 : 1;
-            }
-          }
-        }
-      }
-
-      col = c;
-      row = r;
-
-      console.log(col, row);
-    }
-  }
-
   /* draw */
+
+  function render() {
+    clearCanvas();
+    drawBoard();
+    drawPieces();
+    drawMessage();
+  }
 
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -186,12 +152,7 @@
 
   /* run the game */
 
-  function render() {
-    clearCanvas();
-    drawBoard();
-    drawPieces();
-    drawMessage();
-  }
+  startGame();
 
   function startGame() {
     board = [
@@ -203,5 +164,44 @@
     interval = setInterval(render);
   }
 
-  startGame();
+  function clickHandler(e) {
+    var r = Math.floor((e.clientY - OFFSET_Y) / CELL);
+    var c = Math.floor((e.clientX - OFFSET_X) / CELL);
+    var inBoard = r > -1 && r < COUNT && c > -1 && c < COUNT;
+    
+    if (!inBoard) {
+      return;
+    }
+    
+    var id = board[row][col];
+
+    if (id) {
+      var piece = getPieceById(id);
+
+      if (piece.team == turn) {
+        // validate
+        var takeable = isTakeable(piece, r, c);
+
+        if (takeable) {
+          // move
+          var tmp = board[row][col];
+          board[row][col] = 0;
+          board[r][c] = tmp;
+
+          // end check
+          setEnd();
+
+          if (!end) {
+            // turn change
+            turn = turn == 1 ? 2 : 1;
+          }
+        }
+      }
+    }
+
+    col = c;
+    row = r;
+
+    console.log(col, row);
+  }
 })()
