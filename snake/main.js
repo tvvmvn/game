@@ -60,6 +60,7 @@
   var game;
   var prevX;
   var prevY;
+  var prevDir;
   var interval;
   var checker = [];
 
@@ -175,6 +176,10 @@
   // Snake
   function setSnake() {
     snake.m++;
+
+    if (prevDir !== snake.dir) {
+      snake.m += snake.movingPoint;
+    }
     
     if (snake.m > snake.movingPoint) {
       if (snake.dir == Direction.RIGHT) {
@@ -215,6 +220,7 @@
 
     prevX = snake.x;
     prevY = snake.y;
+    prevDir = snake.dir;
   }
 
   function selfCrash() {
@@ -416,7 +422,6 @@
       snake.dir = Direction.DOWN;
     }
     
-    snake.m += snake.movingPoint;
     snake.moved = false;
   }
 })()
