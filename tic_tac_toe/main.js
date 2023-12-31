@@ -242,8 +242,10 @@
     }
 
     if (turn == USER) {
-      var r = Math.floor((e.clientY - GRID_OFFSET_Y) / GRID_ITEM_SIZE);
-      var c = Math.floor((e.clientX - GRID_OFFSET_X) / GRID_ITEM_SIZE);
+      var r = Math.floor((e.offsetY - GRID_OFFSET_Y) / GRID_ITEM_SIZE);
+      var c = Math.floor((e.offsetX - GRID_OFFSET_X) / GRID_ITEM_SIZE);
+
+      console.log(e)
       
       if (r > -1 && r < GRID_ITEM_COUNT && c > -1 && c < GRID_ITEM_COUNT) {
         row = r;
