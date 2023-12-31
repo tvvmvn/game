@@ -24,8 +24,70 @@
   var winner;
   var turn;
   var row, col;
+  var interval;
+
+  /* run the game */
+
+  drawMessage("Touch or click to start");
+
+  function startGame() {
+    result = null;
+    winner = null;
+    turn = Math.ceil(Math.random() * 2);
+    board = [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ]
+
+    if (turn == COM) {
+      com();
+    }
+
+    interval = setInterval(run, 10);
+  }
+
+  function run() {
+    clearCanvas();
+  
+    getResult();
+    
+    drawSymbol();
+    drawResult();
+
+    if (result) {
+      clearInterval(interval);
+      start = false;
+    }
+  }
 
   /* functions */
+
+  function com() {
+    setAlg();
+
+    if (target != null) { 
+      var [tr, tc] = target;
+      board[tr][tc] = COM;
+      target = null;
+    } else {
+      while (true) {
+        var r = Math.floor(Math.random() * 3);
+        var c = Math.floor(Math.random() * 3);
+
+        if (result) {
+          break;
+        }
+
+        if (board[r][c] == 0) {
+          board[r][c] = COM;
+          break;
+        }
+      }
+    }
+
+    turn = USER;
+  }
 
   function setAlg() {
     fill_hole([0, 1], [1, 1], [2, 1]);
@@ -74,7 +136,6 @@
     checkBingo([0, 2], [1, 2], [2, 2]);
 
     if (result == "DONE") {
-      start = false;
       return;
     }
 
@@ -93,8 +154,6 @@
     if (drawn) {
       result = "DRAW";
       winner = null;
-
-      start = false;
     }
   }
 
@@ -175,66 +234,10 @@
 
   /* control */
 
-  function com() {
-    setAlg();
-
-    if (target != null) { 
-      var [tr, tc] = target;
-      board[tr][tc] = COM;
-      target = null;
-    } else {
-      while (true) {
-        var r = Math.floor(Math.random() * 3);
-        var c = Math.floor(Math.random() * 3);
-
-        if (result) {
-          break;
-        }
-
-        if (board[r][c] == 0) {
-          board[r][c] = COM;
-          break;
-        }
-      }
-    }
-
-    
-    ////    
-    clearCanvas();
-    drawSymbol();
-
-    getResult();
-
-    if (result) {
-      drawResult();
-    }
-    ////
-
-
-    turn = USER;
-  }
-
-  drawMessage("Touch or click to start");
-
   function clickHandler(e) {
     if (!start) {
-      result = null;
-      winner = null;
-      turn = Math.ceil(Math.random() * 2);
-      // turn = USER;
-      board = [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0],
-      ]
+      startGame();
       start = true;
-
-      clearCanvas();
-
-      if (turn == COM) {
-        com();
-      }
-
       return;
     }
 
@@ -250,21 +253,10 @@
   
         if (board[row][col] == 0) {
           board[row][col] = USER;
-          
-          
-          ////
-          clearCanvas();
-          drawSymbol();
-          
-          getResult();
-
-          if (result) {
-            drawResult();
-          }
-          ////
-
-
+      
+          // COM play
           turn = COM;
+
           setTimeout(() => {
             com();
           }, 1000)
