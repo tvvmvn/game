@@ -61,8 +61,8 @@
   var prevX;
   var prevY;
   var prevDir;
-  var interval;
   var checker = [];
+  var start = false;
 
   for (var r = 0; r < Stage.HEIGHT / Stage.CELL; r++) {
     checker[r] = [];
@@ -83,9 +83,41 @@
 
   /* run the game */
 
-  startGame();
+  setInterval(run, 10); // 100hz
 
-  function startGame() {
+  function run() {
+    clearCanvas();
+    drawTitle();
+    drawStage();
+
+    // Start screen
+    if (!start) {
+      initialize();
+      drawMessage("Press any key to start game");
+      return;
+    }
+
+    if (game.over || game.end) {
+      if (game.over) {
+        drawMessage("GAME OVER");
+      }
+  
+      if (game.end) {
+        drawMessage("YOU WIN!");
+      }
+    } else {
+      setSnake();
+      setApple();
+      setTime();
+    }
+
+    drawApple();
+    drawSnake();
+    drawTime();
+    drawScore();
+  }
+
+  function initialize() {
     snake = new Snake(
       Stage.OFFSET_X + (Stage.CELL * 2), Stage.OFFSET_Y,
       0,
@@ -115,63 +147,15 @@
     };
 
     game = {
-      start: false,
       over: false,
       end: false
     }
 
     prevX = snake.x;
     prevY = snake.y;
-
-    interval = createInterval();
-  }
-
-
-  function render() {
-    clearCanvas();
-    drawTitle();
-    drawStage();
-
-    // Start screen
-    if (!game.start) {
-      drawMessage("Press any key to start game");
-      return;
-    }
-    
-    setSnake();
-    drawSnake();
-    
-    setApple();
-    
-    setTime();
-    drawTime();
-    drawScore();
-
-    // Game status
-    if (game.over) {
-      drawMessage("GAME OVER");
-      initGame();
-    }
-
-    if (game.end) {
-      drawMessage("YOU WIN!");
-      initGame()
-    }
   }
 
   /* functions */
-
-  function initGame() {
-    clearInterval(interval);
-
-    setTimeout(() => {
-      startGame();
-    }, 2000)
-  }
-
-  function createInterval() {
-    return setInterval(render, 10) // 100hz
-  }
 
   // Snake
   function setSnake() {
@@ -259,8 +243,6 @@
         putApple();
         snake.movingPoint--;
       }
-
-      drawApple();
     } else {
       game.end = true;
     }
@@ -382,11 +364,17 @@
   function keyDownHandler(e) {
     var key = e.key; 
 
-    if (!snake.moved) return;
-
-    if (!game.start) {
-      game.start = true;
+    if (!start) {
+      start = true;
+      return;
     }
+
+    if (game.over || game.end) {
+      start = false;
+      return;
+    }
+
+    if (!snake.moved) return;
 
     // prevent accel and u-turn 
     if (snake.dir == Direction.RIGHT) {

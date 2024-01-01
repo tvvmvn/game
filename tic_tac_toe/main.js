@@ -4,6 +4,8 @@
   canvas.width = 500;
   canvas.height = 500;
   canvas.addEventListener("click", clickHandler);
+  var image = new Image();
+  image.src = "./bg.png";
 
   /* constants  */
 
@@ -32,6 +34,7 @@
     
   function run() {
     clearCanvas();
+    drawBg();
 
     if (!start) {
       initialize();
@@ -49,6 +52,11 @@
         turn = null;
       }
     }
+  }
+
+  function drawBg() {
+    // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+    ctx.drawImage(image, 0, 0, 500, 500, 0, 0, 500, 500);
   }
 
   function initialize() {

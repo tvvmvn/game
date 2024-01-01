@@ -34,8 +34,7 @@
   }
 
   class Game {
-    constructor(start, over, end, score) {
-      this.start = start;
+    constructor(over, end, score) {
       this.over = over;
       this.end = end;
       this.score = score;
@@ -70,7 +69,7 @@
   var game;
   var leftKeyPressed;
   var rightKeyPressed;
-  var interval;
+  var start = false;
 
   canvas.width = innerWidth;
   canvas.height = innerHeight;
@@ -80,9 +79,45 @@
 
   /* run the game */
 
-  startGame();
+  setInterval(run, 10);
 
-  function startGame() {
+  function run() {
+    clearCanvas();
+
+    drawTitle()
+    drawStage();
+    
+    // game status
+    if (!start) {
+      initialize();
+      drawMessage("Press any key to start game");
+      return;
+    } 
+
+    drawBall();
+    drawPaddle();
+    drawBricks();
+
+    if (game.over || game.end) {
+      if (game.over) {
+        drawMessage("GAME OVER");
+      }
+      
+      if (game.end) {
+        drawMessage("YOU WIN!");
+      }    
+    } else {
+      setBall()
+      setBricks();
+      setPaddle();
+
+      // set ball x, y
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+    }
+  }
+
+  function initialize() {
     // ball
     ball = new Ball(
       STAGE_OFFSET_X + (STAGE_WIDTH / 2),
@@ -127,57 +162,7 @@
     rightKeyPressed = false;
 
     // game
-    game = new Game(false, false, false, 0);
-
-    interval = createInterval();
-  }
-
-  function render() {
-    clearCanvas();
-    drawTitle()
-    drawStage();
-    setBall()
-    drawBall();
-    drawPaddle();
-    setBricks();
-    setPaddle();
-    drawPaddle();
-
-    // game status
-    if (!game.start) {
-      drawMessage("Press any key to start game");
-      return;
-    }
-
-    if (game.over) {
-      drawMessage("GAME OVER");
-      initialize();
-    }
-
-    if (game.end) {
-      drawMessage("YOU WIN!");
-      initialize();
-    }
-
-    // set ball x, y
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-  }
-
-  function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  function initialize() {
-    clearInterval(interval);
-
-    setTimeout(() => {
-      startGame();
-    }, 2000)
-  }
-
-  function createInterval() {
-    return setInterval(render, 10); // 100hz
+    game = new Game(false, false, 0);
   }
 
   /* functions */
@@ -203,11 +188,6 @@
               game.end = true;
             }
           }
-
-          brick.x = OFFSET_X + (c * (brick.width + PADDING));
-          brick.y = OFFSET_Y + (r * (brick.height + PADDING));
-
-          drawBrick(brick.x, brick.y, brick.width, brick.height, brick.color);
         }
       }
     }
@@ -262,6 +242,10 @@
 
   /* draw */
 
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
   function drawTitle() {
     ctx.font = "20px Monospace";
     ctx.fillStyle = "#fff";
@@ -281,9 +265,20 @@
     ctx.stroke();
   }
 
-  function drawBrick(x, y, width, height, color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, width, height);
+  function drawBricks() {
+    for (var r = 0; r < ROW_COUNT; r++) {
+      for (var c = 0; c < COLUMN_COUNT; c++) {
+        var brick = bricks[r][c];
+
+        if (brick.status == 1) {
+          brick.x = OFFSET_X + (c * (brick.width + PADDING));
+          brick.y = OFFSET_Y + (r * (brick.height + PADDING));
+
+          ctx.fillStyle = brick.color;
+          ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
+        }
+      }
+    }
   }
 
   function drawPaddle() {
@@ -313,8 +308,14 @@
   /* control */
 
   function keyDownHandler(e) {
-    if (!game.start) {
-      game.start = true;
+    if (!start) {
+      start = true;
+      return;
+    }
+
+    if (game.end || game.over) {
+      start = false;
+      return;
     }
 
     if (e.key == ARROW_RIGHT) {

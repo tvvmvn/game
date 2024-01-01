@@ -1,17 +1,20 @@
 (function () {
-  /* constants and variables */
-
   var canvas = document.getElementById("canvas");
   var ctx = canvas.getContext("2d");
   canvas.style["backgroundColor"] = "#000";
   canvas.width = innerWidth;
   canvas.height = innerHeight;
+  canvas.addEventListener("click", clickHandler);
+  
+  /* constants*/
 
   const STORE = "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ";
   const CX = canvas.width / 2;
   const CY = 240;
   const RADIUS = 120;
   const TIME = 10;
+
+  /* variables */
 
   var q = "";
   var pass;
@@ -20,72 +23,56 @@
   var s;
   var _s;
   var over;
-  var interval;
-
-  addEventListener("click", clickHandler);
 
   /* run the game */
 
-  startGame();
+  setInterval(run, 10);
 
-  function startGame() {
+  function run() {
+    clearCanvas();
+    drawTitle();
+    
+    if (!start) {
+      initialize();
+      drawStart();
+      return;
+    }
+    
+    drawTimer();
+    
+    if (!over) {
+      setTime();
+      drawFill();
+      drawQuiz();
+
+      if (s == TIME) {
+        over = true;
+      }
+
+      if (pass) {
+        q = setQuiz();
+        p = 1.5;
+        s = 0;
+        _s = 0;
+  
+        pass = false;
+      }
+    } else {
+      drawOver();
+    }
+  }
+
+  function initialize() {
     q = setQuiz();
     p = 1.5;
     s = 0;
     _s = 0;
 
     pass = null;
-    start = false;
     over = false;
-
-    interval;
-    interval = setInterval(render, 10);
-  }
-
-  function render() {
-    clearCanvas();
-    drawTitle();
-
-    if (!start) {
-      drawStart();
-      return;
-    }
-
-    if (pass) {
-      q = setQuiz();
-      p = 1.5;
-      s = 0;
-      _s = 0;
-
-      pass = false;
-    }
-
-    setTime();
-    setTimer();
-    drawTimer();
-
-    if (s == TIME) {
-      over = true;
-    }
-
-    if (over) {
-      setOver();
-      return;
-    }
-
-    drawQuiz();
   }
 
   /* functions */
-
-  function setOver() {
-    clearInterval(interval);
-    drawOver();
-
-    setTimeout(() => {
-      startGame();
-    }, 2000)
-  }
 
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -107,14 +94,6 @@
     }
   }
 
-  function setTimer() {
-    p += (20 / TIME) / 1000;
-
-    if (p == 2) {
-      p = 0;
-    }
-  }
-
   /* draw */
 
   function drawTitle() {
@@ -125,14 +104,18 @@
   }
 
   function drawTimer() {
-    // arc(x, y, radius, startAngle, endAngle)
-
     ctx.beginPath();
     ctx.lineWidth = 16;
     ctx.strokeStyle = "#eee";
     ctx.arc(CX, CY, RADIUS, 0, 2 * Math.PI);
     ctx.stroke();
+  }
 
+  function drawFill() {
+    p += (20 / TIME) / 1000;
+    
+    if (p == 2) p = 0;
+    
     ctx.beginPath();
     ctx.lineWidth = 16;
     ctx.strokeStyle = "#08f";
@@ -145,7 +128,7 @@
     ctx.fillStyle = "#fff";
     ctx.textAlign = "center";
     ctx.fillText(
-      "Touch or click to start game",
+      "Touch or click to start",
       CX,
       CY + (20 * 0.5)
     );
@@ -173,15 +156,14 @@
     }
 
     if (over) {
+      start = false;
       return;
     }
 
-    var x = e.clientX;
-    var y = e.clientY;
+    var a = Math.pow((e.clientX - CX), 2) + Math.pow((e.clientY - CY), 2);
+    var b = Math.pow(RADIUS, 2);
 
-    var circleClicked = Math.pow((x - CX), 2) + Math.pow((y - CY), 2) <= Math.pow(RADIUS, 2);
-
-    if (circleClicked) {
+    if (a <= b) {
       pass = true;
     }
   }
