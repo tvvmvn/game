@@ -23,9 +23,80 @@
   var result;
   var winner;
   var turn;
+  var lot = false;
   var row, col;
 
+  /* run the game */
+    
+  setInterval(run, 10);
+    
+  function run() {
+    clearCanvas();
+
+    if (!start) {
+      initialize();
+      return;
+    }
+
+    getResult();
+    drawSymbol();
+
+    if (result) {
+      drawResult();
+    } else {
+      if (turn == COM) {
+        setTimeout(com, 1000);
+        turn = null;
+      }
+    }
+  }
+
+  function initialize() {
+    result = null;
+    winner = null;
+    board = [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ]
+
+    if (!lot) {
+      turn = Math.ceil(Math.random() * 2);
+      lot = true;
+    }
+
+    var message = (turn == USER ? "YOU" : "COM") + " First, Ready?";
+    
+    drawMessage(message);
+  }
+
   /* functions */
+
+  function com() {
+    setAlg();
+
+    if (target != null) { 
+      var [tr, tc] = target;
+      board[tr][tc] = COM;
+      target = null;
+    } else {
+      while (true) {
+        var r = Math.floor(Math.random() * 3);
+        var c = Math.floor(Math.random() * 3);
+
+        if (result) {
+          break;
+        }
+
+        if (board[r][c] == 0) {
+          board[r][c] = COM;
+          break;
+        }
+      }
+    }
+
+    turn = USER;
+  }
 
   function setAlg() {
     fill_hole([0, 1], [1, 1], [2, 1]);
@@ -74,7 +145,6 @@
     checkBingo([0, 2], [1, 2], [2, 2]);
 
     if (result == "DONE") {
-      start = false;
       return;
     }
 
@@ -93,8 +163,6 @@
     if (drawn) {
       result = "DRAW";
       winner = null;
-
-      start = false;
     }
   }
 
@@ -175,101 +243,32 @@
 
   /* control */
 
-  function com() {
-    setAlg();
-
-    if (target != null) { 
-      var [tr, tc] = target;
-      board[tr][tc] = COM;
-      target = null;
-    } else {
-      while (true) {
-        var r = Math.floor(Math.random() * 3);
-        var c = Math.floor(Math.random() * 3);
-
-        if (result) {
-          break;
-        }
-
-        if (board[r][c] == 0) {
-          board[r][c] = COM;
-          break;
-        }
-      }
-    }
-
-    
-    ////    
-    clearCanvas();
-    drawSymbol();
-
-    getResult();
-
-    if (result) {
-      drawResult();
-    }
-    ////
-
-
-    turn = USER;
-  }
-
-  drawMessage("Touch or click to start");
-
   function clickHandler(e) {
     if (!start) {
-      result = null;
-      winner = null;
-      turn = Math.ceil(Math.random() * 2);
-      // turn = USER;
-      board = [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0],
-      ]
       start = true;
-
-      clearCanvas();
-
-      if (turn == COM) {
-        com();
-      }
-
       return;
     }
 
-    if (turn == USER) {
-      var r = Math.floor((e.offsetY - GRID_OFFSET_Y) / GRID_ITEM_SIZE);
-      var c = Math.floor((e.offsetX - GRID_OFFSET_X) / GRID_ITEM_SIZE);
+    if (result) {
+      start = false;
+      lot = false;
+      return;
+    }
 
-      console.log(e)
-      
-      if (r > -1 && r < GRID_ITEM_COUNT && c > -1 && c < GRID_ITEM_COUNT) {
-        row = r;
-        col = c;
-  
-        if (board[row][col] == 0) {
-          board[row][col] = USER;
-          
-          
-          ////
-          clearCanvas();
-          drawSymbol();
-          
-          getResult();
+    if (turn != USER) return;
+    
+    var r = Math.floor((e.offsetY - GRID_OFFSET_Y) / GRID_ITEM_SIZE);
+    var c = Math.floor((e.offsetX - GRID_OFFSET_X) / GRID_ITEM_SIZE);
 
-          if (result) {
-            drawResult();
-          }
-          ////
+    if (r > -1 && r < GRID_ITEM_COUNT && c > -1 && c < GRID_ITEM_COUNT) {
+      row = r;
+      col = c;
 
-
-          turn = COM;
-          setTimeout(() => {
-            com();
-          }, 1000)
-        }
+      if (board[row][col] == 0) {
+        board[row][col] = USER;
+        turn = COM;
       }
     }
   }
 })();
+
