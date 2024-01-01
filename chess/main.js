@@ -25,44 +25,84 @@
       }
     }
   }
-
-  /* variables */
-
-  var pieces = [
+  
+  const PIECES = [
     { id: 1, name: "knight", team: 1 },
     { id: 2, name: "pawn", team: 1 },
     { id: 3, name: "knight", team: 2 },
     { id: 4, name: "pawn", team: 2 },
   ]
+
+  /* variables */
+  
   var board;
-  var row = 0;
-  var col = 0;
+  var row, col;
   var turn = 2;
+  var start = false;
   var end;
-  var interval;
+
+  /* run the game */
+
+  setInterval(run, 10); // 100hz
+
+  function run() {
+    clearCanvas();
+
+    if (!start) {
+      initialize();
+      drawStart();
+      return;
+    }
+    
+    drawBoard();    
+    drawPieces();
+    
+    if (end) {
+      drawEnd();
+    } else {
+      drawTurn();
+    }
+  }
+
+  function initialize() {
+    board = [
+      [1, 0, 2, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 3, 0, 4],
+    ]
+    row = 3;
+    col = 0;
+    turn = 2;
+    end = false;
+  }
 
   /* functions */
-
+  
   function getPieceById(id) {
     var piece;
-
-    for (var i = 0; i < pieces.length; i++) {
-      if (pieces[i].id == id) {
-        piece = pieces[i];
+    
+    for (var i = 0; i < PIECES.length; i++) {
+      if (PIECES[i].id == id) {
+        piece = PIECES[i];
       }
     }
 
     return piece;
   }
-  
-  function isTakeable(piece, row_d, col_d) {
-    var p = getPieceById(board[row_d][col_d])
-    
-    if (p && p.team == turn) return false;
-    
-    // define movement on each piece here
-    
-    return true;
+
+  function isTakeable(id) {
+    if (!id) {
+      return true;
+    }
+
+    var piece = getPieceById(id);
+
+    if (piece.team != turn) {
+      return true;
+    }
+
+    return false;
   }
 
   function setEnd() {
@@ -83,14 +123,56 @@
     }
   }
 
-  /* draw */
+  /* control */
+  
+  function clickHandler(e) {
+    if (!start) {
+      start = true;
+      return;
+    }
 
-  function render() {
-    clearCanvas();
-    drawBoard();
-    drawPieces();
-    drawMessage();
+    if (end) {
+      start = false;
+      return;
+    }
+
+    var r = Math.floor((e.offsetY - OFFSET_Y) / CELL);
+    var c = Math.floor((e.offsetX - OFFSET_X) / CELL);
+    
+    if (r > -1 && r < COUNT && c > -1 && c < COUNT) {
+
+      // piece id to move
+      var id = board[row][col];
+
+      if (id) {
+        var piece = getPieceById(id);
+
+        if (piece.team == turn) {
+          // move
+          var takeable = isTakeable(board[r][c]);
+
+          if (takeable) {
+            board[row][col] = 0;
+            board[r][c] = id;
+
+            // end
+            setEnd();
+
+            if (!end) {
+              turn = turn == 1 ? 2 : 1;
+            }
+          }
+        }
+      }
+
+      row = r;
+      col = c;
+
+      console.log(row, col)
+    }
   }
+
+  /* draw */
 
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -125,7 +207,7 @@
           ctx.arc(
             OFFSET_X + (c * CELL) + (CELL / 2),
             OFFSET_Y + (r * CELL) + (CELL / 2),
-            15,
+            ((id == board[row][col] && piece.team == turn) ? 20 : 15),
             0,
             2 * Math.PI
           );
@@ -136,72 +218,27 @@
     }
   }
 
-  function drawMessage() {
-    var message;
-
-    if (!end) {
-      message = turn == 1 ? "W" : "B";
-    } else {
-      message = (turn == 1 ? "W" : "B") + " WIN!";
-    }
+  function drawStart() {
+    var message = "Touch or click to start";
 
     ctx.font = "16px Arial";
     ctx.fillStyle = "#000";
     ctx.fillText(message, 300, 100);
   }
 
-  /* run the game */
+  function drawTurn() {
+    var message = turn == 1 ? "W" : "B";
 
-  startGame();
-
-  function startGame() {
-    board = [
-      [1, 0, 2, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 3, 0, 4],
-    ]
-    interval = setInterval(render);
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#000";
+    ctx.fillText(message, 300, 100);
   }
 
-  function clickHandler(e) {
-    var r = Math.floor((e.clientY - OFFSET_Y) / CELL);
-    var c = Math.floor((e.clientX - OFFSET_X) / CELL);
-    var inBoard = r > -1 && r < COUNT && c > -1 && c < COUNT;
-    
-    if (!inBoard) {
-      return;
-    }
-    
-    var id = board[row][col];
+  function drawEnd() {
+    var message = (turn == 1 ? "W" : "B") + " WIN!";
 
-    if (id) {
-      var piece = getPieceById(id);
-
-      if (piece.team == turn) {
-        // validate
-        var takeable = isTakeable(piece, r, c);
-
-        if (takeable) {
-          // move
-          var tmp = board[row][col];
-          board[row][col] = 0;
-          board[r][c] = tmp;
-
-          // end check
-          setEnd();
-
-          if (!end) {
-            // turn change
-            turn = turn == 1 ? 2 : 1;
-          }
-        }
-      }
-    }
-
-    col = c;
-    row = r;
-
-    console.log(col, row);
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#000";
+    ctx.fillText(message, 300, 100);
   }
 })()

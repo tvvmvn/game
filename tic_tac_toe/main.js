@@ -1,19 +1,18 @@
 (function () {
   var canvas = document.getElementById("canvas");
   var ctx = canvas.getContext("2d");
-  canvas.width = 500;
-  canvas.height = 500;
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+  canvas.style.backgroundColor = "#222";
   canvas.addEventListener("click", clickHandler);
-  var image = new Image();
-  image.src = "./bg.png";
 
   /* constants  */
 
   const GRID_SIZE = 300;
-  const GRID_OFFSET_X = 100;
-  const GRID_OFFSET_Y = 150;
-  const GRID_ITEM_COUNT = 3;
-  const GRID_ITEM_SIZE = GRID_SIZE / GRID_ITEM_COUNT;
+  const GRID_OFFSET_X = (canvas.width - GRID_SIZE) / 2;
+  const GRID_OFFSET_Y = 100;
+  const GRID_LINE_COUNT = 3;
+  const GRID_ITEM_SIZE = GRID_SIZE / GRID_LINE_COUNT;
   const USER = 1;
   const COM = 2;
 
@@ -34,7 +33,7 @@
     
   function run() {
     clearCanvas();
-    drawBg();
+    drawBoard();
 
     if (!start) {
       initialize();
@@ -54,9 +53,22 @@
     }
   }
 
-  function drawBg() {
-    // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-    ctx.drawImage(image, 0, 0, 500, 500, 0, 0, 500, 500);
+  function drawBoard() {
+    ctx.beginPath();
+    ctx.strokeStyle = "#444";
+    ctx.lineWidth = 4;
+
+    for (var r = 1; r < GRID_LINE_COUNT; r++) {
+      ctx.moveTo(GRID_OFFSET_X, GRID_OFFSET_Y + (GRID_ITEM_SIZE * r));
+      ctx.lineTo(GRID_OFFSET_X + GRID_SIZE, GRID_OFFSET_Y + (GRID_ITEM_SIZE * r));
+    }
+
+    for (var c = 1; c < GRID_LINE_COUNT; c++) {
+      ctx.moveTo(GRID_OFFSET_X + (GRID_ITEM_SIZE * c), GRID_OFFSET_Y);
+      ctx.lineTo(GRID_OFFSET_X + (GRID_ITEM_SIZE * c), GRID_OFFSET_Y + GRID_SIZE);
+    }
+
+    ctx.stroke();
   }
 
   function initialize() {
@@ -213,27 +225,23 @@
         var x = GRID_OFFSET_X + (c * GRID_ITEM_SIZE);
         var y = GRID_OFFSET_Y + (r * GRID_ITEM_SIZE);
 
+        ctx.beginPath();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 8;
+
         if (id == 1) {
-          ctx.beginPath();
-          ctx.arc(
-            x + 50, 
-            y + 50, 
-            30, 0, 2 * Math.PI);
-          ctx.strokeStyle = "#888";
-          ctx.lineWidth = 8;
+          ctx.arc(x + 50, y + 50, 30, 0, 2 * Math.PI);
           ctx.stroke();
         } 
 
         if (id == 2) {
-          ctx.beginPath();
-          ctx.strokeStyle = "#888";
-          ctx.lineWidth = 8;
           ctx.moveTo(x + 20, y + 20);
           ctx.lineTo(x + 80, y + 80);
           ctx.moveTo(x + 80, y + 20);
           ctx.lineTo(x + 20, y + 80);
-          ctx.stroke();
         }
+
+        ctx.stroke();
       }
     }
   }
@@ -245,7 +253,7 @@
     ctx.fillText(
       message,
       canvas.width / 2,
-      GRID_OFFSET_Y + ((GRID_SIZE + 24) / 2)
+      60,
     );
   }
 
@@ -268,7 +276,7 @@
     var r = Math.floor((e.offsetY - GRID_OFFSET_Y) / GRID_ITEM_SIZE);
     var c = Math.floor((e.offsetX - GRID_OFFSET_X) / GRID_ITEM_SIZE);
 
-    if (r > -1 && r < GRID_ITEM_COUNT && c > -1 && c < GRID_ITEM_COUNT) {
+    if (r > -1 && r < GRID_LINE_COUNT && c > -1 && c < GRID_LINE_COUNT) {
       row = r;
       col = c;
 
