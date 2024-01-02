@@ -35,6 +35,7 @@
   var turn = 2;
   var start = false;
   var end;
+  var message;
 
   /* run the game */
 
@@ -51,6 +52,7 @@
 
     drawBoard();
     drawPieces();
+    drawMessage();
 
     if (end) {
       drawEnd();
@@ -70,6 +72,7 @@
     row = 0;
     col = 0;
     turn = 2;
+    message = "";
     end = false;
   }
 
@@ -116,6 +119,12 @@
 
     ctx.font = "16px Arial";
     ctx.fillStyle = "#000";
+    ctx.fillText(message, 300, 50);
+  }
+
+  function drawMessage() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#000";
     ctx.fillText(message, 300, 100);
   }
 
@@ -124,14 +133,13 @@
 
     ctx.font = "16px Arial";
     ctx.fillStyle = "#000";
-    ctx.fillText(message, 300, 100);
+    ctx.fillText(message, 300, 150);
   }
 
   function drawBoard() {
     ctx.beginPath();
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
-    ctx.globalAlpha = 1;
 
     // grid
     for (var r = 0; r <= COUNT; r++) {
@@ -151,9 +159,12 @@
     for (var r = 0; r < board.length; r++) {
       for (var c = 0; c < board[r].length; c++) {
         var id = board[r][c];
-
         if (id) {
           var piece = getPieceById(id);
+          
+          if (row == r && col == c && turn == piece.team) {
+            ctx.globalAlpha = 0.5;
+          }
 
           ctx.beginPath();
           ctx.arc(
@@ -165,6 +176,8 @@
           );
           ctx.fillStyle = piece.team == 1 ? "red" : "green";
           ctx.fill();
+
+          ctx.globalAlpha = 1;
         }
       }
     }
@@ -200,6 +213,12 @@
                 if (!end) {
                   turn = turn == 1 ? 2 : 1;  
                 }
+
+                message = "";
+
+              } else {
+                message = "not takeable"
+                console.log("not takeable");
               }
             }
           }
@@ -215,57 +234,39 @@
 
   function isTakeable(self, r, c) {
     var takeable;
+    var id = board[r][c];
 
+    // ZOL
     if (self.name == "zol") {
-      if (row - 1 == r && col == c) {
-        takeable = true;
-      } else if (row == r && col - 1 == c) {
-        takeable = true;
-      } else if (row == r && col + 1 == c) {
-        takeable = true;
-      } else {
-        takeable = false;
+      if (self.team == 1) {
+        if (row + 1 == r && col == c) {
+          takeable = true;
+        } 
+      } 
+
+      if (self.team == 2) {
+        if (row - 1 == r && col == c) {
+          takeable = true;
+        } 
       }
+
+      if (row == r && col - 1 == c) {
+        takeable = true;
+      } 
+      
+      if (row == r && col + 1 == c) {
+        takeable = true;
+      } 
     } 
 
+    // MA
     if (self.name == "ma") {
-      
-    }
+      takeable = true;
+    } 
 
     console.log(takeable);
+
     return takeable;
-  }
-
-  // ref
-  function getMa() {
-    function f(root, a, b) {
-      var [x, y] = target.crds;
-  
-      var piece = getPieceByCrds([x + root[0], y + root[1]]);
-      
-      if (piece == null) {
-        var piece = getPieceByCrds([x + a[0], y + a[1]]);
-  
-        if (piece == null || piece.team != target.team) {
-          if (inBoard(x + a[0], y + a[1])) {
-            points.push([x + a[0], y + a[1]]);
-          }
-        }
-  
-        var piece = getPieceByCrds([x + b[0], y + b[1]]);
-  
-        if (piece == null || piece.team != target.team) {
-          if (inBoard(x + b[0], y + b[1])) {
-            points.push([x + b[0], y + b[1]]);
-          }
-        }
-      }
-    }
-
-    f([0, -1], [-1, -2], [1, -2]);
-    f([1, 0], [2, -1], [2, 1]);
-    f([0, 1], [1, 2], [-1, 2]);
-    f([-1, 0], [-2, -1], [-2, 1]);
   }
 })();
 
