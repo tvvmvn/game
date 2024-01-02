@@ -12,6 +12,7 @@
   const COUNT = 3
   const CELL = SIZE / COUNT;
   const SPOTS = [];
+
   for (var r = 0; r <= COUNT; r++) {
     SPOTS[r] = [];
 
@@ -20,25 +21,45 @@
     }
   }
 
-  /* variables */
-  var pieces = [
+  const PIECES = [
     { id: 1, name: "zol", team: 1 },
     { id: 2, name: "ma", team: 1 },
     { id: 3, name: "zol", team: 2 },
     { id: 4, name: "ma", team: 2 },
   ]
 
+  /* variables */
+
   var board;
-  var row = 0;
-  var col = 0;
+  var row, col;
   var turn = 2;
-  var interval;
+  var start = false;
+  var end;
 
   /* run the game */
 
-  startGame();
+  setInterval(run, 10); // 100hz
 
-  function startGame() {
+  function run() {
+    clearCanvas();
+
+    if (!start) {
+      init();
+      start = true;
+      return;
+    }
+
+    drawBoard();
+    drawPieces();
+
+    if (end) {
+      drawEnd();
+    } else {
+      drawTurn();
+    }
+  }
+
+  function init() {
     board = [
       [0, 1, 0, 2],
       [0, 0, 0, 0],
@@ -46,47 +67,64 @@
       [0, 3, 0, 4],
     ]
 
-    interval = setInterval(render);
-  }
-
-  function render() {
-    clearCanvas();
-
-    f();
-
-    drawTurn();
-    drawBoard();
-    drawPieces();
+    row = 0;
+    col = 0;
+    turn = 2;
+    end = false;
   }
 
   /* functions */
 
-  function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
   function getPieceById(id) {
-    var piece = null;
+    var piece;
 
-    for (var i = 0; i < pieces.length; i++) {
-      if (pieces[i].id == id) {
-        piece = pieces[i];
+    for (var i = 0; i < PIECES.length; i++) {
+      if (PIECES[i].id == id) {
+        piece = PIECES[i];
       }
     }
 
     return piece;
   }
 
-  function f() {}
+  function setEnd() {
+    end = true;
+
+    for (var r = 0; r < board.length; r++) {
+      for (var c = 0; c < board[r].length; c++) {
+        var id = board[r][c];
+
+        if (id) {
+          var piece = getPieceById(id);
+
+          if (piece.team != turn) {
+            end = false;
+          }
+        }
+      }
+    }
+  }
 
   /* draw */
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
 
   function drawTurn() {
     var message = turn == 1 ? "HAN" : "CHO";
 
     ctx.font = "16px Arial";
     ctx.fillStyle = "#000";
-    ctx.fillText(message, 300, 50);
+    ctx.fillText(message, 300, 100);
+  }
+
+  function drawEnd() {
+    var message = (turn == 1 ? "HAN" : "CHO") + " WIN!";
+
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#000";
+    ctx.fillText(message, 300, 100);
   }
 
   function drawBoard() {
@@ -132,46 +170,14 @@
     }
   }
 
-  function setEnd() {
-    var end = true;
-
-    for (var r = 0; r < board.length; r++) {
-      for (var c = 0; c < board[r].length; c++) {
-        var id = board[r][c];
-
-        if (id) {
-          var piece = getPieceById(id);
-
-          if (piece.team == turn) {
-            end = false;
-          }
-        }
-      }
-    }
-    
-    if (end) {
-      console.log(turn + " WIN!");
-    }
-  }
-
   /* control */
-
-  function v(piece, row_d, col_d) {
-    var p = getPieceById(board[row_d][col_d])
-
-    if (p && p.team == turn) return 0;
-
-    // define movement 
-
-    return 1;
-  }
 
   function clickHandler(e) {
     for (var r = 0; r <= COUNT; r++) {
       for (var c = 0; c <= COUNT; c++) {
         var spot = SPOTS[r][c]; // intersection
 
-        var a = Math.pow((e.clientX - spot[0]), 2) + Math.pow((e.clientY - spot[1]), 2);
+        var a = Math.pow((e.offsetX - spot[0]), 2) + Math.pow((e.offsetY - spot[1]), 2);
         var b = Math.pow(CELL / 2, 2);
 
         if (a <= b) {
@@ -181,20 +187,19 @@
             var piece = getPieceById(id);
 
             if (piece.team == turn) {
-              // validate
-              var takeable = v(piece, r, c);
+              // move
+              var takeable = isTakeable(piece, r, c);
 
               if (takeable) {
-                // move
-                var tmp = board[row][col];
                 board[row][col] = 0;
-                board[r][c] = tmp;
+                board[r][c] = id;
   
-                // change turn
-                turn = turn == 1 ? 2 : 1;
-                
                 // check end
                 setEnd();
+
+                if (!end) {
+                  turn = turn == 1 ? 2 : 1;  
+                }
               }
             }
           }
@@ -207,4 +212,61 @@
       }
     }
   }
-})()
+
+  function isTakeable(self, r, c) {
+    var takeable;
+
+    if (self.name == "zol") {
+      if (row - 1 == r && col == c) {
+        takeable = true;
+      } else if (row == r && col - 1 == c) {
+        takeable = true;
+      } else if (row == r && col + 1 == c) {
+        takeable = true;
+      } else {
+        takeable = false;
+      }
+    } 
+
+    if (self.name == "ma") {
+      
+    }
+
+    console.log(takeable);
+    return takeable;
+  }
+
+  // ref
+  function getMa() {
+    function f(root, a, b) {
+      var [x, y] = target.crds;
+  
+      var piece = getPieceByCrds([x + root[0], y + root[1]]);
+      
+      if (piece == null) {
+        var piece = getPieceByCrds([x + a[0], y + a[1]]);
+  
+        if (piece == null || piece.team != target.team) {
+          if (inBoard(x + a[0], y + a[1])) {
+            points.push([x + a[0], y + a[1]]);
+          }
+        }
+  
+        var piece = getPieceByCrds([x + b[0], y + b[1]]);
+  
+        if (piece == null || piece.team != target.team) {
+          if (inBoard(x + b[0], y + b[1])) {
+            points.push([x + b[0], y + b[1]]);
+          }
+        }
+      }
+    }
+
+    f([0, -1], [-1, -2], [1, -2]);
+    f([1, 0], [2, -1], [2, 1]);
+    f([0, 1], [1, 2], [-1, 2]);
+    f([-1, 0], [-2, -1], [-2, 1]);
+  }
+})();
+
+
