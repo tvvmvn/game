@@ -3,24 +3,21 @@
   var ctx = canvas.getContext("2d");
   canvas.width = innerWidth;
   canvas.height = innerHeight;
-  canvas.style.backgroundColor = "#eee";
+  canvas.addEventListener("click", clickHandler)
 
   /* constants */
 
-  const Board = {
-    OFFSET_X: 0,
-    OFFSET_Y: 0,
-    SIZE: 320,
-    COUNT: 8,
-    CELL: 40 // size / count
-  }
-
+  const OFFSET_X = 50;
+  const OFFSET_Y = 50;
+  const SIZE = 200
+  const COUNT = 4
+  const CELL = SIZE / COUNT;
   const CHECKER = [];
 
-  for (var r = 0; r < Board.COUNT; r++) {
+  for (var r = 0; r < COUNT; r++) {
     CHECKER[r] = [];
 
-    for (var c = 0; c < Board.COUNT; c++) {
+    for (var c = 0; c < COUNT; c++) {
       if ((r + c) % 2) {
         CHECKER[r][c] = 1;
       } else {
@@ -28,130 +25,160 @@
       }
     }
   }
-
-  /* class */
-
-  class Piece {
-    constructor (id, name, team, crds, status, active) {
-      this.id = id;
-      this.name = name;
-      this.team = team;
-      this.crds = crds;
-      this.status = status;
-      this.active = active;
-    }
- 
-    getPoints() {
-      return [
-        [this.crds[0] - 1, this.crds[1] - 1],
-        [this.crds[0] + 1, this.crds[1] - 1],
-      ]
-    }
-  }
-
-  /* variables */
-  var pieces = [
-    new Piece("", "pawn", 2, [1, 1], 1, false),
-    new Piece("", "pawn", 2, [4, 1], 1, false),
-    new Piece("", "pawn", 2, [7, 1], 1, false),
-    new Piece("", "pawn", 1, [1, 6], 1, false),
-    new Piece("", "pawn", 1, [4, 6], 1, false),
-    new Piece("", "pawn", 1, [7, 6], 1, false),
+  
+  const PIECES = [
+    { id: 1, name: "knight", team: 1 },
+    { id: 2, name: "pawn", team: 1 },
+    { id: 3, name: "knight", team: 2 },
+    { id: 4, name: "pawn", team: 2 },
   ]
 
-  var interval;
-  var x, y;
-  var points;
-  var turn = 1;
+  /* variables */
+  
+  var board;
+  var row, col;
+  var turn = 2;
+  var start = false;
+  var end;
 
   /* run the game */
 
-  startGame();
-  document.addEventListener("click", clickHandler);
+  setInterval(run, 10); // 100hz
 
-  function startGame() {
-    x, y = -1;
-    points = [];
-
-    interval = setInterval(render, 10);
-  }
-
-  function render() {
+  function run() {
     clearCanvas();
 
-    f();
-
-    drawStage();
+    if (!start) {
+      initialize();
+      drawStart();
+      return;
+    }
+    
+    drawBoard();    
     drawPieces();
-    drawPoints();
+    
+    if (end) {
+      drawEnd();
+    } else {
+      drawTurn();
+    }
   }
 
-  function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function initialize() {
+    board = [
+      [1, 0, 2, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 3, 0, 4],
+    ]
+    row = 3;
+    col = 0;
+    turn = 2;
+    end = false;
   }
 
   /* functions */
+  
+  function getPieceById(id) {
+    var piece;
+    
+    for (var i = 0; i < PIECES.length; i++) {
+      if (PIECES[i].id == id) {
+        piece = PIECES[i];
+      }
+    }
 
-  function f() {
-    for (var i = 0; i < pieces.length; i++) {
-      var piece = pieces[i];
+    return piece;
+  }
 
-      // 1
-      if (piece.active) {
-        if (piece.team == 1) {
-          points = [
-            [piece.crds[0] - 1, piece.crds[1] - 1],
-            [piece.crds[0] + 1, piece.crds[1] - 1],
-          ]
-        } else {
-          points = [
-            [piece.crds[0] - 1, piece.crds[1] + 1],
-            [piece.crds[0] + 1, piece.crds[1] + 1],
-          ]
-        }
+  function isTakeable(id) {
+    if (!id) {
+      return true;
+    }
 
-        for (var j = 0; j < points.length; j++) {
-          var point = points[j];
+    var piece = getPieceById(id);
+
+    if (piece.team != turn) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function setEnd() {
+    end = true;
           
-          if (point[0] == x && point[1] == y) {
-            piece.crds = [x, y];
-
-            // after move
-            turn = turn == 1 ? 2 : 1;
-            points = []
-            piece.active = false;
+    for (var r = 0; r < board.length; r++) {
+      for (var c = 0; c < board[r].length; c++) {
+        var id = board[r][c];
+  
+        if (id) {
+          var piece = getPieceById(id);
+  
+          if (piece.team != turn) {
+            end = false;
           }
-        }
-      } 
-
-      // 2
-      if (piece.team == turn) {
-        if (piece.crds[0] == x && piece.crds[1] == y) {
-          piece.active = true;
-        } else {
-          piece.active = false;
         }
       }
     }
   }
 
-  /* draw */
+  /* control */
+  
+  function clickHandler(e) {
+    if (!start) {
+      start = true;
+      return;
+    }
 
-  function drawPoints() {
-    for (var i=0; i<points.length; i++) {
-      ctx.beginPath();
-      ctx.strokeStyle = "#f00";
-      ctx.lineWidth = 2;
-      ctx.arc(
-        Board.OFFSET_X + (points[i][0] * Board.CELL) + Board.CELL / 2,
-        Board.OFFSET_Y + (points[i][1] * Board.CELL) + Board.CELL / 2,
-        10, 0, 2 * Math.PI
-      );
-      ctx.stroke();
+    if (end) {
+      start = false;
+      return;
+    }
+
+    var r = Math.floor((e.offsetY - OFFSET_Y) / CELL);
+    var c = Math.floor((e.offsetX - OFFSET_X) / CELL);
+    
+    if (r > -1 && r < COUNT && c > -1 && c < COUNT) {
+
+      // piece id to move
+      var id = board[row][col];
+
+      if (id) {
+        var piece = getPieceById(id);
+
+        if (piece.team == turn) {
+          // move
+          var takeable = isTakeable(board[r][c]);
+
+          if (takeable) {
+            board[row][col] = 0;
+            board[r][c] = id;
+
+            // end
+            setEnd();
+
+            if (!end) {
+              turn = turn == 1 ? 2 : 1;
+            }
+          }
+        }
+      }
+
+      row = r;
+      col = c;
+
+      console.log(row, col)
     }
   }
 
-  function drawStage() {
+  /* draw */
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function drawBoard() {
     for (var r = 0; r < CHECKER.length; r++) {
       for (var c = 0; c < CHECKER[r].length; c++) {
         if (CHECKER[r][c] == 1) {
@@ -160,36 +187,58 @@
           ctx.fillStyle = "#ddd";
         }
         ctx.fillRect(
-          Board.OFFSET_X + (Board.CELL * c),
-          Board.OFFSET_Y + (Board.CELL * r),
-          Board.CELL, Board.CELL
+          OFFSET_X + (CELL * c),
+          OFFSET_Y + (CELL * r),
+          CELL, CELL
         );
       }
     }
   }
 
   function drawPieces() {
-    for (var i=0; i<pieces.length; i++) {
-      var piece = pieces[i];
+    for (var r = 0; r < board.length; r++) {
+      for (var c = 0; c < board[r].length; c++) {
+        var id = board[r][c];
 
-      ctx.beginPath();
-      ctx.arc(
-        Board.OFFSET_X + (piece.crds[0] * Board.CELL) + Board.CELL / 2,
-        Board.OFFSET_Y + (piece.crds[1] * Board.CELL) + Board.CELL / 2,
-        piece.active ? 15 : 10,
-        0, 2 * Math.PI
-      );
-      ctx.fillStyle = piece.team == 1 ? "#000" : "#fff";
-      ctx.fill();
+        if (id) {
+          var piece = getPieceById(id);
+
+          ctx.beginPath();
+          ctx.arc(
+            OFFSET_X + (c * CELL) + (CELL / 2),
+            OFFSET_Y + (r * CELL) + (CELL / 2),
+            ((id == board[row][col] && piece.team == turn) ? 20 : 15),
+            0,
+            2 * Math.PI
+          );
+          ctx.fillStyle = piece.team == 1 ? "#fff" : "#000";
+          ctx.fill();
+        }
+      }
     }
   }
 
-  /* control */
+  function drawStart() {
+    var message = "Touch or click to start";
 
-  function clickHandler(e) {
-    x = Math.floor(e.clientX / Board.CELL) - Board.OFFSET_X;
-    y = Math.floor(e.clientY / Board.CELL) - Board.OFFSET_Y;
-
-    console.log(x, y);
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#000";
+    ctx.fillText(message, 300, 100);
   }
-})();
+
+  function drawTurn() {
+    var message = turn == 1 ? "W" : "B";
+
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#000";
+    ctx.fillText(message, 300, 100);
+  }
+
+  function drawEnd() {
+    var message = (turn == 1 ? "W" : "B") + " WIN!";
+
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#000";
+    ctx.fillText(message, 300, 100);
+  }
+})()

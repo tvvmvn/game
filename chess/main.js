@@ -37,6 +37,8 @@
   
   var board;
   var row, col;
+  var prevRow, prevCol;
+  var selected = null;
   var turn = 2;
   var start = false;
   var end;
@@ -50,9 +52,10 @@
 
     if (!start) {
       initialize();
-      drawStart();
-      return;
+      start = true;
     }
+
+    f();
     
     drawBoard();    
     drawPieces();
@@ -66,13 +69,15 @@
 
   function initialize() {
     board = [
-      [1, 0, 2, 0],
+      [0, 1, 0, 2],
       [0, 0, 0, 0],
       [0, 0, 0, 0],
       [0, 3, 0, 4],
     ]
-    row = 3;
+    row = 0;
     col = 0;
+    prevRow = row;
+    prevCol = col;
     turn = 2;
     end = false;
   }
@@ -123,6 +128,47 @@
     }
   }
 
+  function f() {
+    if (!selected) {
+      // select piece to move
+      var id = board[row][col];
+  
+      if (!id) return;
+  
+      var piece = getPieceById(id);
+  
+      if (piece.team == turn) {
+        selected = id;
+      } else {
+        return;
+      }
+    } else {
+      // move
+      if (prevRow != row || prevCol != col) {
+        if (board[row][col] != 0) {
+          var target = getPieceById(board[row][col]);
+  
+          if (target.team == turn) {
+            selected = target.id;
+            prevRow = row;
+            prevCol = col;
+            return;
+          }
+        }
+
+        board[prevRow][prevCol] = 0;
+        board[row][col] = selected;
+  
+        turn = turn == 1 ? 2 : 1;
+        selected = null;
+      }
+    }
+
+    // save prev
+    prevRow = row;
+    prevCol = col;
+  }
+
   /* control */
   
   function clickHandler(e) {
@@ -140,35 +186,10 @@
     var c = Math.floor((e.offsetX - OFFSET_X) / CELL);
     
     if (r > -1 && r < COUNT && c > -1 && c < COUNT) {
-
-      // piece id to move
-      var id = board[row][col];
-
-      if (id) {
-        var piece = getPieceById(id);
-
-        if (piece.team == turn) {
-          // move
-          var takeable = isTakeable(board[r][c]);
-
-          if (takeable) {
-            board[row][col] = 0;
-            board[r][c] = id;
-
-            // end
-            setEnd();
-
-            if (!end) {
-              turn = turn == 1 ? 2 : 1;
-            }
-          }
-        }
-      }
-
       row = r;
       col = c;
 
-      console.log(row, col)
+      console.log(row, col);
     }
   }
 

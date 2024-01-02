@@ -232,41 +232,18 @@
     }
   }
 
-  function isTakeable(self, r, c) {
-    var takeable;
-    var id = board[r][c];
+  function isTakeable(peace) {
+    if (!id) {
+      return true;
+    }
 
-    // ZOL
-    if (self.name == "zol") {
-      if (self.team == 1) {
-        if (row + 1 == r && col == c) {
-          takeable = true;
-        } 
-      } 
+    var piece = getPieceById(id);
 
-      if (self.team == 2) {
-        if (row - 1 == r && col == c) {
-          takeable = true;
-        } 
-      }
+    if (piece.team != turn) {
+      return true;
+    }
 
-      if (row == r && col - 1 == c) {
-        takeable = true;
-      } 
-      
-      if (row == r && col + 1 == c) {
-        takeable = true;
-      } 
-    } 
-
-    // MA
-    if (self.name == "ma") {
-      takeable = true;
-    } 
-
-    console.log(takeable);
-
-    return takeable;
+    return false;
   }
 })();
 
