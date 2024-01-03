@@ -130,43 +130,50 @@
 
   function f() {
     if (!selected) {
-      // select piece to move
       var id = board[row][col];
-  
-      if (!id) return;
-  
-      var piece = getPieceById(id);
-  
-      if (piece.team == turn) {
-        selected = id;
-      } else {
-        return;
+      
+      if (id) {
+        // select piece to move
+        var piece = getPieceById(id);
+    
+        if (piece.team == turn)  {
+          selected = id;
+        }
       }
     } else {
-      // move
       if (prevRow != row || prevCol != col) {
-        if (board[row][col] != 0) {
-          var target = getPieceById(board[row][col]);
-  
+        // validate target
+        var takeable = false;
+
+        var id = board[row][col];
+
+        if (id == 0) {
+          takeable = true;
+        } else {
+          var target = getPieceById(id);
+          
           if (target.team == turn) {
             selected = target.id;
-            prevRow = row;
-            prevCol = col;
-            return;
+          } else {
+            // define movement for each piece here..
+            takeable = true;
           }
         }
-
-        board[prevRow][prevCol] = 0;
-        board[row][col] = selected;
-  
-        turn = turn == 1 ? 2 : 1;
-        selected = null;
+        
+        // move
+        if (takeable) {
+          board[prevRow][prevCol] = 0;
+          board[row][col] = selected;
+    
+          turn = turn == 1 ? 2 : 1;
+          selected = null;
+        }
       }
-    }
 
-    // save prev
-    prevRow = row;
-    prevCol = col;
+      // save current crds of piece
+      prevRow = row;
+      prevCol = col;
+    }
   }
 
   /* control */
