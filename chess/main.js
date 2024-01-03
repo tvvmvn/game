@@ -27,10 +27,10 @@
   }
   
   const PIECES = [
-    { id: 1, name: "knight", team: 1 },
-    { id: 2, name: "pawn", team: 1 },
-    { id: 3, name: "knight", team: 2 },
-    { id: 4, name: "pawn", team: 2 },
+    { id: 1, name: "pawn", team: 1 },
+    { id: 2, name: "knight", team: 1 },
+    { id: 3, name: "pawn", team: 2 },
+    { id: 4, name: "knight", team: 2 },
   ]
 
   /* variables */
@@ -38,10 +38,11 @@
   var board;
   var row, col;
   var prevRow, prevCol;
-  var selected = null;
+  var selected;
   var turn = 2;
   var start = false;
   var end;
+  var message;
 
   /* run the game */
 
@@ -59,6 +60,7 @@
     
     drawBoard();    
     drawPieces();
+    drawMessage();
     
     if (end) {
       drawEnd();
@@ -79,6 +81,8 @@
     prevRow = row;
     prevCol = col;
     turn = 2;
+    message = "";
+    selected = null;
     end = false;
   }
 
@@ -142,26 +146,32 @@
       }
     } else {
       if (prevRow != row || prevCol != col) {
-        // validate target
-        var takeable = false;
+        // case 1: change piece to move
+        var piece = getPieceById(selected);
+        var targetId = board[row][col]; // target id
+        var changed = false;
 
-        var id = board[row][col];
-
-        if (id == 0) {
-          takeable = true;
-        } else {
-          var target = getPieceById(id);
+        if (targetId) {
+          var target = getPieceById(targetId);
           
-          if (target.team == turn) {
-            selected = target.id;
-          } else {
-            // define movement for each piece here..
-            takeable = true;
+          if (target.team == piece.team) {
+            selected = targetId;
+            changed = true;
           }
-        }
-        
-        // move
-        if (takeable) {
+        } 
+
+        // case 2: movement
+        if (!changed) {
+          var takeable = v();
+          
+          // move
+          if (!takeable) {
+            message = "untakeable";
+            return;
+          } else {
+            message = "";
+          }
+
           board[prevRow][prevCol] = 0;
           board[row][col] = selected;
     
@@ -176,28 +186,49 @@
     }
   }
 
-  /* control */
+  function v() {
+    var piece = getPieceById(selected);
+    var takeable = false;
+
+    if (piece.name == "pawn") {
+      if (piece.team == 1) {
+        if (row == prevRow + 1 && col == prevCol - 1) {
+          takeable = true;
+        }
   
-  function clickHandler(e) {
-    if (!start) {
-      start = true;
-      return;
-    }
+        if (row == prevRow + 1 && col == prevCol + 1) {
+          takeable = true;
+        }
 
-    if (end) {
-      start = false;
-      return;
-    }
+        if (row == prevRow + 1 && col == prevCol) {
+          if (board[row][col] == 0) {
+            takeable = true;
+          }
+        }
+      }
 
-    var r = Math.floor((e.offsetY - OFFSET_Y) / CELL);
-    var c = Math.floor((e.offsetX - OFFSET_X) / CELL);
+      if (piece.team == 2) {
+        if (row == prevRow - 1 && col == prevCol - 1) {
+          takeable = true;
+        }
+  
+        if (row == prevRow - 1 && col == prevCol + 1) {
+          takeable = true;
+        }
+
+        if (row == prevRow - 1 && col == prevCol) {
+          if (board[row][col] == 0) {
+            takeable = true;
+          }
+        }
+      }
+    } 
     
-    if (r > -1 && r < COUNT && c > -1 && c < COUNT) {
-      row = r;
-      col = c;
-
-      console.log(row, col);
+    if (piece.name == "knight") {
+      takeable = true;
     }
+
+    return takeable;
   }
 
   /* draw */
@@ -231,16 +262,22 @@
         if (id) {
           var piece = getPieceById(id);
 
+          if (id == selected) {
+            ctx.globalAlpha = 0.6;
+          }
+
           ctx.beginPath();
           ctx.arc(
             OFFSET_X + (c * CELL) + (CELL / 2),
             OFFSET_Y + (r * CELL) + (CELL / 2),
-            ((id == board[row][col] && piece.team == turn) ? 20 : 15),
+            (piece.name == "pawn" ? 15 : 20),
             0,
             2 * Math.PI
           );
           ctx.fillStyle = piece.team == 1 ? "#fff" : "#000";
           ctx.fill();
+
+          ctx.globalAlpha = 1.0
         }
       }
     }
@@ -259,7 +296,13 @@
 
     ctx.font = "16px Arial";
     ctx.fillStyle = "#000";
-    ctx.fillText(message, 300, 100);
+    ctx.fillText("Turn: " + message, 300, 100);
+  }
+
+  function drawMessage() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#000";
+    ctx.fillText(message, 300, 120);
   }
 
   function drawEnd() {
@@ -269,4 +312,29 @@
     ctx.fillStyle = "#000";
     ctx.fillText(message, 300, 100);
   }
-})()
+
+  /* control */
+  
+  function clickHandler(e) {
+    if (!start) {
+      start = true;
+      return;
+    }
+
+    if (end) {
+      start = false;
+      return;
+    }
+
+    var r = Math.floor((e.offsetY - OFFSET_Y) / CELL);
+    var c = Math.floor((e.offsetX - OFFSET_X) / CELL);
+    
+    if (r > -1 && r < COUNT && c > -1 && c < COUNT) {
+      row = r;
+      col = c;
+
+      console.log(row, col);
+    }
+  }
+})();
+
